@@ -1,0 +1,30 @@
+name: Fetch music
+on:
+  push:
+    paths: ['music-src/tracks.txt']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  music:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and shrink tracks
+        run: |
+          sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg
+          mkdir -p www/music
+          while read name url; do
+            [ -z "$name" ] && continue
+            curl -sSL -A "Mozilla/5.0" -o "/tmp/$name.src" "$url"
+            ffmpeg -loglevel error -y -i "/tmp/$name.src" -ac 2 -b:a 96k -ar 44100 "www/music/$name.mp3"
+            ls -la "www/music/$name.mp3"
+          done < music-src/tracks.txt
+          cp music-src/CREDITS.txt www/music/CREDITS.txt
+      - name: Commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add www/music
+          git commit -m "Add game music (CC0, RandomMind)" || echo nothing
+          git push
