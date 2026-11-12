@@ -17,7 +17,7 @@ jobs:
           while read name url; do
             [ -z "$name" ] && continue
             curl -sSL -A "Mozilla/5.0" -o "/tmp/$name.src" "$url"
-            ffmpeg -loglevel error -y -i "/tmp/$name.src" -ac 2 -b:a 96k -ar 44100 "www/music/$name.mp3"
+            ffmpeg -nostdin -loglevel error -y -i "/tmp/$name.src" -ac 2 -b:a 96k -ar 44100 "www/music/$name.mp3"
             ls -la "www/music/$name.mp3"
           done < music-src/tracks.txt
           cp music-src/CREDITS.txt www/music/CREDITS.txt
