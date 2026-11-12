@@ -141,7 +141,7 @@ button{font-family:inherit;cursor:pointer}
     <li>Rivers can only be crossed at bridges and fords; lakes and the sea block movement. Forests hide units and halve arrow damage. Spears beat cavalry from the front; hit units in the side or rear. Broken units may rally once.</li>
   </ul>
   <p><b>Siege of Aurenhall:</b> break into the walled town held by Terfein. Tap the <b>gate</b> with the ram (or infantry) to batter it. Tap a <b>wall</b> with foot soldiers to climb ladders. Select the <b>catapult</b> and tap a wall, tower, gate or enemy to bombard it. Hold the <b>town square</b> for 60 seconds with no defenders near to win. Point at (or tap) anything to see what it is.</p>
-  <div id="pick"><div class="plab">Region</div><div class="prow" id="pReg"></div><div class="plab">Battlefield</div><div class="prow" id="pMap"></div><div class="plab">Battle size</div><div class="prow" id="pSize"></div><p id="pDesc"></p><div class="plab">Battle advisor</div><div class="prow" id="pAdv"></div></div>
+  <div id="pick"><div class="plab">Region</div><div class="prow" id="pReg"></div><div class="plab">Battlefield</div><div class="prow" id="pMap"></div><div class="plab">Battle size</div><div class="prow" id="pSize"></div><p id="pDesc"></p><div class="plab">Season</div><div class="prow" id="pSea"></div><div class="plab">Battle advisor</div><div class="prow" id="pAdv"></div></div>
   <button id="bStart">Start field battle</button> <button id="bSiege">Siege of Aurenhall</button>
 </div></div>
 <div id="end" class="ov" style="display:none"><div class="panel"><h2 id="endT"></h2><p id="endP"></p><button id="bRestart">Play again</button> <button id="bEndMenu">Main menu</button></div></div>
@@ -497,6 +497,23 @@ function slopeMul(x,y,dx,dy){const d=Math.hypot(dx,dy);if(d<1e-3)return 1;const 
 // ---------- state ----------
 let units,men,proj,time,genDead,over,started=false,paused=false,speed=1,aiT,hidT,sel,groups,nextG,grid;
 let tc=null,tx=null;const TILES=[],TS=1024;
+let WINTER=false;
+// Winter cloaks: everyone wears whatever cloak he owns, so colours vary man to man.
+// Ormana's men are issued the same black cloak.
+const CLOAKS=['#6b4a2b','#7a5533','#5a3f26','#8a6a44','#4e4a42','#6e6a5e','#575e43','#4a5a3a','#7a3a2c','#5e2f2a','#3f3a33','#8b7355'];
+function cloakCol(side){if(SIDE[side]&&SIDE[side].cloak)return SIDE[side].cloak;return CLOAKS[(Math.random()*CLOAKS.length)|0];}
+function shadeHex(h,k){const n=parseInt(h.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;r=Math.max(0,Math.min(255,r*k|0));g=Math.max(0,Math.min(255,g*k|0));b=Math.max(0,Math.min(255,b*k|0));return '#'+((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1);}
+// Draw a cloak over the shoulders and back (local coords: facing +x), then put the helmet and crest back on top.
+function drawCloak(m,hx,sc,img,sx,sy,sw,sh,dx,dy,dw,dh){const c=m.ck||'#6b4a2b',sway=Math.sin(m.wk||0)*Math.min(1,(m.spd||0)/1.5)*.06;
+ ctx.save();ctx.translate(hx,0);ctx.scale(sc,sc);
+ ctx.beginPath();ctx.moveTo(.16,-.36);ctx.quadraticCurveTo(-.05,-.5,-.3,-.44);ctx.quadraticCurveTo(-.62,-.38+sway,-.74,-.2+sway);
+ ctx.quadraticCurveTo(-.82,0+sway,-.74,.2+sway);ctx.quadraticCurveTo(-.62,.38+sway,-.3,.44);ctx.quadraticCurveTo(-.05,.5,.16,.36);ctx.quadraticCurveTo(.24,0,.16,-.36);ctx.closePath();
+ ctx.fillStyle=c;ctx.fill();ctx.lineWidth=.07;ctx.strokeStyle='#22170d';ctx.stroke();
+ ctx.strokeStyle=shadeHex(c,.72);ctx.lineWidth=.045;ctx.beginPath();ctx.moveTo(-.2,-.28);ctx.quadraticCurveTo(-.48,-.2+sway,-.66,-.12+sway);ctx.moveTo(-.2,.28);ctx.quadraticCurveTo(-.48,.2+sway,-.66,.12+sway);ctx.moveTo(-.25,0);ctx.lineTo(-.72,sway);ctx.stroke();
+ ctx.fillStyle=shadeHex(c,1.18);ctx.beginPath();ctx.ellipse(.02,0,.13,.4,0,0,6.283);ctx.fill();
+ ctx.restore();
+ // helmet + crest back on top, cut from the same sprite frame
+ ctx.save();ctx.beginPath();ctx.ellipse(hx,0,.31*sc,.31*sc,0,0,6.283);ctx.ellipse(hx,0,.34*sc,.1*sc,0,0,6.283);ctx.clip();ctx.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh);ctx.restore();}
 function mkUnit(side,type,cx,cy,face){
  const d=UT[type];let NN=d[2];if(NQ&&NQ[side]&&NQ[side][type]&&NQ[side][type].length)NN=Math.max(1,Math.min(d[2],NQ[side][type].shift()));
  const u={id:units.length,side,type,cls:d[0],grp:d[1],n0:NN,cols:d[3],wpn:d[4],spdS:d[5],atk:d[6],def:d[7],chg:d[8],rng:d[9]*10,ammo:d[10],mor:d[11],shield:d[12],
@@ -506,7 +523,7 @@ function mkUnit(side,type,cx,cy,face){
  for(let k=0;k<u.n0;k++){
   const m={u,k,x:0,y:0,vx:0,vy:0,a:face,hp:u.cls=='cav'?HP_CAV:HP_INF,alive:true,esc:false,
    smul:u.cls=='cav'?.85+Math.random()*.3:.9+Math.random()*.22,ph:Math.random()*6.283,dl:0,cd:Math.random()*SWING,chg:true,imp:0,fight:null,
-   gen:u.general&&k==1,tint:(Math.random()-.5)*.16,sx:0,sy:0,spd:0,fp:null,wk:Math.random()*6.283,hit:0};
+   gen:u.general&&k==1,ck:cloakCol(side),tint:(Math.random()-.5)*.16,sx:0,sy:0,spd:0,fp:null,wk:Math.random()*6.283,hit:0};
   u.men.push(m);men.push(m);}
  assignSlots(u);for(const m of u.men){m.x=m.sx+(Math.random()-.5)*.4;m.y=m.sy+(Math.random()-.5)*.4;}
  units.push(u);return u;}
@@ -907,8 +924,8 @@ function drawMan(m){
   ctx.fillStyle='#4f3d2b';el(sw*.22+.05,-.1,.12,.08);el(-sw*.22+.05,.1,.12,.08);
  }
  if(spr){let fr=0;if(m.spd>.25&&!fight){const runn=m.spd>u.walk*1.35;fr=(runn?9:1)+(Math.floor(m.wk*8/6.283)%8+8)%8;}
-  if(cav){const sh=SPR.cav[KIT[u.type]||'round'][u.side],FS=sh.height;const f2=m.spd>.25?1+(Math.floor(m.wk*8/6.283)%8+8)%8:0;ctx.drawImage(sh,f2*FS,0,FS,FS,-1.7,-1.7,3.4,3.4);}
-  else{const kk=KIT[u.type]||'plain',ak=SPR.atk&&SPR.atk[kk]&&SPR.atk[kk][u.side];if(ak&&m.thr>0){const af=Math.max(0,Math.min(7,Math.floor((1-m.thr/.35)*8)));ctx.drawImage(ak,af*192,0,192,192,-1,-1,2,2);}else{const sh=SPR.inf[kk][u.side],FS=sh.height;ctx.drawImage(sh,fr*FS,0,FS,FS,-1+thr*.6,-1,2,2);}}}
+  if(cav){const sh=SPR.cav[KIT[u.type]||'round'][u.side],FS=sh.height;const f2=m.spd>.25?1+(Math.floor(m.wk*8/6.283)%8+8)%8:0;ctx.drawImage(sh,f2*FS,0,FS,FS,-1.7,-1.7,3.4,3.4);if(WINTER)drawCloak(m,-.14,.7,sh,f2*FS,0,FS,FS,-1.7,-1.7,3.4,3.4);}
+  else{const kk=KIT[u.type]||'plain',ak=SPR.atk&&SPR.atk[kk]&&SPR.atk[kk][u.side];if(ak&&m.thr>0){const af=Math.max(0,Math.min(7,Math.floor((1-m.thr/.35)*8)));ctx.drawImage(ak,af*192,0,192,192,-1,-1,2,2);if(WINTER)drawCloak(m,-.04,1,ak,af*192,0,192,192,-1,-1,2,2);}else{const sh=SPR.inf[kk][u.side],FS=sh.height;ctx.drawImage(sh,fr*FS,0,FS,FS,-1+thr*.6,-1,2,2);if(WINTER)drawCloak(m,-.04+thr*.6,1,sh,fr*FS,0,FS,FS,-1+thr*.6,-1,2,2);}}}
  ctx.lineCap='round';ctx.strokeStyle='#7d5a36';ctx.lineWidth=.075;ctx.beginPath();
  const w=u.wpn,tx0=thr;
  if(w=='spear'){ctx.moveTo(-.4+tx0,.22);ctx.lineTo((cav?2.2:2.0)+tx0,.22);}
@@ -940,6 +957,7 @@ function render(){
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#1b1d18';ctx.fillRect(0,0,VW,VH);
  const z=cam.z;ctx.setTransform(dpr*z,0,0,dpr*z,dpr*(VW/2-cam.x*z),dpr*(VH/2-cam.y*z));
  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';{const vx0=cam.x-VW/2/z,vx1=cam.x+VW/2/z,vy0=cam.y-VH/2/z,vy1=cam.y+VH/2/z;for(const t of TILES){const X=t.x0/R,Y=t.y0/R,W=t.w/R,H=t.h/R;if(X>vx1||X+W<vx0||Y>vy1||Y+H<vy0)continue;ctx.drawImage(t.c,X,Y,W+.03,H+.03);}}if(MODE==='siege'&&SG)drawSiegeUnder();
+ if(WINTER){ctx.fillStyle='rgba(226,233,243,.42)';ctx.fillRect(0,0,MW,MH);}
  if(DEPLOY){ctx.fillStyle='rgba(110,230,110,.22)';ctx.beginPath();ctx.moveTo(0,0);for(let yy=0;yy<=MH;yy+=6)ctx.lineTo(depMax(yy),yy);ctx.lineTo(0,MH);ctx.closePath();ctx.fill();ctx.strokeStyle='rgba(150,250,150,.85)';ctx.lineWidth=2/z;ctx.setLineDash([8/z,5/z]);ctx.beginPath();for(let yy=0;yy<=MH;yy+=6)yy?ctx.lineTo(depMax(yy),yy):ctx.moveTo(depMax(0),0);ctx.stroke();ctx.setLineDash([]);}
  const x0=cam.x-VW/2/z-4,x1=cam.x+VW/2/z+4,y0=cam.y-VH/2/z-4,y1=cam.y+VH/2/z+4;
  const vis=[];for(const m of men){if(!m.alive||m.esc)continue;if(m.u.side==1&&m.u.hid)continue;if(m.x<x0||m.x>x1||m.y<y0||m.y>y1)continue;vis.push(m);}
@@ -960,6 +978,7 @@ function render(){
   if(u.path.length){const p=u.path[u.path.length-1];ctx.strokeStyle=(u.runO||u.run)?'rgba(255,170,90,.95)':'rgba(245,226,122,.9)';ctx.beginPath();ctx.moveTo(p[0]-1.2,p[1]-1.2);ctx.lineTo(p[0]+1.2,p[1]+1.2);ctx.moveTo(p[0]+1.2,p[1]-1.2);ctx.lineTo(p[0]-1.2,p[1]+1.2);ctx.stroke();}}
  if(flash&&time<flash.t){ctx.strokeStyle=flash.run?'rgba(255,170,90,.9)':'rgba(245,226,122,.8)';ctx.beginPath();ctx.arc(flash.x,flash.y,1.5+(flash.t-time)*3,0,6.283);ctx.stroke();}
  ctx.setTransform(dpr,0,0,dpr,0,0);
+ if(WINTER){const tt=performance.now()/1000;ctx.fillStyle='rgba(255,255,255,.85)';ctx.beginPath();for(let i=0;i<70;i++){const sx=((i*137.5+tt*(14+i%5*4)+Math.sin(tt*.7+i)*12)%(VW+20)+VW+20)%(VW+20)-10,sy=((i*91.3+tt*(32+i%7*6))%(VH+20)+VH+20)%(VH+20)-10,r=1+(i%3)*.6;ctx.moveTo(sx+r,sy);ctx.arc(sx,sy,r,0,6.283);}ctx.fill();}
  const g=ctx.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*.45,VW/2,VH/2,Math.max(VW,VH)*.75);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.28)');ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH);
  for(const u of units){u.bx=-999;if(u.gone)continue;if(u.side==1&&u.hid)continue;
   const sx=(u.cx-cam.x)*z+VW/2,sy=(u.cy-cam.y)*z+VH/2-Math.max(18,z*3.2);if(sx<-30||sx>VW+30||sy<-30||sy>VH+30)continue;
@@ -1230,7 +1249,7 @@ function cBattle(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P
   const cut=(a,f)=>a.u.forEach(x=>{x.n=Math.max(0,Math.round(x.n*(1-f*(.7+Math.random()*.6))));});const lb=armyMen(win?foe:mine);cut(win?mine:foe,.15+.35*r);cut(win?foe:mine,.55+.3*(1-r));
   const pr=Math.round((lb-armyMen(win?foe:mine))*.3);finish(win,win&&Math.random()<.08,win?pr:0,win?0:pr);return;}
  $('camp').style.display='none';CB={mine,foe,pid,finish};
- window.launchBattle({map:P.bf||'arden_fields',siege:!!(P.walls&&foe===def),A:mine.u,B:foe.u,enemy:OWN[foe.o].n});});}
+ window.launchBattle({map:P.bf||'arden_fields',siege:!!(P.walls&&foe===def),A:mine.u,B:foe.u,enemy:OWN[foe.o].n,winter:(CS.turn-1)%4===3});});}
 function campBattleDone(win){if(!CB)return;const {mine,foe,finish}=CB;
  const alive=s=>{const r={};units.filter(u=>u.side==s&&u.cls!=='siege').forEach(u=>{(r[u.type]=r[u.type]||[]).push(u.men.filter(m=>m.alive).length);});return r;};
  const a0=alive(0),a1=alive(1);mine.u.forEach(x=>{const q=a0[x.t];x.n=q&&q.length?q.shift():0;});foe.u.forEach(x=>{const q=a1[x.t];x.n=q&&q.length?q.shift():0;});
@@ -1522,9 +1541,9 @@ function boot(){
   chips($('pMap'),MAPS.filter(m=>m.reg===selReg).map(m=>[m.id,m.name]),MAP.id,k=>setMap(k));
   chips($('pSize'),Object.entries(SZ),BSIZE,k=>{BSIZE=k;});$('pDesc').textContent=MAP.desc;};
  drawPick();
- const startMode=md=>{$('help').style.display='none';if(CB){paused=false;setPause();return;}STORY=false;TUT=null;AIHOLD=false;advHide();BDREAD=0;SIDE[1].name='Terfein';SIDE[1].col='#2e5fa8';SIDE[1].dark='#1b3a6b';SIDE[1].sym='sun';$('nB').textContent='Terfein';const key=md+MAP.id+BSIZE;if(key!==runKey||!started){runKey=key;$('load').style.display='flex';setTimeout(()=>{MODE=md;if(md==='field')genTerrain();init();sel=new Set();$('bot').innerHTML='';$('grp').dataset.k='x';refreshUI();$('load').style.display='none';started=true;paused=false;setPause();if(md==='field')startDeploy();if(md==='siege'){cam.x=Math.max(VW/cam.z/2,150);cam.y=150;}else{cam.x=VW/cam.z/2+60;cam.y=150;}clampCam();advPre();},30);}else{paused=false;setPause();}};
+ const startMode=md=>{$('help').style.display='none';if(CB){paused=false;setPause();return;}STORY=false;TUT=null;AIHOLD=false;advHide();WINTER=CSEA==='winter';delete SIDE[1].cloak;runKey+='';BDREAD=0;SIDE[1].name='Terfein';SIDE[1].col='#2e5fa8';SIDE[1].dark='#1b3a6b';SIDE[1].sym='sun';$('nB').textContent='Terfein';const key=md+MAP.id+BSIZE;if(key!==runKey||!started){runKey=key;$('load').style.display='flex';setTimeout(()=>{MODE=md;if(md==='field')genTerrain();init();sel=new Set();$('bot').innerHTML='';$('grp').dataset.k='x';refreshUI();$('load').style.display='none';started=true;paused=false;setPause();if(md==='field')startDeploy();if(md==='siege'){cam.x=Math.max(VW/cam.z/2,150);cam.y=150;}else{cam.x=VW/cam.z/2+60;cam.y=150;}clampCam();advPre();},30);}else{paused=false;setPause();}};
  $('bStart').onclick=()=>startMode('field');$('bSiege').onclick=()=>startMode('siege');
- const startStory=(skip)=>{$('title').style.display='none';(skip?(l,f)=>f():playScenes)(INTRO,()=>{STORY=true;setMap('arden_fields');selReg='arden';BSIZE='t';SIDE[1].name='Bran';SIDE[1].col='#4cba58';SIDE[1].dark='#21752d';SIDE[1].sym='horse';$('nB').textContent='Bran';
+ const startStory=(skip)=>{WINTER=false;delete SIDE[1].cloak;$('title').style.display='none';(skip?(l,f)=>f():playScenes)(INTRO,()=>{STORY=true;setMap('arden_fields');selReg='arden';BSIZE='t';SIDE[1].name='Bran';SIDE[1].col='#4cba58';SIDE[1].dark='#21752d';SIDE[1].sym='horse';$('nB').textContent='Bran';
    $('load').style.display='flex';setTimeout(()=>{MODE='field';genTerrain();init();sel=new Set();$('bot').innerHTML='';$('grp').dataset.k='x';refreshUI();$('load').style.display='none';started=true;paused=false;setPause();runKey='story';
    cam.x=VW/cam.z/2+60;cam.y=150;clampCam();AIHOLD=true;window.tutLine=false;TUT=true;tutI=0;advCd={};advT=-99;tutShow();},30);});};
  $('bStory').onclick=()=>{buzz();startStory();};
@@ -1560,7 +1579,7 @@ async function showCode(){const c=saveCode();let copied=false;try{await navigato
  await cDlg('Save code',(copied?'Copied to your clipboard. ':'Select all of the text below and copy it. ')+'Paste it into “Load a save code” on the title screen to pick up from here.<textarea id="codeTA" readonly style="width:100%;height:90px;margin-top:8px;font-size:11px;word-break:break-all">'+c+'</textarea>',[['Done','ok','pri']]);}
 $('bCode').onclick=async()=>{buzz();const v=await cDlg('Load a save code','Paste the save code you copied from the Menu.<textarea id="codeIn" style="width:100%;height:90px;margin-top:8px;font-size:11px"></textarea><div id="codeErr" style="color:#e66;margin-top:4px"></div>',[['Load','l','pri'],['Cancel','x']]);
  if(v!=='l')return;const t=window._codeVal||'';try{const o=readCode(t);MEMSAVE=JSON.stringify(o);try{localStorage.setItem('tbt_save',MEMSAVE);}catch(e){}$('title').style.display='none';cStart(false);}catch(e){toast('That save code did not work. Check you copied all of it.');}};
- window.launchBattle=o=>{STORY=false;TUT=null;AIHOLD=false;advHide();BDREAD=(CS&&CS.dread)||0;SIDE[1].name=o.enemy;{const ow=Object.values(OWN).find(q=>q.n===o.enemy);if(ow){SIDE[1].col=ow.c;SIDE[1].dark=ow.d;SIDE[1].sym=ow.sym;}}$('nB').textContent=o.enemy;
+ window.launchBattle=o=>{STORY=false;TUT=null;AIHOLD=false;advHide();WINTER=!!o.winter;if(/ormana/i.test(o.enemy||''))SIDE[1].cloak='#1c1b1e';else delete SIDE[1].cloak;BDREAD=(CS&&CS.dread)||0;SIDE[1].name=o.enemy;{const ow=Object.values(OWN).find(q=>q.n===o.enemy);if(ow){SIDE[1].col=ow.c;SIDE[1].dark=ow.d;SIDE[1].sym=ow.sym;}}$('nB').textContent=o.enemy;
   const cnt=L=>{const q={};L.forEach(x=>{(q[x.t]=q[x.t]||[]).push(x.n);});return q;};NQ=[cnt(o.A),cnt(o.B)];
   const tA=o.A.filter(x=>x.n>0).map(x=>x.t),tB=o.B.filter(x=>x.n>0).map(x=>x.t);
   if(o.siege){CB.siegeLists=[tA,tB];CB.lists=null;}else{CB.lists=[tA,tB];CB.siegeLists=null;setMap(o.map);BSIZE='c';}
@@ -1570,6 +1589,7 @@ $('bCode').onclick=async()=>{buzz();const v=await cDlg('Load a save code','Paste
  $('depGo').onclick=()=>{buzz();endDeploy();};
  $('bCustom').onclick=()=>{buzz();$('title').style.display='none';$('help').style.display='flex';};
  chips($('pAdv'),[['full','Full'],['warn','Warnings only'],['off','Off']],ADV,k=>{ADV=k;try{localStorage.setItem('eth_adv',k);}catch(e){}});
+ let CSEA='summer';const drawSea=()=>chips($('pSea'),[['summer','Summer'],['winter','Winter']],CSEA,k=>{CSEA=k;drawSea();});drawSea();
  const _dp=drawPick;
  $('bRestart').onclick=()=>{$('end').style.display='none';if(STORY){runKey='';STORY=false;startStory(true);return;}init();sel=new Set();$('bot').innerHTML='';$('grp').dataset.k='x';refreshUI();started=true;};
  let last=performance.now(),uiT=0;
