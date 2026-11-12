@@ -59,7 +59,7 @@ button{font-family:inherit;cursor:pointer}
 .tbtn{display:block;margin:10px auto;min-width:240px;padding:12px 18px;font:600 17px Georgia,serif;border:2px solid #b08a46;border-radius:6px;background:rgba(40,28,16,.85);color:#f3e6c4}.tbtn.main{background:linear-gradient(#8a3322,#5a1e12);border-color:#e0b25c}.tfoot{margin-top:22px;font-size:12px;opacity:.6}
 #title{background:radial-gradient(ellipse at 50% 40%,rgba(60,40,20,.55),rgba(0,0,0,.92));z-index:6}
 #scene{position:fixed;inset:0;z-index:7;background:#000;overflow:hidden}#sbg{position:absolute;inset:-6%;background-size:420px;filter:blur(1px) brightness(.95) saturate(.9);animation:kb 18s linear infinite alternate}@keyframes kb{from{transform:scale(1)}to{transform:scale(1.08) translate(-1%,1%)}}
-#stint{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 30%,rgba(0,0,0,.85))}#sbox{position:absolute;left:8%;right:8%;bottom:9%;color:#f3e6c4;text-shadow:0 2px 8px #000}
+#stint{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 30%,rgba(0,0,0,.85))}#sbox{position:absolute;left:8%;right:8%;bottom:9%;color:#f3e6c4;text-shadow:0 2px 8px #000,0 0 18px rgba(0,0,0,.8)}#sprog{position:absolute;left:0;bottom:0;height:3px;background:rgba(241,213,138,.7);width:0}
 #stitle{font:700 30px Georgia,serif;color:#f1d58a;margin-bottom:10px;letter-spacing:.04em}#stext{font:19px/1.55 Georgia,serif;max-width:760px}#shint{margin-top:14px;font-size:12px;opacity:.6}
 #sbox.in{animation:fin .9s ease}@keyframes fin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 #sskip{position:absolute;top:12px;right:14px;background:rgba(0,0,0,.4);color:#f3e6c4;border:1px solid #b08a46;border-radius:16px;padding:6px 14px;font:600 13px system-ui}
@@ -122,9 +122,9 @@ button{font-family:inherit;cursor:pointer}
  <div id="cpan"><div style="flex:1;min-width:0"><div id="cpn"></div><div id="cpu"></div></div><button id="cMrg">Merge</button><button id="cRec">Recruit</button></div>
 </div>
 <div id="cdlg" class="ov" style="display:none;z-index:8"><div class="panel cdp"><h2 id="cdT"></h2><div id="cdB"></div><div id="cdF"></div></div></div>
-<div id="scene" style="display:none"><div id="sbg"></div><div id="stint"></div>
+<div id="scene" style="display:none"><div id="sbg"></div><canvas id="scv" style="position:absolute;inset:0;width:100%;height:100%"></canvas><div id="stint"></div>
   <div id="sbox"><div id="stitle"></div><div id="stext"></div><div id="shint">Tap to continue</div></div>
-  <button id="sskip">Skip ›</button></div>
+  <button id="sskip">Skip ›</button><div id="sprog"></div></div>
 <div id="adv" style="display:none"><div id="advp">H</div><div id="advb"><div id="advn">Marshal Holm</div><div id="advt"></div>
   <div id="advbtn"><button id="advNext">Next ›</button><button id="advHide">Hide</button></div></div></div>
 <div id="help" class="ov" style="display:none"><div class="panel">
@@ -1314,19 +1314,19 @@ async function cEvents(){
 async function cCheckEnd(){if(!CS||CS.done)return;
  if(!CS.armies.some(a=>a.o==='caelan')&&!PROV.some(p=>CS.prov[p.id]==='caelan')){CS.done=1;cSave();await cDlg('Arden is lost','Your armies are gone and your lands taken. Your brothers will divide the crown between them.',[['Back to the title','ok','pri']]);try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return;}
  if(['osric','bran','varen'].every(o=>CS.bros[o]!=='free')){CS.done=1;cSave();await cActEnd();}}
-async function cActEnd(){$('camp').style.display='none';advHide();
- await new Promise(r=>playScenes([{t:'The last banner falls',x:'Your brothers’ armies are broken, and Aurenhall’s gates stand open. Those of your brothers who still live are brought before you in chains.',bg:'dirt',tint:'rgba(30,10,5,.5)'},
-  {t:'The Seer',x:'That night a woman in a grey hood walks past your guards as if they were not there. “Kill them,” she says, “if you want peace.” Then she is gone.',bg:'leaves',tint:'rgba(20,10,30,.65)'}],r));
+async function cActEnd(){$('camp').style.display='none';advHide();MUS.res='finale';MUS.resT=performance.now()+600000;musTick();
+ await new Promise(r=>playScenes([{img:'holm',fx:['embers'],t:'The last banner falls',x:'Your brothers’ armies are broken, and Aurenhall’s gates stand open. Those of your brothers who still live are brought before you in chains.',bg:'dirt',tint:'rgba(30,10,5,.5)'},
+  {img:'seer',fx:['mist'],t:'The Seer',x:'That night a woman in a grey hood walks past your guards as if they were not there. “Kill them,” she says, “if you want peace.” Then she is gone.',bg:'leaves',tint:'rgba(20,10,30,.65)'}],r));
  for(const o of ['osric','bran','varen']){if(CS.bros[o]!=='captured')continue;
   const v=await cDlg('The fate of '+OWN[o].n,'Your brother kneels before you. What is your judgement?',[['Execute','execute'],['Exile','exile'],['Pardon','pardon','pri']]);CS.fate[o]=v;}
  for(const o of ['osric','bran','varen'])if(CS.bros[o]==='dead')CS.fate[o]='died in battle';
  cSave();const merciful=Object.values(CS.fate).some(f=>f==='pardon'||f==='exile');
- await new Promise(r=>playScenes([{t:'The coronation',x:'In the great hall of Aurenhall, the crown of Arden is set on your head. Lords who fought against you a season ago kneel and swear. Marshal Holm stands at your right hand.',bg:'grass',tint:'rgba(40,30,0,.45)'},
+ await new Promise(r=>playScenes([{img:'usurper',fx:['candles','dust'],t:'The coronation',x:'In the great hall of Aurenhall, the crown of Arden is set on your head. Lords who fought against you a season ago kneel and swear. Marshal Holm stands at your right hand.',bg:'grass',tint:'rgba(40,30,0,.45)'},
   {t:'The feast',x:(merciful?'“You were merciful, little king,”':'“You were not merciful, little king,”')+' says the Seer, standing among your guests though no one saw her enter. “Mercy is a fine crown, but it will not keep one on your head. Will you be merciful again?”',bg:'dirt',tint:'rgba(20,10,30,.6)'},
   {t:'The prophecy',x:'“Trevelle will be your death. Take their mountains and their silver before the next winter’s end, or Arden will not see three more years.” Across the hall, King Aldous’s envoy raises a cup to your health.',bg:'leaves',tint:'rgba(10,0,20,.7)'},
   {t:'To be continued',x:'Betray the friend who won you the crown, or trust him and risk everything? The story continues in Part 2 of The Broken Thrones: ₦3,000 / $2.99, coming soon.',bg:'dirt',tint:'rgba(0,0,0,.7)'}],r));
  cExit();}
-function cExit(){$('camp').style.display='none';advHide();$('title').style.display='flex';if(window.refreshTitle)refreshTitle();}
+function cExit(){$('camp').style.display='none';advHide();if(MUS.res==='finale')MUS.res=null;$('title').style.display='flex';if(window.refreshTitle)refreshTitle();}
 function cStart(fresh){if(fresh||!cLoad())cNew();CIMG=null;CSEL=null;if(!MIMG.ok){loadMapSpr().then(()=>cStart(false));return;}if(!PIX){$('load').style.display='flex';setTimeout(()=>{cBuild();$('load').style.display='none';cStart2(fresh);},40);return;}cStart2(fresh);}
 function cStart2(fresh){cShow();
  if(CS.turn===1&&fresh)setTimeout(()=>cAdv('Bran’s host waits in Horsemarch to the south. Varen holds the north, Osric the capital. Tap your army, then a lit province to march. March two of your armies into one province to merge them. Drag to move the map, pinch to zoom.'),600);}
@@ -1336,16 +1336,16 @@ window.addEventListener('resize',()=>{if($('camp')&&$('camp').style.display==='b
 // ---------------- music ----------------
 const MUS={on:true,cur:null,el:null,res:null,resT:0,mapI:0,vol:.5,unlocked:false,bad:{}};
 try{MUS.on=localStorage.getItem('tbt_music')!=='off';}catch(e){}
-const MUSF={title:'title',battle:'battle',victory:'victory',defeat:'defeat',map:['map1','map2','map3']};
+const MUSF={title:'title',battle:['battle','battle2','battle3'],victory:'victory',defeat:'defeat',finale:'finale',map:['map1','map2','map3']};MUS.batI=(Math.random()*3)|0;
 function musVis(id){const e=document.getElementById(id);return !!e&&getComputedStyle(e).display!=='none';}
 function musWant(){if(!MUS.on)return null;const now=performance.now();if(MUS.res&&now<MUS.resT)return MUS.res;MUS.res=null;
  if(musVis('scene')||musVis('title'))return 'title';if(musVis('camp'))return 'map';if(typeof started!=='undefined'&&started)return 'battle';return 'title';}
 function musFade(el,to,ms,done){const from=el.volume,t0=performance.now();const f=()=>{const k=Math.min(1,(performance.now()-t0)/ms);el.volume=Math.max(0,Math.min(1,from+(to-from)*k));if(k<1)requestAnimationFrame(f);else done&&done();};f();}
 function musStart(k){const old=MUS.el;MUS.cur=k;MUS.el=null;if(old)musFade(old,0,900,()=>{old.pause();old.src='';});
- if(!k)return;const name=k==='map'?MUSF.map[MUS.mapI%3]:MUSF[k];if(MUS.bad[name])return;
- const a=new Audio('music/'+name+'.mp3');a.loop=(k==='battle'||k==='title');a.volume=0;a.preload='auto';
+ if(!k)return;let name;if(k==='map')name=MUSF.map[MUS.mapI%3];else if(k==='battle'){MUS.batI++;for(let i=0;i<3;i++){name=MUSF.battle[(MUS.batI+i)%3];if(!MUS.bad[name])break;}}else name=MUSF[k];if(MUS.bad[name])return;
+ const a=new Audio('music/'+name+'.mp3');a.loop=(k==='battle'||k==='title'||k==='finale');a.volume=0;a.preload='auto';
  a.onended=()=>{if(MUS.el!==a)return;if(k==='map'){MUS.mapI++;MUS.cur=null;musTick();}else if(k==='victory'||k==='defeat'){MUS.res=null;MUS.cur=null;musTick();}};
- a.onerror=()=>{MUS.bad[name]=true;};
+ a.onerror=()=>{const P=(()=>{try{return window.parent!==window&&window.parent.TBT;}catch(e){return null;}})();if(P&&P.remote&&!a._remote){a._remote=1;a.src=P.remote+'music/'+name+'.mp3';const q=a.play();if(q&&q.catch)q.catch(()=>{});return;}MUS.bad[name]=true;if(MUS.el===a){MUS.el=null;MUS.cur=null;}};
  MUS.el=a;const p=a.play();if(p&&p.catch)p.catch(()=>{if(MUS.el===a){MUS.el=null;MUS.cur=null;}});musFade(a,MUS.vol*(k==='victory'||k==='defeat'?1:1),1200);}
 function musTick(){if(!MUS.unlocked)return;const w=musWant();if(w!==MUS.cur)musStart(w);}
 function musResult(win){MUS.res=win?'victory':'defeat';MUS.resT=performance.now()+30000;musTick();}
@@ -1356,23 +1356,73 @@ setInterval(musTick,500);
 document.addEventListener('visibilitychange',()=>{if(!MUS.el)return;if(document.hidden)MUS.el.pause();else if(MUS.on)MUS.el.play().catch(()=>{});});
 let AIHOLD=false,STORY=false,ADV='full';try{ADV=localStorage.getItem('eth_adv')||'full';}catch(e){}
 const INTRO=[
- {t:'Ethrann',x:'For two hundred years the island of Ormana ruled the mainland of Ethrann. Its black-sailed ships took our grain, our timber and our sons.',bg:'sand',tint:'rgba(10,20,40,.55)'},
- {t:'The Great Rising',x:'Then the mainland rose as one. Arden, Terfein, Odei, Trevelle and Yova broke Ormana’s armies and drove them back into the sea.',bg:'dirt',tint:'rgba(60,10,5,.45)'},
- {t:'Five kingdoms',x:'Free at last, the victors divided the land. The alliance that won the war was soon forgotten. Across the water, Ormana did not forget.',bg:'leaves',tint:'rgba(10,25,10,.45)'},
- {t:'Arden',x:'Two generations on, Arden is the richest of the kingdoms: green fields, great cities, and granaries that feed half the mainland. Its king, Halvard, grew old on his throne.',bg:'grass',tint:'rgba(30,25,5,.35)'},
- {t:'The king is dead',x:'This spring King Halvard lay dying. With his last breath he spoke to you alone: “Your brothers are not worthy of the crown. Take it from them.” No one else heard, and no will was ever found.',bg:'dirt',tint:'rgba(0,0,0,.6)'},
- {t:'The usurper',x:'By law the crown belongs to Osric, the eldest. You are only the youngest son, and you know that what you are about to do is not right. But you believe your father, and you believe your brothers would ruin Arden.',bg:'dirt',tint:'rgba(30,5,0,.55)'},
- {t:'Caelan',x:'You claimed the crown. Osric, Bran and Varen refused you and called you a usurper. Now their armies march, and you hold only Calder and its granaries. Bran’s raiders are already riding for your fields.',bg:'grass',tint:'rgba(40,10,5,.45)'},
- {t:'Calder Fields',x:'Spring, Year 1.',bg:'grass',tint:'rgba(0,0,0,.35)'}];
+ {img:'ethrann',fx:['rain','spray','lightning'],cam:[.62,.5,1.12,.42,.52,1.04],t:'Ethrann',x:'For two hundred years the island of Ormana ruled the mainland of Ethrann. Its black-sailed ships took our grain, our timber and our sons.',bg:'sand',tint:'rgba(10,20,40,.55)'},
+ {img:'rising',fx:['dust','spray'],cam:[.5,.5,1.02,.55,.45,1.18],t:'The Great Rising',x:'Then the mainland rose as one. Arden, Terfein, Odei, Trevelle and Yova broke Ormana’s armies and drove them back into the sea.',bg:'dirt',tint:'rgba(60,10,5,.45)'},
+ {img:'kingdoms',fx:['candles','dust'],cam:[.5,.55,1.18,.5,.45,1.04],t:'Five kingdoms',x:'Free at last, the victors divided the land. The alliance that won the war was soon forgotten. Across the water, Ormana did not forget.',bg:'leaves',tint:'rgba(10,25,10,.45)'},
+ {img:'arden',fx:['birds','dust'],cam:[.3,.5,1.12,.7,.5,1.12],t:'Arden',x:'Two generations on, Arden is the richest of the kingdoms: green fields, great cities, and granaries that feed half the mainland. Its king, Halvard, grew old on his throne.',bg:'grass',tint:'rgba(30,25,5,.35)'},
+ {img:'kingdead',fx:['candles'],cam:[.5,.5,1.02,.45,.48,1.2],t:'The king is dead',x:'This spring King Halvard lay dying. With his last breath he spoke to you alone: “Your brothers are not worthy of the crown. Take it from them.” No one else heard, and no will was ever found.',bg:'dirt',tint:'rgba(0,0,0,.6)'},
+ {img:'usurper',fx:['dust'],cam:[.5,.55,1.0,.5,.45,1.22],t:'The usurper',x:'By law the crown belongs to Osric, the eldest. You are only the youngest son, and you know that what you are about to do is not right. But you believe your father, and you believe your brothers would ruin Arden.',bg:'dirt',tint:'rgba(30,5,0,.55)'},
+ {img:'caelan',fx:['dust','birds'],cam:[.35,.55,1.15,.6,.45,1.05],t:'Caelan',x:'You claimed the crown. Osric, Bran and Varen refused you and called you a usurper. Now their armies march, and you hold only Calder and its granaries. Bran’s raiders are already riding for your fields.',bg:'grass',tint:'rgba(40,10,5,.45)'},
+ {img:'caelan',fx:['dust'],cam:[.6,.45,1.2,.62,.42,1.3],t:'Calder Fields',x:'Spring, Year 1.',bg:'grass',tint:'rgba(0,0,0,.35)'}];
 const AFTER=[
- {t:'Calder holds',x:'Bran’s raiders are broken and scattered. Marshal Holm, who served your father for thirty years, kneels in the trampled wheat. “Arden needs one king, not four. I am yours, my prince.”',bg:'grass',tint:'rgba(30,20,5,.45)'},
- {t:'Watched',x:'From the edge of the wood, a woman in a grey hood watches the dead being carried away. When Holm turns to look, she is gone. Only her words stay on the wind: “Not yet, little prince. Not yet.”',bg:'leaves',tint:'rgba(20,10,30,.6)'},
- {t:'The Brothers’ War begins',x:'Your brothers will not stop at one raid. The war for Arden’s crown begins.',bg:'dirt',tint:'rgba(0,0,0,.6)'}];
-function playScenes(list,done){const sc=$('scene');let i=-1;sc.style.display='block';
- const show=()=>{i++;if(i>=list.length){sc.style.display='none';sc.onclick=null;done&&done();return;}const q=list[i];
-  $('sbg').style.backgroundImage=TEXSRC[q.bg]?'url('+TEXSRC[q.bg]+')':'none';$('stint').style.background='radial-gradient(ellipse at 50% 45%,transparent 25%,rgba(0,0,0,.8)),'+q.tint;
-  const b=$('sbox');b.classList.remove('in');void b.offsetWidth;b.classList.add('in');$('stitle').textContent=q.t;$('stext').textContent=q.x;};
- sc.onclick=e=>{if(e.target.id==='sskip')return;buzz();show();};$('sskip').onclick=e=>{e.stopPropagation();i=list.length-1;show();};show();}
+ {img:'holm',fx:['embers','dust'],cam:[.5,.5,1.04,.5,.5,1.18],t:'Calder holds',x:'Bran’s raiders are broken and scattered. Marshal Holm, who served your father for thirty years, kneels in the trampled wheat. “Arden needs one king, not four. I am yours, my prince.”',bg:'grass',tint:'rgba(30,20,5,.45)'},
+ {img:'seer',fx:['mist'],cam:[.6,.5,1.15,.45,.5,1.05],t:'Watched',x:'From the edge of the wood, a woman in a grey hood watches the dead being carried away. When Holm turns to look, she is gone. Only her words stay on the wind: “Not yet, little prince. Not yet.”',bg:'leaves',tint:'rgba(20,10,30,.6)'},
+ {img:'caelan',fx:['embers'],cam:[.5,.45,1.25,.5,.5,1.05],t:'The Brothers’ War begins',x:'Your brothers will not stop at one raid. The war for Arden’s crown begins.',bg:'dirt',tint:'rgba(0,0,0,.6)'}];
+// ---- animated story scenes ----
+// Each scene: {t,x, img: key in INTROIMG (painting), bg: fallback texture, tint,
+//   cam:[x0,y0,z0, x1,y1,z1] (centre as fraction of picture, zoom), fx:[effects]}
+const INTROIMG={};const SCIMG={};
+function scImg(key){if(!key||!INTROIMG[key])return null;if(!SCIMG[key]){const im=new Image();im.src=INTROIMG[key];SCIMG[key]=im;}return SCIMG[key];}
+function scTex(key){const k='tex:'+key;if(!SCIMG[k]&&TEXSRC[key]){const im=new Image();im.src=TEXSRC[key];SCIMG[k]=im;}return SCIMG[k]||null;}
+let SCN=null;
+function scParts(fx,W,H){const P=[];const add=(n,f)=>{for(let i=0;i<n;i++)P.push(f(i));};const R=Math.random;
+ for(const e of fx||[]){
+  if(e==='embers')add(60,()=>({k:e,x:R()*W,y:H*(.5+R()*.6),vx:(R()-.3)*12,vy:-(18+R()*40),r:1+R()*2.2,p:R()*6}));
+  if(e==='snow')add(90,()=>({k:e,x:R()*W,y:R()*H,vx:6+R()*10,vy:22+R()*30,r:1+R()*2.4,p:R()*6}));
+  if(e==='rain')add(120,()=>({k:e,x:R()*W,y:R()*H,vx:-60,vy:520+R()*200,r:1,p:0}));
+  if(e==='dust')add(45,()=>({k:e,x:R()*W,y:R()*H,vx:4+R()*8,vy:-2+R()*4,r:1+R()*1.6,p:R()*6}));
+  if(e==='mist'||e==='fog')add(9,()=>({k:'mist',x:R()*W,y:H*(.45+R()*.5),vx:6+R()*10,vy:0,r:H*(.25+R()*.25),p:R()*6}));
+  if(e==='birds')add(7,i=>({k:e,x:-R()*W*.5,y:H*(.12+R()*.25),vx:30+R()*20,vy:-2+R()*4,r:3+R()*2,p:R()*6}));
+  if(e==='spray')add(40,()=>({k:e,x:R()*W,y:H*(.6+R()*.4),vx:-20-R()*30,vy:-(10+R()*30),r:1+R()*3,p:R()*6}));
+ }return P;}
+function playScenes(list,done){const sc=$('scene'),cv=$('scv'),g=cv.getContext('2d');let i=-1,raf=0,timer=0;sc.style.display='block';$('sbg').style.display='none';
+ const fit=()=>{const d=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*d;cv.height=innerHeight*d;};fit();
+ const durOf=q=>Math.min(16,Math.max(5.5,3+q.x.length*.055));
+ let cur=null,prev=null;
+ const drawPic=(st,a,now)=>{if(!st||a<=0)return;const W=cv.width,H=cv.height,q=st.q,k=Math.min(1,(now-st.t0)/(st.D*1000+1500)),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+  const c=q.cam||[.5,.5,1.06,.5,.5,1.16],cx=c[0]+(c[3]-c[0])*e,cy=c[1]+(c[4]-c[1])*e,z=c[2]+(c[5]-c[2])*e;g.globalAlpha=a;
+  const im=scImg(q.img);
+  if(im&&im.complete&&im.naturalWidth){const s=Math.max(W/im.naturalWidth,H/im.naturalHeight)*z,dw=im.naturalWidth*s,dh=im.naturalHeight*s;
+   let x=W/2-cx*dw,y=H/2-cy*dh;x=Math.min(0,Math.max(W-dw,x));y=Math.min(0,Math.max(H-dh,y));g.drawImage(im,x,y,dw,dh);}
+  else{const t=scTex(q.bg);g.fillStyle='#111';g.fillRect(0,0,W,H);if(t&&t.complete&&t.naturalWidth){g.save();g.translate(W/2,H/2);g.scale(z*1.6,z*1.6);g.translate(-W/2-(cx-.5)*W*.2,-H/2-(cy-.5)*H*.2);const p=g.createPattern(t,'repeat');g.fillStyle=p;g.filter='blur(1px)';g.fillRect(-W,-H,W*3,H*3);g.filter='none';g.restore();}}
+  if(q.tint){g.fillStyle=q.tint;g.fillRect(0,0,W,H);}
+  // effects
+  const dt=Math.min(.05,(now-(st.last||now))/1000);st.last=now;const d=Math.min(2,devicePixelRatio||1);
+  for(const p of st.P){p.x+=p.vx*dt*d;p.y+=p.vy*dt*d;p.p+=dt;
+   if(p.x>W+40)p.x=-40;if(p.x<-60&&p.k!=='birds')p.x=W+40;if(p.y>H+20)p.y=-20;if(p.y<-20)p.y=H+20;
+   if(p.k==='embers'){const f=.5+.5*Math.sin(p.p*6);g.fillStyle='rgba(255,'+(140+80*f|0)+',60,'+(.5+.4*f)+')';g.beginPath();g.arc(p.x,p.y,p.r*d,0,6.283);g.fill();}
+   else if(p.k==='snow'){g.fillStyle='rgba(255,255,255,.85)';g.beginPath();g.arc(p.x+Math.sin(p.p*1.3)*8*d,p.y,p.r*d,0,6.283);g.fill();}
+   else if(p.k==='rain'){g.strokeStyle='rgba(200,215,235,.35)';g.lineWidth=d;g.beginPath();g.moveTo(p.x,p.y);g.lineTo(p.x-6*d,p.y+22*d);g.stroke();}
+   else if(p.k==='dust'){g.fillStyle='rgba(255,236,190,'+(.25+.2*Math.sin(p.p*2))+')';g.beginPath();g.arc(p.x,p.y,p.r*d,0,6.283);g.fill();}
+   else if(p.k==='spray'){g.fillStyle='rgba(230,240,250,.35)';g.beginPath();g.arc(p.x,p.y,p.r*d,0,6.283);g.fill();if(p.y<H*.55){p.y=H*(.8+Math.random()*.2);}}
+   else if(p.k==='mist'){const gr=g.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);gr.addColorStop(0,'rgba(190,180,210,.16)');gr.addColorStop(1,'rgba(190,180,210,0)');g.fillStyle=gr;g.fillRect(p.x-p.r,p.y-p.r,p.r*2,p.r*2);}
+   else if(p.k==='birds'){const w=Math.sin(p.p*9)*p.r*d;g.strokeStyle='rgba(20,15,10,.7)';g.lineWidth=1.4*d;g.beginPath();g.moveTo(p.x-p.r*2*d,p.y-w);g.quadraticCurveTo(p.x-p.r*d,p.y-p.r*d,p.x,p.y);g.quadraticCurveTo(p.x+p.r*d,p.y-p.r*d,p.x+p.r*2*d,p.y-w);g.stroke();}}
+  if((q.fx||[]).includes('candles')){const f=.82+.18*Math.sin(now/90)*Math.sin(now/37);const gr=g.createRadialGradient(W*.5,H*.4,0,W*.5,H*.4,Math.max(W,H)*.7);gr.addColorStop(0,'rgba(255,180,90,'+(.12*f)+')');gr.addColorStop(1,'rgba(0,0,0,'+(.25*(1.1-f))+')');g.fillStyle=gr;g.fillRect(0,0,W,H);}
+  if((q.fx||[]).includes('lightning')&&Math.sin(now/1700)>.985){g.fillStyle='rgba(220,230,255,.25)';g.fillRect(0,0,W,H);}
+  g.globalAlpha=1;};
+ const loop=now=>{const W=cv.width,H=cv.height;g.clearRect(0,0,W,H);
+  if(prev){const fa=Math.min(1,(now-cur.t0)/1200);drawPic(prev,1,now);drawPic(cur,fa,now);if(fa>=1)prev=null;}else drawPic(cur,1,now);
+  const pr=$('sprog');if(cur)pr.style.width=Math.min(100,(now-cur.t0)/(cur.D*10))+'%';
+  raf=requestAnimationFrame(loop);};
+ const finish=()=>{cancelAnimationFrame(raf);clearTimeout(timer);sc.style.display='none';sc.onclick=null;removeEventListener('resize',fit);SCN=null;done&&done();};
+ const show=()=>{i++;clearTimeout(timer);if(i>=list.length){finish();return;}const q=list[i];
+  prev=cur;cur={q,t0:performance.now(),D:durOf(q),P:scParts(q.fx,cv.width,cv.height)};scImg(q.img);if(list[i+1])scImg(list[i+1].img);
+  $('stint').style.background='radial-gradient(ellipse at 50% 42%,transparent 38%,rgba(0,0,0,.82)),linear-gradient(transparent 55%,rgba(0,0,0,.55))';
+  const b=$('sbox');b.classList.remove('in');void b.offsetWidth;b.classList.add('in');$('stitle').textContent=q.t;$('stext').textContent=q.x;
+  timer=setTimeout(show,cur.D*1000);};
+ addEventListener('resize',fit);SCN={next:show};
+ sc.onclick=e=>{if(e.target.id==='sskip')return;buzz();show();};$('sskip').onclick=e=>{e.stopPropagation();i=list.length-1;show();};
+ raf=requestAnimationFrame(loop);show();}
 // ---- battle advisor ----
 let advQ=null,advCd={},advT=0,TUT=null,tutI=0,advTimer=null;
 function advSay(txt,opts){opts=opts||{};if(ADV==='off'&&!opts.tut)return;if(ADV==='warn'&&!opts.warn&&!opts.tut)return;
