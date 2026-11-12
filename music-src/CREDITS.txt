@@ -1,9 +1,9 @@
-Music by RandomMind (opengameart.org), released under CC0 (public domain).
-Credit is not required; given here with thanks.
-- Fantasy: Lament for a Warrior's Soul
-- Medieval: Exploration
-- Medieval: King's Feast
-- Medieval: The Bard's Tale
-- Medieval: Battle
-- Medieval: Minstrel Dance
-- Medieval: Defeat Theme
+All music is released under CC0 (public domain). Credit is not required; given here with thanks.
+RandomMind (opengameart.org):
+- Fantasy: Lament for a Warrior's Soul (title and story)
+- Medieval: Exploration, King's Feast, The Bard's Tale (campaign map)
+- Medieval: Battle (battle)
+- Medieval: Minstrel Dance (battle won), Medieval: Defeat Theme (battle lost)
+- Medieval: Victory Theme (war won)
+Eldritch Grim (opengameart.org): Massive Battle (battle)
+Umplix (opengameart.org): To Battle! (battle)
