@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>The Broken Thrones</title>
+<style>html,body{margin:0;height:100%;background:#1b1d18;overflow:hidden}
+iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#1b1d18}
+#msg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#f0c060;font:600 15px Georgia,serif;text-align:center;padding:20px}</style>
+</head><body><div id="msg">Loading…</div>
+<script>
+// The Broken Thrones app shell: loads the newest copy of the game it has.
+// The bundled copy is game.html; newer copies downloaded by the in-game
+// updater are kept in IndexedDB and used when their build number is higher.
+(function(){
+const REMOTE=new URLSearchParams(location.search).get('remote')||'https://raw.githubusercontent.com/greatGI-ART/BROKEN-THRONES/main/www/';
+const DB='tbt_updates',ST='game';
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>r.result.createObjectStore(ST);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+function idbGet(k){return idb().then(d=>new Promise((res,rej)=>{const t=d.transaction(ST).objectStore(ST).get(k);t.onsuccess=()=>res(t.result);t.onerror=()=>rej(t.error);}));}
+function idbPut(k,v){return idb().then(d=>new Promise((res,rej)=>{const tx=d.transaction(ST,'readwrite');tx.objectStore(ST).put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);}));}
+function idbDel(k){return idb().then(d=>new Promise(res=>{const tx=d.transaction(ST,'readwrite');tx.objectStore(ST).delete(k);tx.oncomplete=()=>res();tx.onerror=()=>res();}));}
+async function bundledBuild(){try{const r=await fetch('version.json',{cache:'no-store'});return (await r.json()).build|0;}catch(e){return 0;}}
+
+const TBT={build:0,source:'bundled',remote:REMOTE,
+ // Ask GitHub for the latest build number. Returns {build, newer}.
+ async check(){const r=await fetch(REMOTE+'version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const v=await r.json();return {build:v.build|0,notes:v.notes||'',newer:(v.build|0)>TBT.build};},
+ // Download the newest game file, keep it, and restart into it.
+ async update(onProgress){const info=await TBT.check();if(!info.newer)return false;
+  const r=await fetch(REMOTE+'game.html?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);
+  const total=+r.headers.get('content-length')||0,rd=r.body&&r.body.getReader?r.body.getReader():null;let html;
+  if(rd){const parts=[];let got=0;for(;;){const {done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;onProgress&&onProgress(total?got/total:0);}html=new TextDecoder().decode(await new Blob(parts).arrayBuffer());}
+  else html=await r.text();
+  if(html.length<100000||html.indexOf('THE BROKEN THRONES')<0)throw new Error('Download incomplete');
+  await idbPut('latest',{build:info.build,html,at:Date.now()});location.reload();return true;},
+ // Go back to the version that came with the app.
+ async reset(){await idbDel('latest');location.reload();}
+};
+window.TBT=TBT;
+
+(async function start(){
+ const bb=await bundledBuild();let use=null;
+ try{const s=await idbGet('latest');if(s&&s.build>bb&&s.html)use=s;else if(s)await idbDel('latest');}catch(e){}
+ const f=document.createElement('iframe');f.setAttribute('allow','autoplay; fullscreen');
+ if(use){TBT.build=use.build;TBT.source='downloaded';f.srcdoc=use.html;}
+ else{TBT.build=bb;TBT.source='bundled';f.src='game.html';}
+ document.body.appendChild(f);f.onload=()=>{const m=document.getElementById('msg');if(m)m.remove();try{f.contentWindow.focus();}catch(e){}};
+ // If a downloaded copy fails to start within 20 s, fall back to the bundled one.
+ if(use)setTimeout(()=>{try{if(!f.contentWindow.document.getElementById('title'))TBT.reset();}catch(e){}},20000);
+})();
+})();
+</script></body></html>
