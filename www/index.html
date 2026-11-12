@@ -91,7 +91,7 @@ button{font-family:inherit;cursor:pointer}
   <span id="tm" class="clock">0:00</span>
   <div class="side"><span id="cb" class="cnt"></span><b id="nB">Terfein</b><span class="shield" style="--c:#2e5fa8"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/></svg></span></div>
   <div id="grp"></div><span class="sp"></span>
-  <button id="bSpeed" class="ic"></button><button id="bPause" class="ic"></button><button id="bHelp" class="ic">?</button>
+  <button id="bSpeed" class="ic"></button><button id="bPause" class="ic"></button><button id="bMus" class="ic" title="Music">♪</button><button id="bHelp" class="ic">?</button>
 </div>
 <div id="dock"><div id="bot"></div>
   <div id="cmds"><button id="bClear" class="cmd"></button><button id="bMulti" class="cmd"></button><button id="bBox" class="cmd"></button><button id="bGroup" class="cmd"></button><button id="bUngroup" class="cmd"></button><button id="bHalt" class="cmd"></button><button id="bRun" class="cmd"></button></div>
@@ -110,11 +110,12 @@ button{font-family:inherit;cursor:pointer}
   <button id="bFile" class="tbtn">Load a save file</button>
   <button id="bCode" class="tbtn">Load a save code</button>
   <input id="fileIn" type="file" accept=".tbt,.txt,application/octet-stream,text/plain" style="display:none">
+  <button id="tMus" class="tbtn" style="font-size:13px;padding:6px 12px">Music: on</button>
   <div class="tfoot">Best played with the phone sideways</div>
 </div></div>
 <div id="camp" style="display:none"><canvas id="cmap"></canvas>
  <div id="ctop"><b id="cseason"></b><span class="res">Silver <b id="csil"></b></span><span class="res">Grain <b id="cgr"></b></span><span class="res">Dread <b id="cdr"></b></span><span style="flex:1"></span>
-  <button id="cDip">Diplomacy</button><button id="cEnd" class="pri">End turn</button><button id="cSaveB">Save</button><button id="cMenu">Menu</button></div>
+  <button id="cDip">Diplomacy</button><button id="cEnd" class="pri">End turn</button><button id="cMus" title="Music">♪</button><button id="cSaveB">Save</button><button id="cMenu">Menu</button></div>
  <div id="cpan"><div style="flex:1;min-width:0"><div id="cpn"></div><div id="cpu"></div></div><button id="cMrg">Merge</button><button id="cRec">Recruit</button></div>
 </div>
 <div id="cdlg" class="ov" style="display:none;z-index:8"><div class="panel cdp"><h2 id="cdT"></h2><div id="cdB"></div><div id="cdF"></div></div></div>
@@ -1301,6 +1302,28 @@ function cStart2(fresh){cShow();
  if(CS.turn===1&&fresh)setTimeout(()=>cAdv('Bran’s host waits in Horsemarch to the south. Varen holds the north, Osric the capital. Tap your army, then a lit province to march. March two of your armies into one province to merge them. Drag to move the map, pinch to zoom.'),600);}
 window.addEventListener('resize',()=>{if($('camp')&&$('camp').style.display==='block'){cResize();cFit();}});
 
+
+// ---------------- music ----------------
+const MUS={on:true,cur:null,el:null,res:null,resT:0,mapI:0,vol:.5,unlocked:false,bad:{}};
+try{MUS.on=localStorage.getItem('tbt_music')!=='off';}catch(e){}
+const MUSF={title:'title',battle:'battle',victory:'victory',defeat:'defeat',map:['map1','map2','map3']};
+function musVis(id){const e=document.getElementById(id);return !!e&&getComputedStyle(e).display!=='none';}
+function musWant(){if(!MUS.on)return null;const now=performance.now();if(MUS.res&&now<MUS.resT)return MUS.res;MUS.res=null;
+ if(musVis('scene')||musVis('title'))return 'title';if(musVis('camp'))return 'map';if(typeof started!=='undefined'&&started)return 'battle';return 'title';}
+function musFade(el,to,ms,done){const from=el.volume,t0=performance.now();const f=()=>{const k=Math.min(1,(performance.now()-t0)/ms);el.volume=Math.max(0,Math.min(1,from+(to-from)*k));if(k<1)requestAnimationFrame(f);else done&&done();};f();}
+function musStart(k){const old=MUS.el;MUS.cur=k;MUS.el=null;if(old)musFade(old,0,900,()=>{old.pause();old.src='';});
+ if(!k)return;const name=k==='map'?MUSF.map[MUS.mapI%3]:MUSF[k];if(MUS.bad[name])return;
+ const a=new Audio('music/'+name+'.mp3');a.loop=(k==='battle'||k==='title');a.volume=0;a.preload='auto';
+ a.onended=()=>{if(MUS.el!==a)return;if(k==='map'){MUS.mapI++;MUS.cur=null;musTick();}else if(k==='victory'||k==='defeat'){MUS.res=null;MUS.cur=null;musTick();}};
+ a.onerror=()=>{MUS.bad[name]=true;};
+ MUS.el=a;const p=a.play();if(p&&p.catch)p.catch(()=>{if(MUS.el===a){MUS.el=null;MUS.cur=null;}});musFade(a,MUS.vol*(k==='victory'||k==='defeat'?1:1),1200);}
+function musTick(){if(!MUS.unlocked)return;const w=musWant();if(w!==MUS.cur)musStart(w);}
+function musResult(win){MUS.res=win?'victory':'defeat';MUS.resT=performance.now()+30000;musTick();}
+function musToggle(){MUS.on=!MUS.on;try{localStorage.setItem('tbt_music',MUS.on?'on':'off');}catch(e){}musLabel();musTick();}
+function musLabel(){const t=MUS.on?'♪':'♪̸';['bMus','cMus'].forEach(id=>{const b=document.getElementById(id);if(b){b.textContent=MUS.on?'♪':'🔇';b.style.opacity=MUS.on?1:.6;}});const tm=document.getElementById('tMus');if(tm)tm.textContent='Music: '+(MUS.on?'on':'off');}
+addEventListener('pointerdown',()=>{if(!MUS.unlocked){MUS.unlocked=true;setTimeout(musTick,50);}},{capture:true});
+setInterval(musTick,500);
+document.addEventListener('visibilitychange',()=>{if(!MUS.el)return;if(document.hidden)MUS.el.pause();else if(MUS.on)MUS.el.play().catch(()=>{});});
 let AIHOLD=false,STORY=false,ADV='full';try{ADV=localStorage.getItem('eth_adv')||'full';}catch(e){}
 const INTRO=[
  {t:'Ethrann',x:'For two hundred years the island of Ormana ruled the mainland of Ethrann. Its black-sailed ships took our grain, our timber and our sons.',bg:'sand',tint:'rgba(10,20,40,.55)'},
@@ -1360,7 +1383,7 @@ function buzz(){try{navigator.vibrate&&navigator.vibrate(8);}catch(e){}}
 let lastCnt=[0,0];
 
 function toast(msg){const e=$('toast');if(!e)return;e.textContent=msg;e.classList.toggle('bad',/Arden.*(fleeing|fallen)/.test(msg));e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('show'),2300);}
-function endGame(win,msg){const e=$('end');if(!e)return;{const ws=win?0:1,ls=1-ws;for(const m of men){if(!m.alive||m.esc||m.u.side!==ls||!m.u.rout)continue;if(units.some(o=>o.side===ws&&!o.gone&&!o.rout&&dist(o.cx,o.cy,m.x,m.y)<30)){m.alive=false;m.cap=true;CAPT[ws]++;}}}if(CB){if(typeof advEnd==='function')advEnd(win);setTimeout(()=>campBattleDone(win),2600);return;}if(typeof advEnd==='function')advEnd(win);if(STORY&&win){setTimeout(()=>storyWin(),2200);return;}
+function endGame(win,msg){const e=$('end');if(!e)return;musResult(win);{const ws=win?0:1,ls=1-ws;for(const m of men){if(!m.alive||m.esc||m.u.side!==ls||!m.u.rout)continue;if(units.some(o=>o.side===ws&&!o.gone&&!o.rout&&dist(o.cx,o.cy,m.x,m.y)<30)){m.alive=false;m.cap=true;CAPT[ws]++;}}}if(CB){if(typeof advEnd==='function')advEnd(win);setTimeout(()=>campBattleDone(win),2600);return;}if(typeof advEnd==='function')advEnd(win);if(STORY&&win){setTimeout(()=>storyWin(),2200);return;}
  const k0=units.filter(u=>u.side==0).reduce((s,u)=>s+u.lost,0),k1=units.filter(u=>u.side==1).reduce((s,u)=>s+u.lost,0);
  $('endT').textContent=win?'Victory!':'Defeat';$('endP').textContent=(msg?msg+' ':(win?(MODE==='siege'?'The defenders are broken. The town is taken! ':SIDE[1].name+' has been driven from the field. '):'Your army has broken. '))+'Arden lost '+k0+' men, '+SIDE[1].name+' lost '+k1+'. Time: '+fmtT(time)+'.'+(CAPT[0]?' You took '+CAPT[0]+' prisoners.':'')+(CAPT[1]?' The enemy took '+CAPT[1]+' of your men.':'');
  setTimeout(()=>e.style.display='flex',1200);}
@@ -1464,6 +1487,7 @@ function boot(){
  $('bStory').onclick=()=>{buzz();startStory();};
  window.refreshTitle=()=>{$('bCont').style.display=hasSave()&&(()=>{try{return !JSON.parse(rawSave()).done;}catch(e){return false;}})()?'':'none';};refreshTitle();
  $('bCont').onclick=()=>{buzz();$('title').style.display='none';cStart(false);};
+ ['bMus','cMus','tMus'].forEach(id=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();buzz();musToggle();};});musLabel();
  {const cm=$('cmap');cm.addEventListener('pointerdown',e=>{cm.setPointerCapture(e.pointerId);cPtrDown(e);});cm.addEventListener('pointermove',cPtrMove);cm.addEventListener('pointerup',cPtrUp);cm.addEventListener('pointercancel',e=>{CPTR.delete(e.pointerId);CPINCH=null;});cm.addEventListener('wheel',cWheel,{passive:false});}$('cMrg').onclick=()=>{buzz();cMergeBtn();};$('cEnd').onclick=()=>{buzz();cEndTurn();};$('cDip').onclick=()=>{buzz();cDiplo();};$('cRec').onclick=()=>{buzz();cRecruit();};
  $('cMenu').onclick=async()=>{buzz();cSave();const msg=STORE_OK?'Your campaign is saved after every move, battle and turn.':'<b>This browser is not keeping saves.</b> Your progress lasts only while this page stays open. Copy your save code and keep it somewhere safe (notes, a message to yourself). Paste it into “Load a save code” on the title screen to carry on.';const v=await cDlg('Menu',msg,[['Resume','r','pri'],['Copy save code','c'],['Back to title','t']]);if(v==='t')cExit();if(v==='c')showCode();};
 
