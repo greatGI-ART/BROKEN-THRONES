@@ -41,7 +41,10 @@ window.TBT=TBT;
  const f=document.createElement('iframe');f.setAttribute('allow','autoplay; fullscreen');
  if(use){TBT.build=use.build;TBT.source='downloaded';f.srcdoc=use.html;}
  else{TBT.build=bb;TBT.source='bundled';f.src='game.html';}
- document.body.appendChild(f);f.onload=()=>{const m=document.getElementById('msg');if(m)m.remove();try{f.contentWindow.focus();}catch(e){}};
+ document.body.appendChild(f);
+ // Phone back button: let the game close whatever is open; on the title screen, leave the app.
+ try{const App=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App;
+  if(App)App.addListener('backButton',()=>{let handled=false;try{const w=f.contentWindow;handled=!!(w&&w.tbtBack&&w.tbtBack());}catch(e){}if(!handled)App.minimizeApp?App.minimizeApp():App.exitApp();});}catch(e){}f.onload=()=>{const m=document.getElementById('msg');if(m)m.remove();try{f.contentWindow.focus();}catch(e){}};
  // If a downloaded copy fails to start within 20 s, fall back to the bundled one.
  if(use)setTimeout(()=>{try{if(!f.contentWindow.document.getElementById('title'))TBT.reset();}catch(e){}},20000);
 })();

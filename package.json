@@ -1,3 +1,1 @@
-{"name":"broken-thrones","version":"1.0.0","private":true,
- "dependencies":{"@capacitor/core":"^8.0.0","@capacitor/android":"^8.0.0"},
- "devDependencies":{"@capacitor/cli":"^8.0.0"}}
+{"name":"broken-thrones","version":"1.0.0","private":true,"dependencies":{"@capacitor/android":"^8.0.0","@capacitor/app":"^8.1.2","@capacitor/core":"^8.0.0"},"devDependencies":{"@capacitor/cli":"^8.0.0"}}
