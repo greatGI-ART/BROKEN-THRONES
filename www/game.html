@@ -164,7 +164,7 @@ const UT={
  'Pikemen':['inf','Spear',16,8,'pike',3,4,6,2,0,0,6,0],
  'Swordsmen':['inf','Infantry',12,6,'sword',5,7,6,4,0,0,6,1],
  'Axemen':['inf','Infantry',12,6,'axe',4,9,4,5,0,0,7,0],
- 'Archers':['mis','Missile',10,5,'bow',5,2,2,1,8,20,4,0],
+ 'Archers':['mis','Missile',10,5,'bow',5,4,4,1,8,20,4,0],
  'Crossbowmen':['mis','Missile',10,5,'xbow',4,3,4,1,6,15,5,0],
  'Javelin skirmishers':['mis','Missile',10,5,'jav',7,3,2,2,3,6,3,1],
  'Light cavalry':['cav','Cavalry',6,3,'spear',9,5,3,6,0,0,4,1],
@@ -174,7 +174,7 @@ const UT={
  'Catapult':['siege','Siege',4,2,'cat',1,1,1,0,20,40,3,0]};
 const MATCH={Spear:{Spear:0,Infantry:-2,Missile:0,Cavalry:4},Infantry:{Spear:4,Infantry:0,Missile:1,Cavalry:0},Missile:{Spear:0,Infantry:0,Missile:0,Cavalry:0},Cavalry:{Spear:-2,Infantry:0,Missile:3,Cavalry:0,Siege:3},Siege:{Spear:0,Infantry:0,Missile:0,Cavalry:0,Siege:0}};
 MATCH.Spear.Siege=2;MATCH.Infantry.Siege=2;MATCH.Missile.Siege=0;
-const RELOAD={bow:5,xbow:7,jav:6},PDMG={bow:4,xbow:5,jav:5};
+const RELOAD={bow:5,xbow:7,jav:6},PDMG={bow:6,xbow:7,jav:6};
 const HP_INF=12,HP_CAV=16,SWING=2.6,SWINGV=1.0,MORF=.1;
 const SHORT={"General's guard":'General','Spearmen':'Spears','Pikemen':'Pikes','Swordsmen':'Swords','Axemen':'Axes','Archers':'Archers','Crossbowmen':'X-bows','Javelin skirmishers':'Javelins','Light cavalry':'Lt cav','Heavy cavalry':'Hvy cav','Horse archers':'H. archers','Battering ram':'Ram','Catapult':'Catapult'};
 
