@@ -1253,8 +1253,8 @@ function cBattle(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P
  if(auto){const pa=power(mine)*(.85+Math.random()*.3),pb=power(foe)*(.85+Math.random()*.3)*(P.walls&&foe===def?1.3:1),win=pa>pb,r=Math.min(pa,pb)/Math.max(pa,pb);
   const cut=(a,f)=>a.u.forEach(x=>{x.n=Math.max(0,Math.round(x.n*(1-f*(.7+Math.random()*.6))));});const lb=armyMen(win?foe:mine);cut(win?mine:foe,.15+.35*r);cut(win?foe:mine,.55+.3*(1-r));
   const pr=Math.round((lb-armyMen(win?foe:mine))*.3);finish(win,win&&Math.random()<.08,win?pr:0,win?0:pr);return;}
- $('camp').style.display='none';CB={mine,foe,pid,finish};
- window.launchBattle({map:foe.o==='ormana'?'ormana_beach':(P.bf||'arden_fields'),siege:!!(P.walls&&foe===def),A:mine.u,B:foe.u,enemy:OWN[foe.o].n,winter:(CS.turn-1)%4===3});});}
+ const go=()=>{$('camp').style.display='none';CB={mine,foe,pid,finish};
+ window.launchBattle({map:foe.o==='ormana'?'ormana_beach':(P.bf||'arden_fields'),siege:!!(P.walls&&foe===def),A:mine.u,B:foe.u,enemy:OWN[foe.o].n,winter:(CS.turn-1)%4===3});};const sp=preSpeech(foe);if(sp)cDlg(sp.who,'<i>“'+sp.t+'”</i>',[['To battle','ok','pri']]).then(go);else go();});}
 function campBattleDone(win){if(!CB)return;const {mine,foe,finish}=CB;
  const alive=s=>{const r={};units.filter(u=>u.side==s&&u.cls!=='siege').forEach(u=>{(r[u.type]=r[u.type]||[]).push(u.men.filter(m=>m.alive).length);});return r;};
  const a0=alive(0),a1=alive(1);mine.u.forEach(x=>{const q=a0[x.t];x.n=q&&q.length?q.shift():0;});foe.u.forEach(x=>{const q=a1[x.t];x.n=q&&q.length?q.shift():0;});
@@ -1552,6 +1552,48 @@ async function chat(){if(!CS||CS.done)return;CS.chat=CS.chat||{};if(Math.random(
 async function ormWarn(){const P=CS.p2;if(!P||P.orm||P.ormT==null)return;const left=P.ormT-CS.turn;
  if(left===4&&!P.w1){P.w1=1;await p2Scene([{img:'seer',fx:['mist'],cam:[.5,.5,1.05,.5,.45,1.15],t:'The Seer',x:'“Across the water, the forges of Ormana have not gone cold for a year. They are coming, little king, and they will come like the sand of the shore. Count your men. Then count them again.”',bg:'leaves',tint:'rgba(10,0,20,.65)'}]);}
  else if(left>0&&left<4){const m=CS.armies.filter(a=>a.o==='caelan').reduce((s,a)=>s+armyMen(a),0);say('We have '+m+' men under arms, '+lord()+'. It is not enough for what is coming. Raise every man you can: recruit, call a levy, buy back the kingdoms’ friendship. '+left+(left>1?' seasons':' season')+', the scouts say.');}}
+
+// ================= the enemy commander speaks before battle =================
+const LORDS={osric:'Lord Edric Vane',bran:'Sir Rodric Hale, master of horse',varen:'Brother-Captain Anselm',trevelle:'Lord Ewan Mor',terfein:'Jarl Hakon Grey',odei:'Lord-Rider Tamar',yova:'Warden Corrin of the Deepwood',ormana:'A masked war-lord of Ormana'};
+const KINGS={trevelle:'King Aldous of Trevelle',terfein:'King Sigvald of Terfein',odei:'Rider-King Arslan of Odei',yova:'Queen Maren of Yova',ormana:'The Iron Mask of Ormana'};
+const pick=a=>a[(Math.random()*a.length)|0];
+const SPEECH={
+ osric:{self:[
+  'Men of Arden! The law of our fathers is older than any of us: the firstborn takes the crown. My father’s seal is on the decree, and it bears my name. The boy across this field is the last son, and the last son does not sit before the first. Today we teach him the law.',
+  'They say a dying man whispered a name. A whisper is not a law, and a boy is not a king. I am the eldest son of Halvard, crowned in Aurenhall before the lords of Arden. Every man who stands against me stands against the crown itself. Forward, for the rightful king!'],
+  lord:['Prince Osric is the firstborn and the crowned king. The decree is sealed; the lords have knelt. The youngest son wants what custom forbids him. Men of Arden, we fight for the law, and the law does not lose!']},
+ bran:{self:[
+  'A crown is not a gift. It is a weight, and it sits on the man strong enough to carry it. I have led the horse lords of the south since I was fifteen. The boy across this field has never led a charge in his life. Let us show him what a charge looks like!',
+  'Osric has a piece of paper. Caelan has a dead man’s whisper. I have you: the finest riders in Ethrann. When this war is over, the kingdom will belong to whoever is still on his horse. Ride!'],
+  lord:['Prince Bran is the strongest arm in Arden, and every rider in the south knows it. A king must win battles, not words. Today we win one for him. Lances down!']},
+ varen:{self:[
+  'I knelt at the altar for twelve years. On the night my father died, God spoke to me in the chapel and told me to put down the book and take up the crown. I did not choose this war. God chose me for it. Those who stand against us stand against Heaven, and Heaven does not lose.',
+  'Look at them: a boy who claims a crown from a dead man’s breath, and brothers who claim it by paper and by horse. None of them asked God. I did, and He answered. Fight without fear, for the godless cannot win against the hand of the Lord.'],
+  lord:['Prince Varen left the cloister because God commanded it. He was anointed by Heaven before any lord knelt to his brothers. Every man who opposes him is godless and cursed. Brothers, strike in the name of God and His chosen king!']},
+ trevelle:{king:[
+  'I sent you my highlanders when you had nothing. I traded my soldiers for your grain and called you brother. And you answered with fire on my border. Men of Trevelle, today we fight a thief, a liar and a betrayer of friends. Give him nothing!'],
+  council:['Our children are starving in the highlands while Arden’s granaries burst. King Aldous would have begged. We will not beg. Take the grain, or go home and bury your families!'],
+  lord:['Trevelle has kept faith with every king of Arden for a hundred years. This one broke it. The mountains remember, and so will he. Hold the high ground and make him climb!']},
+ terfein:{king:['The south has bled itself white, and now a boy-king wants the north as well. The frost has never bowed to Arden, and it will not bow today. Men of Terfein, show him how cold the north can be!'],
+  lord:['King Sigvald sends you his greetings, Arden: these axes. Terfein does not kneel. Shields together!']},
+ odei:{king:['The grass of Odei has no walls and no masters. Every king who has tried to fence it has been ridden down. Riders of Odei, today another one learns!'],
+  lord:['The Rider-King has spoken: no Arden banner will fly over the steppe. Draw your bows. Make them chase us, then make them die.']},
+ yova:{king:['You came into my forest with fire and banners, as if the trees would kneel. The Deepwood has eaten armies before yours. Men of Yova, let them come between the trees!'],
+  lord:['Queen Maren trusts the Deepwood to protect her people. So do we. Every tree is a wall, every shadow a bow. Loose!']},
+ holm:['I taught you to hold a line, boy. I taught you when to charge and when to wait. I served your father’s blood with my whole life, and I watched you dishonour it. Today the student learns one last lesson from his master.'],
+ rebel:o=>['You spared me, little brother, and you thought that made me yours. Mercy is not a crown, and a pardon is not a chain. I am still Halvard’s son. Today I take back what is mine.'],
+ ormana:{king:['For two hundred years your fathers bowed to Ormana. They paid us in grain and timber and sons. Then they forgot. Today they remember. Ride them down, and leave none to tell it.'],
+  lord:['The Iron Mask commands, and Ormana obeys. Your kingdom was ours before it was yours. It will be ours again before the sun sets.']}};
+function preSpeech(foe){const o=foe.o,hasGen=foe.u.some(x=>x.t==="General's guard"&&x.n>0);
+ if(CS.part===2&&CS.p2&&CS.p2.holm&&foe.id===CS.p2.holm.army)return {who:'Marshal Holm',t:pick(SPEECH.holm)};
+ if(['osric','bran','varen'].includes(o)){
+  if(CS.part===2)return {who:'Prince '+OWN[o].n+' leads this army himself',t:pick(SPEECH.rebel(o))};
+  return hasGen?{who:'Prince '+OWN[o].n+' leads this army himself',t:pick(SPEECH[o].self)}:{who:LORDS[o]+', sent by Prince '+OWN[o].n,t:pick(SPEECH[o].lord)};}
+ const S=SPEECH[o];if(!S)return null;
+ if(o==='trevelle'&&CS.p2&&CS.p2.obey===false&&/council/i.test(foe.name))return {who:'The council’s general',t:pick(S.council)};
+ if(o==='ormana')return hasGen?{who:KINGS.ormana,t:pick(S.king)}:{who:LORDS.ormana,t:pick(S.lord)};
+ if(hasGen&&!/levy|guard/i.test(foe.name))return {who:KINGS[o],t:pick(o==='trevelle'&&CS.p2&&CS.p2.obey===false?S.council:S.king)};
+ return {who:LORDS[o]+', for '+KINGS[o],t:pick(S.lord)};}
 
 function cStart(fresh){if(fresh||!cLoad())cNew();if(CS.part===2)p2Ext();CIMG=null;CSEL=null;if(!MIMG.ok){loadMapSpr().then(()=>cStart(false));return;}p2Imgs();if(!PIX){$('load').style.display='flex';setTimeout(()=>{cBuild();$('load').style.display='none';cStart2(fresh);},40);return;}cStart2(fresh);}
 function cStart2(fresh){if(CS.part!==2&&CS.done&&['osric','bran','varen'].every(o=>CS.bros[o]!=='free')){p2Go(false);return;}cShow();
