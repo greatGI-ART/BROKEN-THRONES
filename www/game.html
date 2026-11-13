@@ -1614,7 +1614,7 @@ window.addEventListener('resize',()=>{if($('camp')&&$('camp').style.display==='b
 // ---------------- music ----------------
 const MUS={on:true,cur:null,el:null,res:null,resT:0,mapI:0,vol:.5,unlocked:false,bad:{}};
 try{MUS.on=localStorage.getItem('tbt_music')!=='off';}catch(e){}
-const MUSF={title:'title',battle:['battle','battle2','battle3','battle4','battle5'],orm:'orm',victory:'victory',defeat:'defeat',finale:'finale',map:['map1','map2','map3']};MUS.batI=(Math.random()*5)|0;
+const MUSF={title:'title2',battle:['battle','battle2','battle3','battle4','battle5'],orm:'orm',victory:'victory2',defeat:'defeat',finale:'finale',map:['mapa','mapb','mapc']};MUS.batI=(Math.random()*5)|0;
 function musVis(id){const e=document.getElementById(id);return !!e&&getComputedStyle(e).display!=='none';}
 function musWant(){if(!MUS.on)return null;const now=performance.now();if(MUS.res&&now<MUS.resT)return MUS.res;MUS.res=null;
  if(musVis('scene')||musVis('title'))return 'title';if(musVis('camp'))return 'map';if(typeof started!=='undefined'&&started)return 'battle';return 'title';}
