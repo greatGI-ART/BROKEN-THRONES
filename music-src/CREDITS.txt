@@ -1,9 +1,13 @@
-All music is released under CC0 (public domain). Credit is not required; given here with thanks.
-RandomMind (opengameart.org):
-- Fantasy: Lament for a Warrior's Soul (title and story)
-- Medieval: Exploration, King's Feast, The Bard's Tale (campaign map)
-- Medieval: Battle (battle)
-- Medieval: Minstrel Dance (battle won), Medieval: Defeat Theme (battle lost)
-- Medieval: Victory Theme (war won)
-Eldritch Grim (opengameart.org): Massive Battle (battle)
-Umplix (opengameart.org): To Battle! (battle)
+Music credits (all from opengameart.org)
+
+Alexandr Zhelanov - Darkness March (title). Licence: CC-BY 4.0. https://soundcloud.com/alexandr-zhelanov
+
+The rest is released under CC0 (public domain). Credit is not required; given here with thanks.
+RandomMind: Fantasy: Lament for a Warrior's Soul, Medieval: Exploration, Medieval: Battle, Medieval: Defeat Theme, Medieval: Victory Theme
+Cethiel: Laments of the War
+Eldritch Grim: Massive Battle
+Umplix: To Battle!
+nene: Evil Approach
+Spring Spring: War Theme
+cynicmusic: Epic Endgame Cinematic (battles against Ormana)
+CodeManu: A Legend Will Rise (battle won)
