@@ -3,3 +3,15 @@ s_finalbattle https://opengameart.org/sites/default/files/the_final_battle.ogg
 s_confront https://opengameart.org/sites/default/files/final_confrontation.mp3
 s_epicboss https://opengameart.org/sites/default/files/Juhani%20Junkala%20-%20Epic%20Boss%20Battle%20%5BSeamlessly%20Looping%5D.wav
 s_minstrel https://opengameart.org/sites/default/files/Minstrel_Dance_0.mp3
+s_depressed https://opengameart.org/sites/default/files/Depressed%20of%20Happytown.mp3
+s_elegy https://opengameart.org/sites/default/files/Elegy_Dm.ogg
+s_ofstone https://opengameart.org/sites/default/files/ofstonefix.mp3
+s_lamentpe https://opengameart.org/sites/default/files/Lament.ogg
+s_darkquest https://opengameart.org/sites/default/files/Dark%20Quest.ogg
+s_darkforest https://opengameart.org/sites/default/files/dark_forest.wav
+s_btA https://opengameart.org/sites/default/files/battleThemeA.mp3
+s_btB https://opengameart.org/sites/default/files/battleThemeB.mp3
+s_sinister https://opengameart.org/sites/default/files/Sinister%20Boss%20Appears.wav
+s_dramatic https://opengameart.org/sites/default/files/Heavy%20Concept%20A%20Bass%20Master.wav
+s_demon https://opengameart.org/sites/default/files/demon%20lord.mp3
+s_fanfare https://opengameart.org/sites/default/files/Heavy_ConceptB.wav
