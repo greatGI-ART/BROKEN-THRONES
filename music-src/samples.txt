@@ -30,3 +30,7 @@ s_leap https://opengameart.org/sites/default/files/leapintoeternitymix.ogg
 s_heavyb https://opengameart.org/sites/default/files/Heavy_ConceptB.wav
 s_zbattle https://opengameart.org/sites/default/files/We%20are%20so%20close.mp3
 s_zruna https://opengameart.org/sites/default/files/Runaway.mp3
+s_hordedrums https://opengameart.org/sites/default/files/horde_war_drums_by_william_hector.wav
+s_raiders https://opengameart.org/sites/default/files/raiders_march_-_with_tail.mp3
+s_orcsvict https://opengameart.org/sites/default/files/orcs_victorious_2024.mp3
+s_aboriginal https://opengameart.org/sites/default/files/battle%20-%20aboriginal.mp3
