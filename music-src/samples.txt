@@ -17,3 +17,16 @@ s_demon https://opengameart.org/sites/default/files/demon%20lord.mp3
 s_fanfare https://opengameart.org/sites/default/files/Heavy_ConceptB.wav
 s_kingsfeast https://opengameart.org/sites/default/files/Kings_Feast_0.mp3
 s_bardstale https://opengameart.org/sites/default/files/The_Bards_Tale.mp3
+s_mystery https://opengameart.org/sites/default/files/Mystery%20Manor.mp3
+s_melancholy https://opengameart.org/sites/default/files/Melancholy%20RPG.mp3
+s_atwhatcost https://opengameart.org/sites/default/files/At%20What%20Cost.mp3
+s_amtown https://opengameart.org/sites/default/files/Memories%20of%20Am%20Town.mp3
+s_sadorch https://opengameart.org/sites/default/files/mess.wav
+s_commonenemy https://opengameart.org/sites/default/files/A%20Common%20Enemy.mp3
+s_marybos https://opengameart.org/sites/default/files/dova_mary_only_knows.mp3
+s_boar https://opengameart.org/sites/default/files/ABoarInTheBushesFull.mp3
+s_warthemev1 https://opengameart.org/sites/default/files/war%20theme.ogg
+s_leap https://opengameart.org/sites/default/files/leapintoeternitymix.ogg
+s_heavyb https://opengameart.org/sites/default/files/Heavy_ConceptB.wav
+s_zbattle https://opengameart.org/sites/default/files/We%20are%20so%20close.mp3
+s_zruna https://opengameart.org/sites/default/files/Runaway.mp3
