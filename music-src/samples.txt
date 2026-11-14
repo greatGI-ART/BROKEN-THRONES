@@ -15,3 +15,5 @@ s_sinister https://opengameart.org/sites/default/files/Sinister%20Boss%20Appears
 s_dramatic https://opengameart.org/sites/default/files/Heavy%20Concept%20A%20Bass%20Master.wav
 s_demon https://opengameart.org/sites/default/files/demon%20lord.mp3
 s_fanfare https://opengameart.org/sites/default/files/Heavy_ConceptB.wav
+s_kingsfeast https://opengameart.org/sites/default/files/Kings_Feast_0.mp3
+s_bardstale https://opengameart.org/sites/default/files/The_Bards_Tale.mp3
