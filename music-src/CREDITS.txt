@@ -1,13 +1,65 @@
-Music credits (all from opengameart.org)
+Music credits. All tracks from OpenGameArt.org, used with thanks.
 
-Alexandr Zhelanov - Darkness March (title). Licence: CC-BY 4.0. https://soundcloud.com/alexandr-zhelanov
+RandomMind
+  Fantasy: Lament for a Warrior’s Soul (CC0)
+  Medieval: Minstrel Dance (CC0)
+  Medieval: Battle (CC0)
+  Medieval: Exploration (CC0)
+  Medieval: King’s Feast (CC0)
+  Medieval: Defeat Theme (CC0)
 
-The rest is released under CC0 (public domain). Credit is not required; given here with thanks.
-RandomMind: Fantasy: Lament for a Warrior's Soul, Medieval: Exploration, Medieval: Battle, Medieval: Defeat Theme, Medieval: Victory Theme
-Cethiel: Laments of the War
-Eldritch Grim: Massive Battle
-Umplix: To Battle!
-nene: Evil Approach
-Spring Spring: War Theme
-cynicmusic: Epic Endgame Cinematic (battles against Ormana)
-CodeManu: A Legend Will Rise (battle won)
+Trevor Lentz
+  Of Stone (CC-BY 4.0)
+  At What Cost (CC-BY-SA 3.0)
+
+Umplix
+  To Battle! (CC0)
+
+Alexandr Zhelanov
+  We Are So Close (CC-BY 3.0)
+  Darkness March (CC-BY 4.0)
+  Dark Quest (CC-BY 4.0)
+  Dark Forest (CC-BY 4.0)
+  Mystery Manor (CC-BY 3.0)
+  Runaway (CC-BY 3.0)
+  Melancholy RPG (CC-BY 3.0)
+  Depressed of Happytown (CC-BY 3.0)
+
+Scrabbit
+  Demon Lord (CC-BY 4.0)
+
+SOUND AIRYLUVS by ISAo
+  Final Boss Appearance Dark Fantasy (OGA-BY 3.0)
+
+Eldritch Grim
+  Massive Battle (CC0)
+
+William Hector
+  Horde War Drums (CC0)
+
+Bobjt
+  Aboriginal Battle (CC0)
+
+Juhani Junkala
+  Epic Boss Battle (CC0)
+
+CodeManu
+  A Legend Will Rise (CC0)
+
+skrjablin
+  The Final Battle (Public domain)
+
+tcarisland
+  Final Confrontation (CC-BY 4.0)
+
+Peter Eastman
+  Lament (CC-BY 3.0)
+
+cynicmusic
+  Battle Theme A (CC0)
+  Battle Theme B for RPG (CC0)
+  Victory Fanfare (CC0)
+  Sinister Boss Appears! (CC0)
+
+Cethiel
+  Laments of the War (CC0)

@@ -1263,7 +1263,7 @@ function cBattle(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P
  if(auto){const pa=power(mine)*(.85+Math.random()*.3),pb=power(foe)*(.85+Math.random()*.3)*(P.walls&&foe===def?1.3:1),win=pa>pb,r=Math.min(pa,pb)/Math.max(pa,pb);
   const cut=(a,f)=>a.u.forEach(x=>{x.n=Math.max(0,Math.round(x.n*(1-f*(.7+Math.random()*.6))));});const lb=armyMen(win?foe:mine);cut(win?mine:foe,.15+.35*r);cut(win?foe:mine,.55+.3*(1-r));
   const pr=Math.round((lb-armyMen(win?foe:mine))*.3);finish(win,win&&Math.random()<.08,win?pr:0,win?0:pr);return;}
- const go=()=>{$('camp').style.display='none';CB={mine,foe,pid,finish};
+ const go=()=>{BOSSB=isBossBattle(foe,P);$('camp').style.display='none';CB={mine,foe,pid,finish};
  window.launchBattle({map:foe.o==='ormana'?'ormana_beach':(P.bf||'arden_fields'),siege:!!(P.walls&&foe===def),A:mine.u,B:foe.u,enemy:OWN[foe.o].n,winter:(CS.turn-1)%4===3});};const sp=preSpeech(foe);if(sp)cDlg(sp.who,'<i>“'+sp.t+'”</i>',[['To battle','ok','pri']]).then(go);else go();});}
 function campBattleDone(win){if(!CB)return;const {mine,foe,finish}=CB;
  const alive=s=>{const r={};units.filter(u=>u.side==s&&u.cls!=='siege').forEach(u=>{(r[u.type]=r[u.type]||[]).push(u.men.filter(m=>m.alive).length);});return r;};
@@ -1479,13 +1479,32 @@ async function p2Check(){const P=CS.p2;if(!P||CS.done)return;
  if(P.orm===1&&(P.wave||1)>=3&&!natArmies('ormana').length&&!natProvs('ormana').length)await p2End();
  else if(P.orm===1&&!natArmies('ormana').length&&!P.lull){P.lull=1;say('The shore is clear, '+lord()+', for now. Their sails are still on the horizon. Rest the men while you can.');}
  cSave();cRender();cPanel();}
+
+// ================= end credits =================
+const MUSCRED={k_lament:['Fantasy: Lament for a Warrior’s Soul','RandomMind','CC0'],k_ofstone:['Of Stone','Trevor Lentz','CC-BY 4.0'],k_minstrel:['Medieval: Minstrel Dance','RandomMind','CC0'],
+ k_battle:['Medieval: Battle','RandomMind','CC0'],k_tobattle:['To Battle!','Umplix','CC0'],k_soclose:['We Are So Close','Alexandr Zhelanov','CC-BY 3.0'],k_demon:['Demon Lord','Scrabbit','CC-BY 4.0'],
+ k_finalboss:['Final Boss Appearance Dark Fantasy','SOUND AIRYLUVS by ISAo','OGA-BY 3.0'],k_darkness:['Darkness March','Alexandr Zhelanov','CC-BY 4.0'],k_massive:['Massive Battle','Eldritch Grim','CC0'],
+ k_hordedrums:['Horde War Drums','William Hector','CC0'],k_tribal:['Aboriginal Battle','Bobjt','CC0'],k_epicboss:['Epic Boss Battle','Juhani Junkala','CC0'],k_legend:['A Legend Will Rise','CodeManu','CC0'],
+ k_atwhatcost:['At What Cost','Trevor Lentz','CC-BY-SA 3.0'],k_exploration:['Medieval: Exploration','RandomMind','CC0'],k_finalbattle:['The Final Battle','skrjablin','Public domain'],
+ k_confront:['Final Confrontation','tcarisland','CC-BY 4.0'],k_lamentpe:['Lament','Peter Eastman','CC-BY 3.0'],k_btA:['Battle Theme A','cynicmusic','CC0'],k_btB:['Battle Theme B for RPG','cynicmusic','CC0'],
+ k_darkquest:['Dark Quest','Alexandr Zhelanov','CC-BY 4.0'],k_fanfare:['Victory Fanfare','cynicmusic','CC0'],k_kingsfeast:['Medieval: King’s Feast','RandomMind','CC0'],k_darkforest:['Dark Forest','Alexandr Zhelanov','CC-BY 4.0'],
+ k_laments:['Laments of the War','Cethiel','CC0'],k_mystery:['Mystery Manor','Alexandr Zhelanov','CC-BY 3.0'],k_sinister:['Sinister Boss Appears!','cynicmusic','CC0'],k_runaway:['Runaway','Alexandr Zhelanov','CC-BY 3.0'],
+ k_melancholy:['Melancholy RPG','Alexandr Zhelanov','CC-BY 3.0'],k_defeat:['Medieval: Defeat Theme','RandomMind','CC0'],k_depressed:['Depressed of Happytown','Alexandr Zhelanov','CC-BY 3.0']};
+function musUsed(){const L=[MUSF.title,MUSF.victory,MUSF.defeat,MUSF.finale,...MUSF.orm,...MUSF.battle,...MUSF.map,...MUSF.boss,...Object.values(SCMUS)];return [...new Set(L)].filter(k=>MUSCRED[k]);}
+function showCredits(){return new Promise(res=>{const by={};for(const k of musUsed()){const [t,a,l]=MUSCRED[k];(by[a]=by[a]||{t:[]}).t.push('“'+t+'”'+(l==='CC0'||l==='Public domain'?'':' ('+l+')'));}
+ const d=document.createElement('div');d.id='credits';d.style.cssText='position:fixed;inset:0;z-index:20;background:#0d0b09;color:#ece3d0;overflow:hidden;font-family:Georgia,serif;text-align:center';
+ const rows=Object.entries(by).map(([a,v])=>'<div style="margin:0 0 26px"><div style="font-size:22px;color:#f0c674">'+a+'</div><div style="font-size:16px;opacity:.85;margin-top:4px">'+v.t.join('<br>')+'</div></div>').join('');
+ d.innerHTML='<div id="crol" style="position:absolute;left:0;right:0;top:100%;padding:0 20px"><div style="font-size:34px;letter-spacing:.06em;margin-bottom:8px">THE BROKEN THRONES</div><div style="opacity:.6;margin-bottom:60px">Thank you for playing</div><div style="font-size:15px;letter-spacing:.3em;opacity:.7;margin-bottom:26px">MUSIC</div>'+rows+'<div style="font-size:13px;opacity:.55;margin:50px 0 10px">All music from OpenGameArt.org, used with thanks. Tracks without a licence shown are public domain (CC0).</div><div style="margin-top:60px;opacity:.6">Tap to return to the title screen</div></div>';
+ document.body.appendChild(d);const el=d.querySelector('#crol');const H=()=>el.offsetHeight+innerHeight;const T0=performance.now(),dur=Math.max(40000,H()*30);MUS.res=MUSF.finale;MUS.resT=performance.now()+600000;musTick();
+ let done=false;const fin=()=>{if(done)return;done=true;d.remove();res();};d.onclick=fin;
+ const step=()=>{if(done)return;const k=Math.min(1,(performance.now()-T0)/dur);el.style.transform='translateY('+(-k*H())+'px)';if(k<1)requestAnimationFrame(step);else setTimeout(fin,1500);};requestAnimationFrame(step);});}
 async function p2End(){const P=CS.p2;P.orm=2;CS.done=2;cSave();$('camp').style.display='none';advHide();MUS.res='finale';MUS.resT=performance.now()+600000;musTick();
  await new Promise(r=>playScenes([{img:'ethrann',fx:['spray','birds'],cam:[.5,.5,1.15,.5,.5,1.0],t:'The sea takes them back',x:'The last Ormana banners go down on the shore. Their ships burn in the bay, and the men with steel faces lie where they fell. For the first time in two hundred years, Ormana has nothing on the mainland.',bg:'sand',tint:'rgba(20,10,0,.4)'},
   {img:'coronation',fx:['candles','dust'],cam:[.5,.55,1.02,.5,.4,1.18],t:'King of Ethrann',x:'The kings of the mainland come to Aurenhall and kneel. Caelan, the youngest son, rules Ethrann unchallenged.',bg:'grass',tint:'rgba(40,30,0,.45)'},
   {img:'seernight',fx:['mist'],cam:[.55,.5,1.15,.5,.45,1.04],t:'The Seer',x:P.obey?'“You struck down a friend because I told you to,” the Seer says, one last time. “Trevelle would have been your death. Was his life worth your crown? Only you will ever know.” Then she is gone, and she never returns.':'“You would not betray your friend, and still you stand,” the Seer says, one last time. “Perhaps you did not need me after all.” Then she is gone, and she never returns.',bg:'leaves',tint:'rgba(20,10,30,.65)'},
-  {t:voice(),x:'“Caelan the Inevitable. As I said, my king: as certain as death.”',bg:'dirt',tint:'rgba(20,10,0,.6)'},
+  {t:voice(),x:'“You, my king. Caelan the Inevitable. History will say that your rise was as inevitable as death.”',bg:'dirt',tint:'rgba(20,10,0,.6)'},
   {t:'The End',x:'Thank you for playing The Broken Thrones.',bg:'dirt',tint:'rgba(0,0,0,.7)'}],r));
- cExit();}
+ await showCredits();cExit();}
 async function p2Diplo(){const P=CS.p2;const peace=NATIONS.filter(k=>!P.gone[k]&&!P.war[k]),war=NATIONS.filter(k=>P.war[k]&&P.coal);
  const rows=peace.map(k=>'<div class="gw"><b>'+OWN[k].n+'</b><span class="bar"><i style="width:'+CS.gw[k]+'%;background:'+(CS.gw[k]<25?'#d33':CS.gw[k]<50?'#e9a21a':'#4cba58')+'"></i></span><span>'+CS.gw[k]+'</span></div>').join('');
  const st=NATIONS.map(k=>OWN[k].n+': '+(P.gone[k]==='conq'?'conquered':P.gone[k]==='surr'?'at peace (surrendered)':P.war[k]?'<b style="color:#d33">at war</b>':'at peace')).join('<br>');
@@ -1560,7 +1579,7 @@ async function chat(){if(!CS||CS.done)return;CS.chat=CS.chat||{};if(Math.random(
  const q=ok[(Math.random()*ok.length)|0];CS.chat[q.k]=CS.turn;setTimeout(()=>say(q.t()),900);}
 // Ormana warnings the year before they land
 async function ormWarn(){const P=CS.p2;if(!P||P.orm||P.ormT==null)return;const left=P.ormT-CS.turn;
- if(left===4&&!P.w1){P.w1=1;await p2Scene([{img:'seer',fx:['mist'],cam:[.5,.5,1.05,.5,.45,1.15],t:'The Seer',x:'“Across the water, the forges of Ormana have not gone cold for a year. They are coming, little king, and they will come like the sand of the shore. Count your men. Then count them again.”',bg:'leaves',tint:'rgba(10,0,20,.65)'}]);}
+ if(left===4&&!P.w1){P.w1=1;await p2Scene([{img:'seer',fx:['mist'],cam:[.5,.5,1.05,.5,.45,1.15],t:'The Seer',x:'“Across the water, the forges of Ormana have not gone cold for a year. They will come like the relentless waves of the sea, little king, and so, like the sands of the seashore, you must meet them. Mark my words: like the sands of the seashore.”',bg:'leaves',tint:'rgba(10,0,20,.65)'}]);}
  else if(left>0&&left<4){const m=CS.armies.filter(a=>a.o==='caelan').reduce((s,a)=>s+armyMen(a),0);say('We have '+m+' men under arms, '+lord()+'. It is not enough for what is coming. Raise every man you can: recruit, call a levy, buy back the kingdoms’ friendship. '+left+(left>1?' seasons':' season')+', the scouts say.');}}
 
 // ================= the enemy commander speaks before battle =================
@@ -1614,14 +1633,34 @@ window.addEventListener('resize',()=>{if($('camp')&&$('camp').style.display==='b
 // ---------------- music ----------------
 const MUS={on:true,cur:null,el:null,res:null,resT:0,mapI:0,vol:.5,unlocked:false,bad:{}};
 try{MUS.on=localStorage.getItem('tbt_music')!=='off';}catch(e){}
-const MUSF={title:'title2',battle:['battle','battle2','battle3','battle4','battle5'],orm:'orm',victory:'victory2',defeat:'defeat',finale:'finale',map:['mapa','mapb','mapc']};MUS.batI=(Math.random()*5)|0;
+const MUSF={title:'k_lament',map:['k_ofstone','k_minstrel'],battle:['k_battle','k_tobattle','k_soclose'],boss:['k_demon','k_finalboss','k_darkness','k_massive'],
+ orm:['k_hordedrums','k_tribal','k_battle','k_massive','k_epicboss','k_demon'],victory:'k_legend',defeat:'k_atwhatcost',finale:'k_legend'};MUS.batI=-1;MUS.bossI=-1;MUS.ormI=-1;
+// the music chosen for every cutscene
+const SCMUS={ethrann:'k_exploration',rising:'k_finalbattle',hunt:'k_confront',fire:'k_confront',spear:'k_demon',fall:'k_lamentpe',decree:'k_ofstone',crowns:'k_darkness',holm:'k_darkness',calder:'k_battle',
+ calderholds:'k_btA',watched:'k_darkquest',brotherswar:'k_btB',lastbanner:'k_btA',seernight:'k_darkquest',coronation:'k_fanfare',feast:'k_kingsfeast',prophecy:'k_darkforest',letter:'k_laments',part2:'k_lament',
+ trevstrikes:'k_laments',knife:'k_lamentpe',coalition:'k_mystery',holmdefects:'k_mystery',thorne1:'k_sinister',truth:'k_sinister',cameforfather:'k_sinister',seerwarn:'k_darkquest',blacksails:'k_runaway',gather:'k_runaway',
+ thorne2:'k_melancholy',ormwins:'k_defeat',seatakes:'k_hordedrums',kingeth:'k_legend',seerlast:'k_depressed',thornelast:'k_atwhatcost',theend:'k_lament'};
+const SCK={'Ethrann':'ethrann','The Great Rising':'rising','The royal hunt':'hunt','By the fire':'fire','Out of nowhere':'spear','The king falls':'fall','The old decree':'decree','Three crowns':'crowns','The marshal’s choice':'holm','Calder Fields':'calder',
+ 'Calder holds':'calderholds','Watched':'watched','The Brothers’ War begins':'brotherswar','The last banner falls':'lastbanner','The coronation':'coronation','The feast':'feast','The prophecy':'prophecy','A letter from Trevelle':'letter','Part 2':'part2',
+ 'Trevelle strikes':'trevstrikes','A knife in the dark':'knife','The Coalition':'coalition','Holm':'holmdefects','The truth about the spear':'truth','Those who came for your father':'cameforfather','Black sails':'blacksails','Gather everything':'gather',
+ 'Black sails over Ethrann':'ormwins','The sea takes them back':'seatakes','King of Ethrann':'kingeth','The End':'theend'};
+function sceneKey(q){const t=q.t||'',x=q.x||'';if(SCK[t])return SCK[t];
+ if(t==='The Seer')return x.startsWith('That night')?'seernight':x.startsWith('“Across')?'seerwarn':'seerlast';
+ if(x.startsWith('“My lord, four'))return 'thorne1';if(x.startsWith('“My king, I once'))return 'thorne2';if(x.startsWith('“You, my king'))return 'thornelast';return null;}
+function sceneMus(q){const k=sceneKey(q),f=k&&SCMUS[k];if(!f)return;MUS.res='f:'+f;MUS.resT=performance.now()+1e9;musTick();}
+function sceneMusEnd(){if(MUS.res&&String(MUS.res).startsWith('f:')){MUS.res=null;musTick();}}
+let BOSSB=false;
+function isBossBattle(foe,P){const gen=foe.u.some(x=>x.t==="General's guard"&&x.n>0);if(P&&P.walls)return true;
+ if(['osric','bran','varen'].includes(foe.o))return gen||(typeof CS!=='undefined'&&CS.part===2);
+ if(typeof CS!=='undefined'&&CS.part===2&&CS.p2){if(CS.p2.holm&&foe.id===CS.p2.holm.army)return true;if(CS.p2.coal&&!CS.p2.coalDone&&CS.p2.war[foe.o])return true;if(gen&&isNation(foe.o))return true;}
+ return false;}
 function musVis(id){const e=document.getElementById(id);return !!e&&getComputedStyle(e).display!=='none';}
 function musWant(){if(!MUS.on)return null;const now=performance.now();if(MUS.res&&now<MUS.resT)return MUS.res;MUS.res=null;
  if(musVis('scene')||musVis('title'))return 'title';if(musVis('camp'))return 'map';if(typeof started!=='undefined'&&started)return 'battle';return 'title';}
 function musFade(el,to,ms,done){const from=el.volume,t0=performance.now();const f=()=>{const k=Math.min(1,(performance.now()-t0)/ms);el.volume=Math.max(0,Math.min(1,from+(to-from)*k));if(k<1)requestAnimationFrame(f);else done&&done();};f();}
 function musStart(k){const old=MUS.el;MUS.cur=k;MUS.el=null;if(old)musFade(old,0,900,()=>{old.pause();old.src='';});
- if(!k)return;let name;if(k==='map')name=MUSF.map[MUS.mapI%MUSF.map.length];else if(k==='battle'&&SIDE[1]&&SIDE[1].team==='ormana'&&!MUS.bad.orm)name='orm';else if(k==='battle'){MUS.batI++;const n=MUSF.battle.length;for(let i=0;i<n;i++){name=MUSF.battle[(MUS.batI+i)%n];if(!MUS.bad[name])break;}}else name=MUSF[k];if(MUS.bad[name])return;
- const a=new Audio('music/'+name+'.mp3');a.loop=(k==='battle'||k==='title'||k==='finale');a.volume=0;a.preload='auto';
+ if(!k)return;let name;if(String(k).startsWith('f:'))name=k.slice(2);else if(k==='map')name=MUSF.map[MUS.mapI%MUSF.map.length];else if(k==='battle'){const orm=SIDE[1]&&SIDE[1].team==='ormana',L=orm?MUSF.orm:BOSSB?MUSF.boss:MUSF.battle,ik=orm?'ormI':BOSSB?'bossI':'batI';MUS[ik]++;const n=L.length;for(let i=0;i<n;i++){name=L[(MUS[ik]+i)%n];if(!MUS.bad[name])break;}}else name=MUSF[k];if(MUS.bad[name])return;
+ const a=new Audio('music/'+name+'.mp3');a.loop=(k==='battle'||k==='title'||k==='finale'||(String(k).startsWith('f:')&&k!=='f:k_fanfare'));a.volume=0;a.preload='auto';
  a.onended=()=>{if(MUS.el!==a)return;if(k==='map'){MUS.mapI++;MUS.cur=null;musTick();}else if(k==='victory'||k==='defeat'){MUS.res=null;MUS.cur=null;musTick();}};
  a.onerror=()=>{const P=(()=>{try{return window.parent!==window&&window.parent.TBT;}catch(e){return null;}})();if(P&&P.remote&&!a._remote){a._remote=1;a.src=P.remote+'music/'+name+'.mp3';const q=a.play();if(q&&q.catch)q.catch(()=>{});return;}MUS.bad[name]=true;if(MUS.el===a){MUS.el=null;MUS.cur=null;}};
  MUS.el=a;const p=a.play();if(p&&p.catch)p.catch(()=>{if(MUS.el===a){MUS.el=null;MUS.cur=null;}});musFade(a,MUS.vol*(k==='victory'||k==='defeat'?1:1),1200);}
@@ -1695,11 +1734,11 @@ function playScenes(list,done){const sc=$('scene'),cv=$('scv'),g=cv.getContext('
   if(prev){const fa=Math.min(1,(now-cur.t0)/1200);drawPic(prev,1,now);drawPic(cur,fa,now);if(fa>=1)prev=null;}else drawPic(cur,1,now);
   const pr=$('sprog');if(cur)pr.style.width=Math.min(100,(now-cur.t0)/(cur.D*10))+'%';
   raf=requestAnimationFrame(loop);};
- const finish=()=>{cancelAnimationFrame(raf);clearTimeout(timer);sc.style.display='none';sc.onclick=null;removeEventListener('resize',fit);SCN=null;done&&done();};
+ const finish=()=>{cancelAnimationFrame(raf);clearTimeout(timer);sceneMusEnd();sc.style.display='none';sc.onclick=null;removeEventListener('resize',fit);SCN=null;done&&done();};
  const show=()=>{i++;clearTimeout(timer);if(i>=list.length){finish();return;}const q=list[i];
   prev=cur;cur={q,t0:performance.now(),D:durOf(q),P:scParts(q.fx,cv.width,cv.height)};scImg(q.img);if(list[i+1])scImg(list[i+1].img);
   $('stint').style.background='radial-gradient(ellipse at 50% 42%,transparent 38%,rgba(0,0,0,.82)),linear-gradient(transparent 55%,rgba(0,0,0,.55))';
-  const b=$('sbox');b.classList.remove('in');void b.offsetWidth;b.classList.add('in');$('stitle').textContent=q.t;$('stext').textContent=q.x;
+  const b=$('sbox');b.classList.remove('in');void b.offsetWidth;b.classList.add('in');$('stitle').textContent=q.t;$('stext').textContent=q.x;sceneMus(q);
   timer=setTimeout(show,cur.D*1000);};
  addEventListener('resize',fit);SCN={next:show};
  sc.onclick=e=>{if(e.target.id==='sskip')return;buzz();show();};$('sskip').onclick=e=>{e.stopPropagation();i=list.length-1;show();};
@@ -1872,9 +1911,9 @@ function boot(){
   chips($('pMap'),MAPS.filter(m=>m.reg===selReg).map(m=>[m.id,m.name]),MAP.id,k=>setMap(k));
   chips($('pSize'),Object.entries(SZ),BSIZE,k=>{BSIZE=k;});$('pDesc').textContent=MAP.desc;};
  drawPick();
- const startMode=md=>{$('help').style.display='none';if(CB){paused=false;setPause();return;}STORY=false;TUT=null;AIHOLD=false;advHide();WINTER=CSEA==='winter';delete SIDE[1].cloak;runKey+='';BDREAD=0;SIDE[1].name='Terfein';SIDE[1].col='#2e5fa8';SIDE[1].dark='#1b3a6b';SIDE[1].sym='sun';if(SPR.ok)sprTeam(1,'terfein');else SIDE[1].team='terfein';$('nB').textContent='Terfein';const key=md+MAP.id+BSIZE;if(key!==runKey||!started){runKey=key;$('load').style.display='flex';setTimeout(()=>{MODE=md;if(md==='field')genTerrain();init();sel=new Set();$('bot').innerHTML='';$('grp').dataset.k='x';refreshUI();$('load').style.display='none';started=true;paused=false;setPause();if(md==='field')startDeploy();if(md==='siege'){cam.x=Math.max(VW/cam.z/2,150);cam.y=150;}else{cam.x=VW/cam.z/2+60;cam.y=150;}clampCam();advPre();},30);}else{paused=false;setPause();}};
+ const startMode=md=>{BOSSB=false;$('help').style.display='none';if(CB){paused=false;setPause();return;}STORY=false;TUT=null;AIHOLD=false;advHide();WINTER=CSEA==='winter';delete SIDE[1].cloak;runKey+='';BDREAD=0;SIDE[1].name='Terfein';SIDE[1].col='#2e5fa8';SIDE[1].dark='#1b3a6b';SIDE[1].sym='sun';if(SPR.ok)sprTeam(1,'terfein');else SIDE[1].team='terfein';$('nB').textContent='Terfein';const key=md+MAP.id+BSIZE;if(key!==runKey||!started){runKey=key;$('load').style.display='flex';setTimeout(()=>{MODE=md;if(md==='field')genTerrain();init();sel=new Set();$('bot').innerHTML='';$('grp').dataset.k='x';refreshUI();$('load').style.display='none';started=true;paused=false;setPause();if(md==='field')startDeploy();if(md==='siege'){cam.x=Math.max(VW/cam.z/2,150);cam.y=150;}else{cam.x=VW/cam.z/2+60;cam.y=150;}clampCam();advPre();},30);}else{paused=false;setPause();}};
  $('bStart').onclick=()=>startMode('field');$('bSiege').onclick=()=>startMode('siege');
- const startStory=(skip)=>{WINTER=false;delete SIDE[1].cloak;$('title').style.display='none';(skip?(l,f)=>f():playScenes)(INTRO,()=>{STORY=true;setMap('arden_fields');selReg='arden';BSIZE='t';SIDE[1].name='Bran';SIDE[1].col='#4cba58';SIDE[1].dark='#21752d';SIDE[1].sym='horse';if(SPR.ok)sprTeam(1,'bran');else SIDE[1].team='bran';$('nB').textContent='Bran';
+ const startStory=(skip)=>{BOSSB=false;WINTER=false;delete SIDE[1].cloak;$('title').style.display='none';(skip?(l,f)=>f():playScenes)(INTRO,()=>{STORY=true;setMap('arden_fields');selReg='arden';BSIZE='t';SIDE[1].name='Bran';SIDE[1].col='#4cba58';SIDE[1].dark='#21752d';SIDE[1].sym='horse';if(SPR.ok)sprTeam(1,'bran');else SIDE[1].team='bran';$('nB').textContent='Bran';
    $('load').style.display='flex';setTimeout(()=>{MODE='field';genTerrain();init();sel=new Set();$('bot').innerHTML='';$('grp').dataset.k='x';refreshUI();$('load').style.display='none';started=true;paused=false;setPause();runKey='story';
    cam.x=VW/cam.z/2+60;cam.y=150;clampCam();AIHOLD=true;window.tutLine=false;TUT=true;tutI=0;advCd={};advT=-99;tutShow();},30);});};
  $('bStory').onclick=()=>{buzz();startStory();};
