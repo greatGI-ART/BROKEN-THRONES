@@ -1,0 +1,5 @@
+s_sadbattle https://opengameart.org/sites/default/files/the_sad_battle.mp3
+s_finalbattle https://opengameart.org/sites/default/files/the_final_battle.ogg
+s_confront https://opengameart.org/sites/default/files/final_confrontation.mp3
+s_epicboss https://opengameart.org/sites/default/files/Juhani%20Junkala%20-%20Epic%20Boss%20Battle%20%5BSeamlessly%20Looping%5D.wav
+s_minstrel https://opengameart.org/sites/default/files/Minstrel_Dance_0.mp3

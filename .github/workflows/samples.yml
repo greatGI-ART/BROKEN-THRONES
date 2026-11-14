@@ -1,0 +1,29 @@
+name: Fetch music samples
+on:
+  push:
+    paths: ['music-src/samples.txt']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  samples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download
+        run: |
+          sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg
+          mkdir -p samples
+          while read name url; do
+            [ -z "$name" ] && continue
+            curl -sSL -A "Mozilla/5.0" -o "/tmp/$name.src" "$url" || continue
+            ffmpeg -nostdin -loglevel error -y -i "/tmp/$name.src" -ac 2 -b:a 96k -ar 44100 "samples/$name.mp3" || echo "FAILED $name"
+          done < music-src/samples.txt
+          ls -la samples
+      - name: Commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add samples
+          git commit -m "Music samples for choosing" || echo nothing
+          git push
