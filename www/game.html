@@ -164,14 +164,14 @@ const UT={
  'Pikemen':['inf','Spear',16,8,'pike',3,4,6,2,0,0,6,0],
  'Swordsmen':['inf','Infantry',12,6,'sword',5,7,6,4,0,0,6,1],
  'Axemen':['inf','Infantry',12,6,'axe',4,9,4,5,0,0,7,0],
- 'Archers':['mis','Missile',10,5,'bow',5,2,2,1,8,20,4,0],
+ 'Archers':['mis','Missile',10,5,'bow',5,2,2,1,8,28,4,0],
  'Crossbowmen':['mis','Missile',10,5,'xbow',4,3,4,1,6,15,5,0],
  'Javelin skirmishers':['mis','Missile',10,5,'jav',7,3,2,2,3,6,3,1],
  'Light cavalry':['cav','Cavalry',6,3,'spear',9,5,3,6,0,0,4,1],
  'Heavy cavalry':['cav','Cavalry',6,3,'lance',7,8,7,9,0,0,7,1],
  'Horse archers':['cav','Cavalry',6,3,'bow',9,2,2,2,6,15,4,0],
  'Battering ram':['siege','Siege',8,4,'ram',2,2,6,0,0,0,6,0],
- 'Catapult':['siege','Siege',4,2,'cat',1,1,1,0,20,40,3,0]};
+ 'Catapult':['siege','Siege',4,2,'cat',1,1,0,0,20,40,2,0]};
 const MATCH={Spear:{Spear:0,Infantry:-2,Missile:0,Cavalry:4},Infantry:{Spear:4,Infantry:0,Missile:1,Cavalry:0},Missile:{Spear:0,Infantry:0,Missile:0,Cavalry:0},Cavalry:{Spear:-2,Infantry:0,Missile:3,Cavalry:0,Siege:3},Siege:{Spear:0,Infantry:0,Missile:0,Cavalry:0,Siege:0}};
 MATCH.Spear.Siege=2;MATCH.Infantry.Siege=2;MATCH.Missile.Siege=0;
 const RELOAD={bow:5,xbow:7,jav:6},PDMG={bow:6,xbow:7,jav:6};
@@ -331,7 +331,7 @@ function aiSiege(dt){
 }
 function initSiege(){
  genSiege();const E=0,W2=Math.PI;
- if(CB&&CB.siegeLists){const [A,B]=CB.siegeLists;const ys=[128,150,172,106,194,84,216,62,238,40];A.forEach((t,i)=>{const d=UT[t];mkUnit(0,t,d[0]=='mis'?128:d[0]=='cav'?100:150,ys[i%10],E);});mkUnit(0,'Battering ram',128,150,E);mkUnit(0,'Catapult',100,150,E);
+ if(CB&&CB.siegeLists){const [A,B]=CB.siegeLists;const ys=[128,150,172,106,194,84,216,62,238,40];let ci2=0;A.forEach((t,i)=>{const d=UT[t];if(d[0]=='siege'){mkUnit(0,t,96,[126,174,104][ci2++%3],E);return;}mkUnit(0,t,d[0]=='mis'?128:d[0]=='cav'?100:150,ys[i%10],E);});mkUnit(0,'Battering ram',128,150,E);mkUnit(0,'Catapult',100,150,E);
   const wallU=(type,x,y)=>{const u=mkUnit(1,type,x,y,W2);u.onWall=true;for(const m of u.men)m.onWall=true;wallSlots(u);for(const m of u.men){m.x=m.sx;m.y=m.sy;}u.home=[u.x,u.y];return u;};
   let wy=[118,184,GATE_Y,98,204],wi=0,iy=[128,174,104,196,150,84,216];let ii=0;B.forEach(t=>{const d=UT[t];if(d[0]=='mis'&&wi<5)wallU(t,SX0+2,wy[wi++]);else if(t==="General's guard")mkUnit(1,t,372,150,W2);else mkUnit(1,t,340,iy[ii++%7],W2);});return;}
  mkUnit(0,'Spearmen',150,128,E);mkUnit(0,'Swordsmen',150,150,E);mkUnit(0,'Spearmen',150,172,E);
@@ -620,12 +620,12 @@ function kill(d){d.alive=false;d.u.lost++;const dk=kitOf(d.u)||'spear';if(d.u.cl
 function volley(u,t){
  const tal=t.alive;if(!tal.length)return;
  for(const m of u.alive){if(m.fight)continue;const tm=tal[(Math.random()*tal.length)|0];const D=dist(m.x,m.y,tm.x,tm.y);
-  proj.push({x0:m.x,y0:m.y,tm,tx:tm.x+(Math.random()-.5)*1.4,ty:tm.y+(Math.random()-.5)*1.4,t:-Math.random()*.7,T:D/(u.wpn=='jav'?22:38)+.25,jav:u.wpn=='jav',dmg:PDMG[u.wpn],dh:elp(m.x,m.y)-elp(tm.x,tm.y)+(m.onWall?6:0),fw:!!m.onWall});m.thr=.4;}
+  proj.push({ab:u.type==='Archers'?.12:0,x0:m.x,y0:m.y,tm,tx:tm.x+(Math.random()-.5)*1.4,ty:tm.y+(Math.random()-.5)*1.4,t:-Math.random()*.7,T:D/(u.wpn=='jav'?22:38)+.25,jav:u.wpn=='jav',dmg:PDMG[u.wpn],dh:elp(m.x,m.y)-elp(tm.x,tm.y)+(m.onWall?6:0),fw:!!m.onWall});m.thr=.4;}
  t.arT=3;}
 function updProj(dt){
  updParts(dt);
  for(const p of proj){p.t+=dt;if(p.stone){if(p.t>=p.T&&!p.done){p.done=true;stoneLand(p);}continue;}if(p.t>=p.T&&!p.done){p.done=true;const tm=p.tm;
-  if(tm.alive&&!tm.esc&&dist(tm.x,tm.y,p.tx,p.ty)<1.6){let pr=.4-.03*tm.u.def+(p.dh>2?.08:0);if(tm.onWall&&!p.fw)pr*=.6;if(tAt(tm.x,tm.y)==1)pr*=.5;
+  if(tm.alive&&!tm.esc&&dist(tm.x,tm.y,p.tx,p.ty)<1.6){let pr=.4+(p.ab||0)-.03*tm.u.def+(p.dh>2?.08:0);if(tm.onWall&&!p.fw)pr*=.6;if(tAt(tm.x,tm.y)==1)pr*=.5;
    if(tm.u.shield&&Math.abs(angDiff(Math.atan2(p.y0-tm.y,p.x0-tm.x),tm.u.face))<1.05)pr*=.5;
    if(Math.random()<Math.max(.05,pr))hurt(tm,p.dmg*(ARMOUR[tm.u.type]||1));}}}
  proj=proj.filter(p=>!p.done||p.t<p.T+.05);}
@@ -673,7 +673,7 @@ function updUnit(u,dt){
  assignSlots(u);
  if(u.rng>0&&u.ammo>0&&u.fightN==0&&!u.moving&&u.wpn!=='cat'){u.rl-=dt;
   if(u.rl<=0){let t=(u.order=='attack'&&u.tgt&&!u.tgt.gone&&!u.tgt.rout&&dist(u.cx,u.cy,u.tgt.cx,u.tgt.cy)<=rngTo(u,u.tgt))?u.tgt:nearestEnemyUnit(u);
-   if(t){volley(u,t);u.rl=RELOAD[u.wpn]*(.9+Math.random()*.2);u.ammo--;}else u.rl=.5;}}
+   if(t){volley(u,t);u.rl=RELOAD[u.wpn]*(u.type==='Archers'?.75:1)*(.9+Math.random()*.2);u.ammo--;}else u.rl=.5;}}
 }
 function turnTo(a,b,rate){const d=angDiff(b,a);return a+Math.max(-rate,Math.min(rate,d));}
 function updMan(m,dt){
@@ -1091,7 +1091,7 @@ const PROV=[
  {id:'horsemarch',n:'Horsemarch',x:420,y:455,o:'bran',s:100,g:70,bf:'odei_open',seat:'bran',ic:'grass'},
  {id:'southvale',n:'Southvale',x:600,y:460,o:'bran',s:90,g:60,bf:'trevelle_ridge',ic:'hill'}];
 const PI={};PROV.forEach((p,i)=>PI[p.id]=i);
-const COST={'Spearmen':300,'Swordsmen':400,'Pikemen':400,'Axemen':450,'Archers':350,'Crossbowmen':400,'Javelin skirmishers':300,'Light cavalry':500,'Heavy cavalry':800,'Horse archers':600};
+const COST={'Spearmen':300,'Swordsmen':400,'Pikemen':400,'Axemen':450,'Archers':350,'Crossbowmen':400,'Javelin skirmishers':300,'Light cavalry':500,'Heavy cavalry':800,'Horse archers':600,'Catapult':500};
 const SEASON=['Spring','Summer','Autumn','Winter'];
 let PIX=null,DEP=null,DER=null,CNZ=null,CADJ=null,CBASE=null,CIMG=null,CDECO=null;
 function cSeeds(){const S=PROV.map((p,i)=>({x:p.x,y:p.y,k:'p',i}));if(!(CS&&CS.part===2))for(const [k,v] of Object.entries(NB))v.seeds.forEach(([x,y])=>S.push({x,y,k}));return S;}
@@ -1260,14 +1260,14 @@ function cBattle(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P
   CS.armies.forEach(z=>z.u=z.u.filter(x=>x.n>0));CS.armies=CS.armies.filter(z=>z.u.length);
   cCheckBros();cRender();cSave();$('camp').style.display='block';cResize();if(!CRAF)cLoop();cPanel();
   cDlg(win?'Victory':'Defeat',win?'The field is yours. '+(foe.u.length?OWN[foe.o].n+'’s men fall back.':''):'Your army is beaten'+(mine.u.length?' and falls back.':' and scattered.'),[['Continue','ok','pri']]).then(async()=>{await cPrisoners(mine,foe,pm,pf);cRender();cPanel();cSave();cCheckEnd();res(win);});};
- if(auto){const pa=power(mine)*(.85+Math.random()*.3),pb=power(foe)*(.85+Math.random()*.3)*(P.walls&&foe===def?1.3:1),win=pa>pb,r=Math.min(pa,pb)/Math.max(pa,pb);
+ if(auto){const pa=power(mine)*(.85+Math.random()*.3),pb=power(foe)*(.85+Math.random()*.3)*(P.walls&&foe===def?Math.max(1,1.3-.1*mine.u.filter(x=>x.t==='Catapult'&&x.n>0).length):1),win=pa>pb,r=Math.min(pa,pb)/Math.max(pa,pb);
   const cut=(a,f)=>a.u.forEach(x=>{x.n=Math.max(0,Math.round(x.n*(1-f*(.7+Math.random()*.6))));});const lb=armyMen(win?foe:mine);cut(win?mine:foe,.15+.35*r);cut(win?foe:mine,.55+.3*(1-r));
   const pr=Math.round((lb-armyMen(win?foe:mine))*.3);finish(win,win&&Math.random()<.08,win?pr:0,win?0:pr);return;}
  const go=()=>{BOSSB=isBossBattle(foe,P);$('camp').style.display='none';CB={mine,foe,pid,finish};
  window.launchBattle({map:foe.o==='ormana'?'ormana_beach':(P.bf||'arden_fields'),siege:!!(P.walls&&foe===def),A:mine.u,B:foe.u,enemy:OWN[foe.o].n,winter:(CS.turn-1)%4===3});};const sp=preSpeech(foe);if(sp)cDlg(sp.who,'<i>“'+sp.t+'”</i>',[['To battle','ok','pri']]).then(go);else go();});}
 function campBattleDone(win){if(!CB)return;const {mine,foe,finish}=CB;
- const alive=s=>{const r={};units.filter(u=>u.side==s&&u.cls!=='siege').forEach(u=>{(r[u.type]=r[u.type]||[]).push(u.men.filter(m=>m.alive).length);});return r;};
- const a0=alive(0),a1=alive(1);mine.u.forEach(x=>{const q=a0[x.t];x.n=q&&q.length?q.shift():0;});foe.u.forEach(x=>{const q=a1[x.t];x.n=q&&q.length?q.shift():0;});
+ const alive=s=>{const r={};units.filter(u=>u.side==s).forEach(u=>{(r[u.type]=r[u.type]||[]).push(u.men.filter(m=>m.alive).length);});return r;};
+ const a0=alive(0),a1=alive(1);mine.u.forEach(x=>{const q=a0[x.t];if(UT[x.t][0]==='siege'&&!(q&&q.length))return;x.n=q&&q.length?q.shift():0;});foe.u.forEach(x=>{const q=a1[x.t];x.n=q&&q.length?q.shift():0;});
  if(genDead[0]){const g=mine.u.find(x=>x.t==="General's guard");if(g)g.n=Math.max(1,g.n);cToast('Caelan is wounded, but lives.');}
  finish(win,genDead[1],CAPT[0],CAPT[1]);}
 function cGive(a,n){if(!a||n<=0)return;for(const x of a.u){const mx=UT[x.t][2],k=Math.min(n,mx-x.n);x.n+=k;n-=k;if(n<=0)break;}}
@@ -1282,8 +1282,8 @@ async function cPrisoners(mine,foe,pm,pf){const who=OWN[foe.o].n;CS.dread=CS.dre
   const v=await cDlg(who+' holds your men',who+' has taken '+pf+' of your soldiers prisoner and demands '+ask+' silver for their return. If you refuse, they will be killed.',[['Pay '+ask+' silver','pay',can?'pri':'dis'],['Refuse','no']]);
   if(v==='pay'&&can){CS.silver-=ask;cGive(CS.armies.find(z=>z===mine)||CS.armies.find(z=>z.o==='caelan'),pf);cToast('Your men are back in the ranks.');}else cToast('Your captured men are killed.');}}
 async function cRecruit(){const a=CS.armies.find(x=>x.id===CSEL);if(!a)return;
- const opts=Object.entries(COST).filter(([t])=>!/knights/.test(t)||(a.prov==='calder'&&!CS.armies.some(z=>z.o==='caelan'&&z.u.some(x=>x.t===t)))).map(([t,c])=>[(SHORT[t]||t)+' · '+c,t,CS.silver>=c?'':'dis']);
- const v=await cDlg('Recruit in '+PROV[PI[a.prov]].n,'Silver: '+(CS.silver|0)+'. New units join this army at once.'+(a.prov==='calder'?' Knights can only be raised here in Calder, one unit of each kind.':' Knights can only be raised in Calder.'),[...opts,['Cancel','no']]);
+ const opts=Object.entries(COST).filter(([t])=>t!=='Catapult'||a.u.filter(x=>x.t==='Catapult').length<3).filter(([t])=>!/knights/.test(t)||(a.prov==='calder'&&!CS.armies.some(z=>z.o==='caelan'&&z.u.some(x=>x.t===t)))).map(([t,c])=>[(SHORT[t]||t)+' · '+c,t,CS.silver>=c?'':'dis']);
+ const v=await cDlg('Recruit in '+PROV[PI[a.prov]].n,'Silver: '+(CS.silver|0)+'. New units join this army at once. Catapults (up to 3 per army) only fight in sieges.'+(a.prov==='calder'?' Knights can only be raised here in Calder, one unit of each kind.':' Knights can only be raised in Calder.'),[...opts,['Cancel','no']]);
  if(v&&v!=='no'&&CS.silver>=COST[v]&&a.u.length<10){CS.silver-=COST[v];a.u.push(U(v));cSave();cPanel();}}
 function cMergeBtn(){const a=CS.armies.find(x=>x.id===CSEL);if(!a)return;const mate=CS.armies.find(z=>z!==a&&z.o==='caelan'&&z.prov===a.prov);if(mate)cMergeInto(a,mate);}
 async function cDiplo(){if(CS.part===2)return p2Diplo();const rows=Object.entries(NB).map(([k,v])=>'<div class="gw"><b>'+v.n+'</b><span class="bar"><i style="width:'+CS.gw[k]+'%;background:'+(CS.gw[k]<25?'#d33':CS.gw[k]<50?'#e9a21a':'#4cba58')+'"></i></span><span>'+CS.gw[k]+'</span></div>').join('');
@@ -1374,7 +1374,7 @@ Object.assign(UT,{'Masked nobles':['cav','Cavalry',6,3,'lance',7,9,10,11,0,0,12,
 Object.assign(KIT,{'Masked nobles':'o_noble','Steppe archers':'o_hbow','Ormana footmen':'o_foot','Mounted knights':'knight','Foot knights':'knight','Militia':'militia'});
 Object.assign(SHORT,{'Masked nobles':'Masked','Steppe archers':'Steppe bows','Ormana footmen':'Ormana foot','Mounted knights':'Knights','Foot knights':'Foot knights','Militia':'Militia'});
 Object.assign(COST,{'Militia':150,'Foot knights':1200,'Mounted knights':1600});
-const ARMOUR={'Mounted knights':.5,'Foot knights':.5,'Masked nobles':.5,'Steppe archers':.75,'Ormana footmen':.8};
+const ARMOUR={'Catapult':1.5,'Battering ram':1.2,'Mounted knights':.5,'Foot knights':.5,'Masked nobles':.5,'Steppe archers':.75,'Ormana footmen':.8};
 // tinted map figures and towns for the new owners, made from Caelan's red ones
 function tintImg(im,hex){const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d');g.drawImage(im,0,0);
  try{const id=g.getImageData(0,0,c.width,c.height),d=id.data,[R,G,B]=hexRgb(hex);for(let i=0;i<d.length;i+=4){const r=d[i],gg=d[i+1],b=d[i+2];if(d[i+3]>0&&r>gg*1.45&&r>b*1.45&&r>60){const l=r/200;d[i]=Math.min(255,R*l);d[i+1]=Math.min(255,G*l);d[i+2]=Math.min(255,B*l);}}g.putImageData(id,0,0);}catch(e){}return c;}
@@ -1951,7 +1951,7 @@ $('bCode').onclick=async()=>{buzz();const v=await cDlg('Load a save code','Paste
  if(v!=='l')return;const t=window._codeVal||'';try{const o=readCode(t);MEMSAVE=JSON.stringify(o);try{localStorage.setItem('tbt_save',MEMSAVE);}catch(e){}$('title').style.display='none';cStart(false);}catch(e){toast('That save code did not work. Check you copied all of it.');}};
  window.launchBattle=o=>{STORY=false;TUT=null;AIHOLD=false;advHide();WINTER=!!o.winter;if(/ormana/i.test(o.enemy||''))SIDE[1].cloak='#1c1b1e';else delete SIDE[1].cloak;BDREAD=(CS&&CS.dread)||0;SIDE[1].name=o.enemy;{const ow=Object.values(OWN).find(q=>q.n===o.enemy);{const tk=Object.keys(OWN).find(k=>OWN[k].n===o.enemy);if(SPR.ok)sprTeam(1,tk||'terfein');else SIDE[1].team=tk||'terfein';}if(ow){SIDE[1].col=ow.c;SIDE[1].dark=ow.d;SIDE[1].sym=ow.sym;const sh=$('shB');if(sh){sh.style.setProperty('--c',ow.c);const cv=document.createElement('canvas');cv.width=48;cv.height=48;cv.style.width='100%';cv.style.height='100%';drawSym(cv.getContext('2d'),ow.sym,24,24,3.6,'#fff');sh.innerHTML='';sh.appendChild(cv);}}}$('nB').textContent=o.enemy;
   const cnt=L=>{const q={};L.forEach(x=>{(q[x.t]=q[x.t]||[]).push(x.n);});return q;};NQ=[cnt(o.A),cnt(o.B)];
-  const tA=o.A.filter(x=>x.n>0).map(x=>x.t),tB=o.B.filter(x=>x.n>0).map(x=>x.t);
+  const tA=o.A.filter(x=>x.n>0&&(o.siege||UT[x.t][0]!=='siege')).map(x=>x.t),tB=o.B.filter(x=>x.n>0&&(o.siege||UT[x.t][0]!=='siege')).map(x=>x.t);
   if(o.siege){CB.siegeLists=[tA,tB];CB.lists=null;}else{CB.lists=[tA,tB];CB.siegeLists=null;setMap(o.map);BSIZE='c';}
   $('load').style.display='flex';setTimeout(()=>{MODE=o.siege?'siege':'field';if(!o.siege)genTerrain();init();NQ=null;sel=new Set();$('bot').innerHTML='';$('grp').dataset.k='x';refreshUI();$('load').style.display='none';started=true;paused=false;setPause();runKey='camp';if(!o.siege)startDeploy();
    if(o.siege){cam.x=Math.max(VW/cam.z/2,150);cam.y=150;}else{cam.x=VW/cam.z/2+60;cam.y=MAP.cy||150;}clampCam();advPre();},30);};
