@@ -1668,7 +1668,7 @@ function musTick(){if(!MUS.unlocked)return;const w=musWant();if(w!==MUS.cur)musS
 function musResult(win){MUS.res=win?'victory':'defeat';MUS.resT=performance.now()+30000;musTick();}
 function musToggle(){MUS.on=!MUS.on;try{localStorage.setItem('tbt_music',MUS.on?'on':'off');}catch(e){}musLabel();musTick();}
 function musLabel(){const t=MUS.on?'♪':'♪̸';['bMus','cMus'].forEach(id=>{const b=document.getElementById(id);if(b){b.textContent=MUS.on?'♪':'🔇';b.style.opacity=MUS.on?1:.6;}});const tm=document.getElementById('tMus');if(tm)tm.textContent='Music: '+(MUS.on?'on':'off');}
-addEventListener('pointerdown',()=>{if(!MUS.unlocked){MUS.unlocked=true;setTimeout(musTick,50);}},{capture:true});
+addEventListener('pointerdown',()=>{if(!MUS.unlocked){MUS.unlocked=true;setTimeout(musTick,50);}else if(MUS.on&&MUS.el&&MUS.el.paused){const q=MUS.el.play();if(q&&q.catch)q.catch(()=>{});}},{capture:true});
 setInterval(musTick,500);
 document.addEventListener('visibilitychange',()=>{if(!MUS.el)return;if(document.hidden)MUS.el.pause();else if(MUS.on)MUS.el.play().catch(()=>{});});
 let AIHOLD=false,STORY=false,ADV='full';try{ADV=localStorage.getItem('eth_adv')||'full';}catch(e){}
