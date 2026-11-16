@@ -92,6 +92,7 @@ button{font-family:inherit;cursor:pointer}
 #ctop .res{display:inline-flex;align-items:center;gap:5px;padding:4px 9px 4px 4px;border-radius:999px;background:rgba(255,255,255,.12);opacity:1;font-size:12.5px;white-space:nowrap;flex-shrink:0}
 #ctop .res b{font-weight:800}.dot{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font:800 10px system-ui;font-style:normal}
 @media(max-width:1050px){#ctop .res .l{display:none}}
+@media(max-width:940px){#ctop{gap:5px;padding:0 6px}#ctop button{padding:7px 9px;font-size:12px}#ctop .res{padding:3px 7px 3px 3px}}
 #ctop button,#cpan button{font:700 12.5px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;height:auto;padding:8px 13px;border-radius:999px;border:0;background:rgba(255,255,255,.16);color:#fff;white-space:nowrap;box-shadow:none;flex-shrink:0;transition:transform .08s}
 #ctop button.pri,#cpan button.pri{background:linear-gradient(135deg,#ff9a1f,#ff3d57);box-shadow:0 4px 16px rgba(255,90,60,.55);border:0}
 #cpan{left:10px;right:10px;bottom:10px;border-radius:18px;border:1px solid rgba(255,255,255,.16);background:rgba(10,16,34,.8);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;opacity:1;box-shadow:0 10px 30px rgba(0,0,0,.35)}
@@ -140,7 +141,7 @@ button{font-family:inherit;cursor:pointer}
 </div></div>
 <div id="camp" style="display:none"><canvas id="cmap"></canvas>
  <div id="ctop"><b id="cseason"></b><span class="res" title="Silver"><i class="dot" style="background:#dfe7f2;color:#334">S</i><span class="l">Silver</span><b id="csil"></b></span><span class="res" title="Grain"><i class="dot" style="background:#ffd54a;color:#5a4300">G</i><span class="l">Grain</span><b id="cgr"></b></span><span class="res" title="Dread"><i class="dot" style="background:#ff4d6d;color:#fff">D</i><span class="l">Dread</span><b id="cdr"></b></span><span class="res" title="Honour"><i class="dot" style="background:#38c8ff;color:#033">H</i><span class="l">Honour</span><b id="chon"></b></span><span style="flex:1"></span>
-  <button id="cRaise">Raise army</button><button id="cDip">Diplomacy</button><button id="cEnd" class="pri">End turn</button><button id="cMus" title="Music">♪</button><button id="cSaveB">Save</button><button id="cMenu">Menu</button></div>
+  <button id="cRaise">Raise army</button><button id="cDip">Diplomacy</button><button id="cTre">Treasury</button><button id="cEnd" class="pri">End turn</button><button id="cMus" title="Music">♪</button><button id="cSaveB">Save</button><button id="cMenu">Menu</button></div>
  <div id="cpan"><div style="flex:1;min-width:0"><div id="cpn"></div><div id="cpu"></div></div><button id="cMrg">Merge</button><button id="cRec">Recruit</button></div>
 </div>
 <div id="cdlg" class="ov" style="display:none;z-index:8"><div class="panel cdp"><h2 id="cdT"></h2><div id="cdB"></div><div id="cdF"></div></div></div>
@@ -1103,28 +1104,24 @@ const OWN={caelan:{n:'Caelan',c:'#ff4d42',d:'#b3201a',sym:'spears'},osric:{n:'Os
 const NB={terfein:{n:'Terfein',c:'#cfe8ff',seeds:[[870,340],[900,600],[700,560]],drop:12,ic:'snow'},odei:{n:'Odei',c:'#ffe08a',seeds:[[680,760],[430,730]],drop:8,ic:'grass'},
  trevelle:{n:'Trevelle',c:'#d6ea9a',seeds:[[255,360],[200,500],[270,585]],drop:5,ic:'mount'},yova:{n:'Yova',c:'#98e6b4',seeds:[[150,130],[400,190],[290,235]],drop:6,ic:'tree'}};
 const PROV=[
- {id:'calder',n:'Calder',x:360,y:330,o:'caelan',s:120,g:140,bf:'arden_fields',ic:'wheat'},
- {id:'westmere',n:'Westmere',x:470,y:285,o:'caelan',s:80,g:60,bf:'yova_wood',ic:'tree'},
- {id:'greyford',n:'Greyford',x:590,y:330,o:'varen',s:90,g:50,bf:'arden_ford',ic:'hill'},
- {id:'northwatch',n:'Northwatch',x:585,y:440,o:'varen',s:100,g:40,bf:'trevelle_glen',seat:'varen',ic:'mount'},
- {id:'kingsfield',n:'Kingsfield',x:475,y:400,o:'osric',s:110,g:70,bf:'arden_fields',ic:'wheat'},
- {id:'aurenhall',n:'Aurenhall',x:490,y:510,o:'osric',s:220,g:60,walls:1,seat:'osric',ic:'hill'},
- {id:'eastbrook',n:'Eastbrook',x:560,y:610,o:'osric',s:100,g:60,bf:'arden_ford',ic:'tree'},
- {id:'horsemarch',n:'Horsemarch',x:350,y:455,o:'bran',s:100,g:70,bf:'odei_open',seat:'bran',ic:'grass'},
- {id:'southvale',n:'Southvale',x:365,y:575,o:'bran',s:90,g:60,bf:'trevelle_ridge',ic:'hill'}];
+ {id:'calder',n:'Calder',x:400,y:330,o:'caelan',s:120,g:140,bf:'arden_fields',ic:'wheat'},
+ {id:'northwatch',n:'Northwatch',x:560,y:345,o:'varen',s:100,g:40,bf:'trevelle_glen',seat:'varen',ic:'mount'},
+ {id:'kingsfield',n:'Kingsfield',x:480,y:405,o:'osric',s:110,g:70,bf:'arden_fields',ic:'wheat'},
+ {id:'aurenhall',n:'Aurenhall',x:520,y:505,o:'osric',s:220,g:60,walls:1,seat:'osric',ic:'hill'},
+ {id:'horsemarch',n:'Horsemarch',x:370,y:450,o:'bran',s:100,g:70,bf:'odei_open',seat:'bran',ic:'grass'}];
 const PI={};PROV.forEach((p,i)=>PI[p.id]=i);
 const COST={'Spearmen':300,'Swordsmen':400,'Pikemen':400,'Axemen':450,'Archers':350,'Crossbowmen':400,'Javelin skirmishers':300,'Light cavalry':500,'Heavy cavalry':800,'Horse archers':600,'Catapult':500};
 const SEASON=['Spring','Summer','Autumn','Winter'];
 let DSEA=null,PIX=null,DEP=null,DER=null,CNZ=null,CADJ=null,CBASE=null,CIMG=null,CDECO=null;
-function cSeeds(){const S=PROV.map((p,i)=>({x:p.x,y:p.y,k:'p',i}));if(!(CS&&CS.part===2))for(const [k,v] of Object.entries(NB))v.seeds.forEach(([x,y])=>S.push({x,y,k}));return S;}
-const LANDP=[[71,52.3],[123.7,45.0],[257,52.3],[278.7,66.9],[269.4,154.5],[350,161.8],[424.4,115.1],[430.6,160.3],[464.7,161.8],[458.5,186.6],[501.9,207.1],[536,242.1],[576.3,256.7],[591.8,307.8],[644.5,309.3],[691,303.4],[712.7,338.5],[660,332.6],[613.5,329.7],[598,344.3],[598,388.1],[619.7,453.8],[638.3,490.3],[691,490.3],[700.3,534.1],[762.3,526.8],[774.7,592.5],[784,621.7],[802.6,592.5],[784,519.5],[808.8,494.7],[877,497.6],[939,548.7],[963.8,504.9],[861.5,436.3],[802.6,434.8],[768.5,458.2],[706.5,424.6],[641.4,391.0],[644.5,370.6],[749.9,347.2],[722,300.5],[753,256.7],[846,256.7],[908,329.7],[1016.5,388.1],[1084.7,461.1],[1125,558.9],[1094,636.3],[1072.3,665.5],[1001,782.3],[970,767.7],[985.5,680.1],[917.3,694.7],[926.6,767.7],[979.3,826.1],[1047.5,826.1],[1032,869.9],[784,877.2],[412,877.2],[319,869.9],[257,877.2],[219.8,891.8],[210.5,789.6],[319,723.9],[387.2,753.1],[350,694.7],[303.5,672.8],[350,658.2],[365.5,631.9],[288,601.3],[201.2,592.5],[188.8,563.3],[173.3,526.8],[102,534.1],[55.5,512.2],[111.3,490.3],[179.5,468.4],[226,461.1],[288,402.7],[334.5,382.3],[328.3,363.3],[288,366.2],[241.5,388.1],[222.9,417.3],[170.2,453.8],[133,431.9],[102,424.6],[102,411.5],[148.5,417.3],[188.8,391.0],[219.8,361.8],[272.5,334.1],[300.4,312.2],[275.6,285.9],[269.4,253.8],[263.2,227.5],[222.9,230.4],[188.8,193.9],[145.4,179.3],[89.6,173.5],[64.8,151.6],[61.7,118.0],[40,101.9],[64.8,90.3]],ORMP=[[891.5,120.6],[920.0,95.4],[965.0,78.4],[1010.0,75.0],[1052.0,95.4],[1112.0,122.6],[1169.0,146.4],[1215.5,175.3],[1190.0,187.2],[1109.0,188.9],[1091.0,153.2],[1043.0,126.0],[995.0,115.8],[953.0,105.6],[908.0,122.6]];
+function cSeeds(){const S=PROV.map((p,i)=>({x:p.x,y:p.y,k:'p',i,isl:p.isl}));if(!(CS&&CS.part===2))for(const [k,v] of Object.entries(NB))v.seeds.forEach(([x,y])=>S.push({x,y,k}));return S;}
+const LANDP=[[71,52.3],[123.7,45.0],[257,52.3],[278.7,66.9],[269.4,154.5],[350,161.8],[424.4,115.1],[430.6,160.3],[464.7,161.8],[458.5,186.6],[501.9,207.1],[536,242.1],[576.3,256.7],[591.8,307.8],[644.5,309.3],[691,303.4],[712.7,338.5],[660,332.6],[613.5,329.7],[598,344.3],[598,388.1],[619.7,453.8],[638.3,490.3],[691,490.3],[700.3,534.1],[762.3,526.8],[774.7,592.5],[784,621.7],[802.6,592.5],[784,519.5],[808.8,494.7],[877,497.6],[939,548.7],[963.8,504.9],[861.5,436.3],[802.6,434.8],[768.5,458.2],[706.5,424.6],[641.4,391.0],[644.5,370.6],[749.9,347.2],[722,300.5],[753,256.7],[846,256.7],[908,329.7],[1016.5,388.1],[1084.7,461.1],[1125,558.9],[1094,636.3],[1072.3,665.5],[1001,782.3],[970,767.7],[985.5,680.1],[917.3,694.7],[926.6,767.7],[979.3,826.1],[1047.5,826.1],[1032,869.9],[784,877.2],[412,877.2],[319,869.9],[257,877.2],[219.8,891.8],[210.5,789.6],[319,723.9],[387.2,753.1],[350,694.7],[303.5,672.8],[350,658.2],[365.5,631.9],[288,601.3],[201.2,592.5],[188.8,563.3],[173.3,526.8],[102,534.1],[55.5,512.2],[111.3,490.3],[179.5,468.4],[226,461.1],[288,402.7],[334.5,382.3],[328.3,363.3],[288,366.2],[241.5,388.1],[222.9,417.3],[170.2,453.8],[133,431.9],[102,424.6],[102,411.5],[148.5,417.3],[188.8,391.0],[219.8,361.8],[272.5,334.1],[300.4,312.2],[275.6,285.9],[269.4,253.8],[263.2,227.5],[222.9,230.4],[188.8,193.9],[145.4,179.3],[89.6,173.5],[64.8,151.6],[61.7,118.0],[40,101.9],[64.8,90.3]],ORMP=[[832.2,122.0],[874.0,85.0],[940.0,60.0],[1006.0,55.0],[1067.6,85.0],[1155.6,125.0],[1239.2,160.0],[1307.4,202.5],[1270.0,220.0],[1151.2,222.5],[1124.8,170.0],[1054.4,130.0],[984.0,115.0],[922.4,100.0],[856.4,125.0]];
 function landMask(){const c=document.createElement('canvas');c.width=CW;c.height=CH;const g=c.getContext('2d');
  const poly=(P,col)=>{g.fillStyle=col;g.beginPath();P.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.fill();};
  poly(LANDP,'#f00');poly(ORMP,'#0f0');const d=g.getImageData(0,0,CW,CH).data,M=new Uint8Array(CW*CH);
  for(let y=0;y<CH;y++)for(let x=0;x<CW;x++){const n1=(fb(x/18,y/18)-.5)*9,n2=(fb(x/18+9,y/18+4)-.5)*9;const xx=Math.max(0,Math.min(CW-1,(x+n1)|0)),yy=Math.max(0,Math.min(CH-1,(y+n2)|0)),o=(yy*CW+xx)*4;M[y*CW+x]=d[o]>128?1:d[o+1]>128?2:0;}
  return M;}
-function cBuild(){const S=cSeeds(),N=CW*CH;PIX=new Int8Array(N);CNZ=new Uint8Array(N);const LM=landMask();
- for(let y=0;y<CH;y++)for(let x=0;x<CW;x++){const i=y*CW+x,n=(fb(x/90,y/90)-.5)*70;CNZ[i]=(fb(x/22,y/22)*255)|0;if(LM[i]!==1){PIX[i]=LM[i]===2?-2:-1;continue;}let b=0,bd=1e12;for(let k=0;k<S.length;k++){const dx=x-S[k].x+n,dy=y-S[k].y-n*.6,d=dx*dx+dy*dy;if(d<bd){bd=d;b=k;}}PIX[i]=b;CNZ[i]=(fb(x/22,y/22)*255)|0;}
+function cBuild(){const S=cSeeds(),N=CW*CH,seen=ormSeen();PIX=new Int8Array(N);CNZ=new Uint8Array(N);const LM=landMask();
+ for(let y=0;y<CH;y++)for(let x=0;x<CW;x++){const i=y*CW+x,n=(fb(x/90,y/90)-.5)*70;CNZ[i]=(fb(x/22,y/22)*255)|0;const isl=LM[i]===2;if(!LM[i]||(isl&&!seen)){PIX[i]=-1;continue;}let b=-1,bd=1e12;for(let k=0;k<S.length;k++){if(!!S[k].isl!==isl)continue;const dx=x-S[k].x+n,dy=y-S[k].y-n*.6,d=dx*dx+dy*dy;if(d<bd){bd=d;b=k;}}PIX[i]=b;CNZ[i]=(fb(x/22,y/22)*255)|0;}
  const realm=k=>k<0?'s'+k:S[k].k==='p'?'A':S[k].k;
  const cham=(same)=>{const D=new Uint8Array(N).fill(30);for(let y=0;y<CH;y++)for(let x=0;x<CW;x++){const i=y*CW+x;if((x<CW-1&&!same(PIX[i],PIX[i+1]))||(y<CH-1&&!same(PIX[i],PIX[i+CW]))||(x>0&&!same(PIX[i],PIX[i-1]))||(y>0&&!same(PIX[i],PIX[i-CW])))D[i]=0;}
   for(let y=0;y<CH;y++)for(let x=0;x<CW;x++){const i=y*CW+x;let v=D[i];if(x>0)v=Math.min(v,D[i-1]+1);if(y>0)v=Math.min(v,D[i-CW]+1);D[i]=v;}
@@ -1132,6 +1129,7 @@ function cBuild(){const S=cSeeds(),N=CW*CH;PIX=new Int8Array(N);CNZ=new Uint8Arr
  DSEA=cham((a,b)=>(a===-1)===(b===-1));DEP=cham((a,b)=>a===b);DER=cham((a,b)=>realm(a)===realm(b));
  CADJ=PROV.map(()=>new Set());const CNT={};for(let y=0;y<CH-2;y++)for(let x=0;x<CW-2;x++){const a=PIX[y*CW+x];if(a<0||a>=PROV.length)continue;for(const b of [PIX[y*CW+x+1],PIX[(y+1)*CW+x]]){if(b>=0&&a!==b&&b<PROV.length){const key=a<b?a+'_'+b:b+'_'+a;CNT[key]=(CNT[key]||0)+1;}}}
  for(const [key,n] of Object.entries(CNT)){if(n<12)continue;const [a,b]=key.split('_').map(Number);CADJ[a].add(b);CADJ[b].add(a);}
+ if(seen)for(const [a,b] of SEALINK){if(PI[a]!=null&&PI[b]!=null){CADJ[PI[a]].add(PI[b]);CADJ[PI[b]].add(PI[a]);}}
  CBASE=S;cDeco();}
 function hexRgb(h){const n=parseInt(h.slice(1),16);return [n>>16,(n>>8)&255,n&255];}
 function cRender(){if(!PIX)cBuild();const S=CBASE;const c=CIMG||document.createElement('canvas');c.width=CW;c.height=CH;const g=c.getContext('2d'),id=g.createImageData(CW,CH),D=id.data;
@@ -1192,7 +1190,7 @@ function seasonName(t){return SEASON[(t-1)%4]+', Year '+(((t-1)/4|0)+1);}
 let CV={s:1,ox:0,oy:0,fit:true},CRAF=0,CPTR=new Map(),CPINCH=null,CMOVED=false;
 function cShow(){$('camp').style.display='block';cResize();CV.fit=true;cFit();cPanel();if(!CRAF)cLoop();}
 function cResize(){const cv=$('cmap'),d=Math.min(2,window.devicePixelRatio||1);cv.width=innerWidth*d;cv.height=innerHeight*d;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';}
-function cFit(){const top=44,W=innerWidth,H=innerHeight-top,p2=CS&&CS.part===2,bx=PROV.slice(0,9),X0=p2?0:Math.min(...bx.map(q=>q.x))-110,Y0=p2?0:Math.min(...bx.map(q=>q.y))-95,VW2=p2?CW:Math.max(...bx.map(q=>q.x))+130-X0,VH2=p2?CH:Math.max(...bx.map(q=>q.y))+75-Y0;const s=Math.min(H/VH2,W/VW2)*(p2?.97:1);CV.s=s;CV.ox=(W-VW2*s)/2-X0*s;CV.oy=top+(H-VH2*s)/2-Y0*s;}
+function cFit(){const top=44,W=innerWidth,H=innerHeight-top,p2=CS&&CS.part===2,bx=PROV.filter(q=>['caelan','osric','bran','varen'].includes(q.o)),X0=p2?0:Math.min(...bx.map(q=>q.x))-110,Y0=p2?0:Math.min(...bx.map(q=>q.y))-95,VW2=p2?CW:Math.max(...bx.map(q=>q.x))+130-X0,VH2=p2?CH:Math.max(...bx.map(q=>q.y))+75-Y0;const s=Math.min(H/VH2,W/VW2)*(p2?.97:1);CV.s=s;CV.ox=(W-VW2*s)/2-X0*s;CV.oy=top+(H-VH2*s)/2-Y0*s;}
 function cClamp(){const W=innerWidth,H=innerHeight;CV.s=Math.max(Math.min(W/CW,H/CH),Math.min(5,CV.s));CV.ox=Math.min(W*.5,Math.max(W*.5-CW*CV.s,CV.ox));CV.oy=Math.min(H*.5,Math.max(H*.5-CH*CV.s,CV.oy));}
 function cTo(sx,sy){return [(sx-CV.ox)/CV.s,(sy-CV.oy)/CV.s];}
 function cLoop(){CRAF=requestAnimationFrame(cLoop);if($('camp').style.display!=='block'){cancelAnimationFrame(CRAF);CRAF=0;return;}cDraw(performance.now()/1000);}
@@ -1203,10 +1201,10 @@ function cLife(g,T){
   g.strokeStyle='#2c1808';g.lineWidth=2;g.beginPath();g.moveTo(0,2);g.lineTo(0,-20);g.stroke();g.fillStyle=black?'#1b1722':'#ffffff';g.strokeStyle=black?'#000':'#9fb4c8';g.lineWidth=1;g.beginPath();g.moveTo(1,-19);g.quadraticCurveTo(15+Math.sin(T*3)*1.5,-12,1,-4);g.closePath();g.fill();g.stroke();
   g.strokeStyle='rgba(255,255,255,.7)';g.lineWidth=1.5;g.beginPath();g.moveTo(-17,6);g.lineTo(-27,7);g.moveTo(-15,9);g.lineTo(-22,10);g.stroke();g.restore();};
  const loop=(t,P)=>{const n=P.length,f=((t%1)+1)%1*n,i=f|0,u=f-i,a=P[i],b=P[(i+1)%n];return [a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u,b[0]>=a[0]?1:-1];};
- const R1=[[560,90],[700,170],[820,90],[680,60]],R2=[[45,250],[100,275],[60,330],[30,290]],R3=[[1250,560],[1320,700],[1260,860],[1200,720]],R4=[[870,60],[1050,45],[1250,170],[1050,220]];
- let q=loop(T/60,R1);ship(q[0],q[1],q[2]);q=loop(T/50+.3,R2);ship(q[0],q[1],q[2]);q=loop(T/55+.6,R3);ship(q[0],q[1],q[2]);q=loop(T/70,R4);ship(q[0],q[1],q[2],true);
+ const R1=[[560,90],[700,170],[820,90],[680,60]],R2=[[45,250],[100,275],[60,330],[30,290]],R3=[[1250,560],[1320,700],[1260,860],[1200,720]],R4=[[800,150],[840,40],[1100,30],[1340,150],[1290,260],[1080,250]];
+ let q=loop(T/60,R1);ship(q[0],q[1],q[2]);q=loop(T/50+.3,R2);ship(q[0],q[1],q[2]);q=loop(T/55+.6,R3);ship(q[0],q[1],q[2]);if(ormSeen()){q=loop(T/70,R4);ship(q[0],q[1],q[2],true);}
  // chimney smoke over every town
- for(const p of PROV){for(let k=0;k<3;k++){const u=((T*.22+k/3+p.x*.013)%1);g.fillStyle='rgba(255,255,255,'+(.5*(1-u)).toFixed(3)+')';g.beginPath();g.arc(p.x-10+Math.sin(u*5+p.y)*5+u*8,p.y-34-u*34,3+u*7,0,7);g.fill();}}
+ for(const p of PROV){if(p.isl&&!ormSeen())continue;for(let k=0;k<3;k++){const u=((T*.22+k/3+p.x*.013)%1);g.fillStyle='rgba(255,255,255,'+(.5*(1-u)).toFixed(3)+')';g.beginPath();g.arc(p.x-10+Math.sin(u*5+p.y)*5+u*8,p.y-34-u*34,3+u*7,0,7);g.fill();}}
  // soft clouds and gulls
  for(let k=0;k<5;k++){const x=((T*10+k*330)%(CW+500))-250,y=60+k*190;g.fillStyle='rgba(10,30,60,.07)';g.beginPath();g.ellipse(x+26,y+34,90,30,0,0,7);g.fill();g.fillStyle='rgba(255,255,255,.2)';g.beginPath();g.ellipse(x,y,84,28,0,0,7);g.ellipse(x+56,y+8,60,22,0,0,7);g.ellipse(x-40,y+10,44,18,0,0,7);g.fill();}
  g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=1.6;for(let k=0;k<6;k++){const x=((T*26+k*260)%(CW+200))-100,y=120+k*130+Math.sin(T*1.3+k)*14,w=4+Math.sin(T*9+k)*2.2;g.beginPath();g.moveTo(x-6,y-w);g.quadraticCurveTo(x-3,y-1,x,y);g.quadraticCurveTo(x+3,y-1,x+6,y-w);g.stroke();}}
@@ -1216,7 +1214,8 @@ function cDraw(T){if(!CS)return;if(!CIMG)cRender();T=T||performance.now()/1000;c
  // living sea: glints, ships, gulls
  {g.strokeStyle='rgba(255,255,255,.45)';g.lineWidth=2;g.lineCap='round';for(let k=0;k<46;k++){const x=((k*197.3+T*9)%(CW+300))-150,y=((k*113.7)%(CH+200))-100+Math.sin(T*.8+k)*4;const xi=x|0,yi=y|0;if(xi>=0&&yi>=0&&xi<CW&&yi<CH&&PIX&&PIX[yi*CW+xi]!==-1)continue;g.globalAlpha=.35+.35*Math.sin(T*1.7+k*2.1);g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+9,y-5,x+18,y);g.stroke();}g.globalAlpha=1;}
  g.drawImage(CIMG,0,0);cLife(g,T);
- {const cx=ORMP.reduce((a,p)=>a+p[0],0)/ORMP.length,cy=ORMP.reduce((a,p)=>a+p[1],0)/ORMP.length;g.textAlign='center';g.font='italic 700 22px Georgia,serif';g.lineWidth=5;g.strokeStyle='rgba(0,0,0,.6)';g.strokeText('ORMANA',cx,cy+8);g.fillStyle='#e8e2d6';g.fillText('ORMANA',cx,cy+8);
+ {g.textAlign='center';if(ormSeen()){g.font='italic 800 22px Georgia,serif';g.lineWidth=5;g.strokeStyle='rgba(0,0,0,.6)';g.strokeText('ORMANA',1090,255);g.fillStyle='#fff';g.fillText('ORMANA',1090,255);
+  g.strokeStyle='rgba(255,255,255,.6)';g.lineWidth=3;g.setLineDash([4,10]);for(const [a,b] of SEALINK){const A=PROV[PI[a]],B=PROV[PI[b]];if(A&&B){g.beginPath();g.moveTo(A.x,A.y);g.lineTo(B.x,B.y);g.stroke();}}g.setLineDash([]);}
   g.font='italic 600 15px Georgia,serif';g.fillStyle='rgba(235,245,255,.75)';g.fillText('The Western Sea',660,130);g.fillText('The Inner Sea',95,290);g.fillText('The Frozen Sea',1270,700);}
  // drifting cloud shadows
  
@@ -1230,7 +1229,7 @@ function cDraw(T){if(!CS)return;if(!CIMG)cRender();T=T||performance.now()/1000;c
    const dx=p.x-ax,dy=p.y-ay,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,s0=40,s1=L-44;g.setLineDash([10,8]);g.lineDashOffset=-T*30;g.lineWidth=4;g.beginPath();g.moveTo(ax+ux*s0,ay+uy*s0);g.lineTo(ax+ux*s1,ay+uy*s1);g.stroke();g.setLineDash([]);
    g.fillStyle=col;g.beginPath();g.moveTo(ax+ux*(s1+12),ay+uy*(s1+12));g.lineTo(ax+ux*s1-uy*9,ay+uy*s1+ux*9);g.lineTo(ax+ux*s1+uy*9,ay+uy*s1-ux*9);g.fill();g.globalAlpha=1;}}
  // towns: 3D fortified towns, castle for the capital
- for(const p of PROV){const o=CS.prov[p.id],im=MIMG.town[(p.walls?'capital':'town')+'_'+o],w=p.walls?118:92;let h=w*.8;
+ for(const p of PROV){if(p.isl&&!ormSeen())continue;const o=CS.prov[p.id],im=MIMG.town[(p.walls?'capital':'town')+'_'+o],w=p.walls?118:92;let h=w*.8;
   if(im){h=w*im.height/im.width;g.drawImage(im,p.x-w/2,p.y-h*.62,w,h);}
   const ly=p.y+h*.38+16;g.font='800 15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif';g.lineWidth=4.5;g.lineJoin='round';g.strokeStyle='rgba(8,14,34,.9)';g.strokeText(p.n,p.x,ly);g.fillStyle='#ffffff';g.fillText(p.n,p.x,ly);}
  // armies: 3D figures standing beside the town
@@ -1338,9 +1337,9 @@ async function cDiplo(){if(CS.part===2)return p2Diplo();const rows=Object.entrie
  const v=await cDlg('Neighbours','Goodwill falls every season. At zero, that kingdom raids your lands. Send 100 grain to raise it by 20.<br>Dread: '+(CS.dread|0)+(CS.dread>=50?' (feared: goodwill falls half as fast)':'')+'. Executing prisoners raises dread; releasing them lowers it.<br>Grain: '+(CS.grain|0)+rows,[...Object.entries(NB).map(([k,x])=>['Send grain to '+x.n,k,CS.grain>=100?'':'dis']),['Close','no']]);
  if(v&&v!=='no'&&CS.grain>=100){CS.grain-=100;CS.gw[v]=Math.min(100,CS.gw[v]+20);addH(2);cSave();cPanel();cDiplo();}}
 async function cEndTurn(){try{return await cEndTurn0();}catch(e){errLog('end turn: '+String(e&&e.stack||e).slice(0,250));CBUSY=false;try{cPanel();cRender();cSave();}catch(_){}}}
-async function cEndTurn0(){if(CBUSY)return;CBUSY=true;CSEL=null;cPanel();
+async function cEndTurn0(){if(CBUSY)return;CBUSY=true;CSEL=null;cPanel();if(CS.tax===2){addD(1);addH(-1);}else if(CS.tax===0)addH(1);
  const aut=(CS.turn-1)%4===2;
- for(const p of PROV){const o=CS.prov[p.id];if(o==='caelan'){CS.silver+=p.s;CS.grain+=p.g*(aut?3:1);}else if(CS.bros[o]==='free'||isNation(o)||o==='ormana')CS.bs[o]=(CS.bs[o]||0)+p.s;}
+ for(const p of PROV){const o=CS.prov[p.id];if(o==='caelan'){CS.silver+=Math.round(p.s*TAXM[CS.tax==null?1:CS.tax]);CS.grain+=p.g*(aut?3:1);}else if(CS.bros[o]==='free'||isNation(o)||o==='ormana')CS.bs[o]=(CS.bs[o]||0)+p.s;}
  for(const a of CS.armies.filter(a=>a.o==='caelan')){CS.silver-=a.u.length*12;CS.grain-=a.u.length*15;
   if(CS.prov[a.prov]==='caelan')a.u.forEach(x=>{const mx=UT[x.t][2];x.n=Math.min(mx,x.n+Math.ceil(mx*.25));});}
  if(CS.grain<0){CS.grain=0;CS.armies.filter(a=>a.o==='caelan').forEach(a=>a.u.forEach(x=>x.n=Math.max(1,Math.floor(x.n*.9))));cToast('No grain! Your soldiers go hungry and desert.');}
@@ -1398,19 +1397,41 @@ const NATIONS=['trevelle','terfein','odei','yova'];
 Object.assign(OWN,{trevelle:{n:'Trevelle',c:'#b4d63a',d:'#6f8a12',sym:'mount'},terfein:{n:'Terfein',c:'#3d9bff',d:'#1557b8',sym:'sun'},
  odei:{n:'Odei',c:'#ff8f2e',d:'#b85608',sym:'arrow'},yova:{n:'Yova',c:'#1fd1ae',d:'#0b8a70',sym:'tree'},ormana:{n:'Ormana',c:'#2b2a30',d:'#0c0c0e',sym:'mask'}});
 const PROV2=[
- {id:'frostmark',n:'Frostmark',x:870,y:340,o:'terfein',s:90,g:40,bf:'terfein_pass',ic:'snow'},
- {id:'hollin',n:'Hollin',x:900,y:600,o:'terfein',s:160,g:50,bf:'terfein_stream',walls:1,seat:'terfein',ic:'snow'},
+ {id:'thornwood',n:'Thornwood',x:110,y:100,o:'yova',s:80,g:60,bf:'yova_wood',ic:'tree'},
+ {id:'brackwater',n:'Brackwater',x:215,y:170,o:'yova',s:80,g:60,bf:'yova_fen',ic:'tree'},
+ {id:'yovard',n:'Yovard',x:390,y:170,o:'yova',s:140,g:70,bf:'yova_fen',ic:'tree',walls:1,seat:'yova'},
+ {id:'fenreach',n:'Fenreach',x:300,y:255,o:'yova',s:80,g:70,bf:'yova_fen',ic:'tree'},
+ {id:'ironhold',n:'Ironhold',x:250,y:350,o:'trevelle',s:130,g:40,bf:'trevelle_glen',ic:'mount'},
+ {id:'redcliff',n:'Redcliff',x:170,y:395,o:'trevelle',s:90,g:40,bf:'trevelle_ridge',ic:'mount'},
+ {id:'aldmoor',n:'Aldmoor',x:200,y:500,o:'trevelle',s:180,g:50,bf:'trevelle_ridge',ic:'mount',walls:1,seat:'trevelle'},
+ {id:'stonegate',n:'Stonegate',x:120,y:505,o:'trevelle',s:90,g:40,bf:'trevelle_glen',ic:'mount'},
+ {id:'southvale',n:'Southvale',x:300,y:540,o:'trevelle',s:100,g:60,bf:'trevelle_ridge',ic:'hill'},
+ {id:'silverpass',n:'Silverpass',x:215,y:590,o:'trevelle',s:140,g:40,bf:'trevelle_ridge',ic:'mount'},
+ {id:'frostmark',n:'Frostmark',x:870,y:330,o:'terfein',s:90,g:40,bf:'terfein_pass',ic:'snow'},
+ {id:'whitefell',n:'Whitefell',x:760,y:400,o:'terfein',s:90,g:40,bf:'terfein_stream',ic:'snow'},
+ {id:'icewater',n:'Icewater',x:1000,y:440,o:'terfein',s:80,g:30,bf:'terfein_pass',ic:'snow'},
+ {id:'hollin',n:'Hollin',x:920,y:580,o:'terfein',s:160,g:50,bf:'terfein_stream',ic:'snow',walls:1,seat:'terfein'},
  {id:'skarn',n:'Skarn',x:700,y:560,o:'terfein',s:90,g:40,bf:'terfein_pass',ic:'snow'},
- {id:'varda',n:'Varda',x:680,y:760,o:'odei',s:150,g:70,bf:'odei_kurgans',walls:1,seat:'odei',ic:'grass'},
- {id:'sunmere',n:'Sunmere',x:430,y:730,o:'odei',s:90,g:80,bf:'odei_open',coast:1,ic:'grass'},
- {id:'ironhold',n:'Ironhold',x:255,y:360,o:'trevelle',s:130,g:40,bf:'trevelle_glen',ic:'mount'},
- {id:'aldmoor',n:'Aldmoor',x:200,y:500,o:'trevelle',s:180,g:50,bf:'trevelle_ridge',walls:1,seat:'trevelle',ic:'mount'},
- {id:'silverpass',n:'Silverpass',x:270,y:585,o:'trevelle',s:140,g:40,bf:'trevelle_ridge',coast:1,ic:'mount'},
- {id:'thornwood',n:'Thornwood',x:150,y:130,o:'yova',s:80,g:60,bf:'yova_wood',ic:'tree'},
- {id:'yovard',n:'Yovard',x:400,y:190,o:'yova',s:140,g:70,bf:'yova_fen',walls:1,seat:'yova',ic:'tree'},
- {id:'fenreach',n:'Fenreach',x:290,y:235,o:'yova',s:80,g:70,bf:'yova_fen',ic:'tree'}];
+ {id:'karrow',n:'Karrow',x:800,y:640,o:'terfein',s:90,g:40,bf:'terfein_stream',ic:'snow'},
+ {id:'northreach',n:'Northreach',x:1060,y:620,o:'terfein',s:70,g:30,bf:'terfein_pass',ic:'snow'},
+ {id:'varda',n:'Varda',x:680,y:760,o:'odei',s:150,g:70,bf:'odei_kurgans',ic:'grass',walls:1,seat:'odei'},
+ {id:'sunmere',n:'Sunmere',x:430,y:730,o:'odei',s:90,g:80,bf:'odei_open',ic:'grass'},
+ {id:'dunmere',n:'Dunmere',x:400,y:640,o:'odei',s:90,g:80,bf:'odei_open',ic:'grass'},
+ {id:'eastbrook',n:'Eastbrook',x:560,y:660,o:'odei',s:100,g:60,bf:'arden_ford',ic:'tree'},
+ {id:'kurgan',n:'Kurgan',x:300,y:800,o:'odei',s:80,g:60,bf:'odei_kurgans',ic:'grass'},
+ {id:'saltplain',n:'Saltplain',x:450,y:840,o:'odei',s:80,g:60,bf:'odei_open',ic:'grass'},
+ {id:'redsteppe',n:'Redsteppe',x:600,y:850,o:'odei',s:90,g:70,bf:'odei_open',ic:'grass'},
+ {id:'farwood',n:'Farwood',x:830,y:800,o:'odei',s:80,g:50,bf:'yova_wood',ic:'tree'},
+ {id:'blackharbor',n:'Blackharbor',x:910,y:95,o:'ormana',s:120,g:40,bf:'ormana_beach',ic:'hill',isl:1},
+ {id:'maskhold',n:'Maskhold',x:1050,y:105,o:'ormana',s:200,g:40,bf:'ormana_beach',ic:'hill',isl:1,walls:1,seat:'ormana'},
+ {id:'ashcoast',n:'Ashcoast',x:1200,y:185,o:'ormana',s:120,g:40,bf:'ormana_beach',ic:'hill',isl:1}];
+const SEALINK=[['blackharbor','frostmark'],['blackharbor','yovard'],['ashcoast','icewater']];
+function ormSeen(){return !!(CS&&CS.part===2&&CS.p2&&(CS.p2.reveal||CS.p2.orm));}
+for(const k in NB)NB[k].seeds=PROV2.filter(q=>q.o===k).map(q=>[q.x,q.y]);
 const P1N=PROV.length;
 function p2Ext(){if(PROV.length>P1N)return;PROV2.forEach(p=>PROV.push(p));PROV.forEach((p,i)=>PI[p.id]=i);PIX=null;CIMG=null;}
+function cMigrate(){if(!CS)return;for(const p of PROV)if(!CS.prov[p.id])CS.prov[p.id]=(CS.part===2&&['osric','bran','varen'].includes(p.o))?'caelan':p.o;
+ for(const a of CS.armies)if(PI[a.prov]==null)a.prov=(PROV.find(p=>CS.prov[p.id]===a.o)||PROV[0]).id;if(CS.tax==null)CS.tax=1;}
 function isNation(o){return NATIONS.includes(o);}
 function natProvs(k){return PROV.filter(p=>CS.prov[p.id]===k);}
 function natArmies(k){return CS.armies.filter(a=>a.o===k);}
@@ -1438,16 +1459,16 @@ const NPICK={trevelle:['Pikemen','Crossbowmen','Spearmen','Swordsmen'],terfein:[
 function mkArmy(o,prov,name,list){const a={id:CS.nid++,o,prov,name,u:list.map(x=>U(x[0],x[1])),mv:false};CS.armies.push(a);return a;}
 function p2Begin(){p2Ext();CS.part=2;CS.done=0;for(const k in CS.prov)if(['osric','bran','varen'].includes(CS.prov[k]))CS.prov[k]='caelan';
  for(const p of PROV2)CS.prov[p.id]=p.o;
- Object.assign(CS.bs,{trevelle:1500,terfein:1200,odei:1000,yova:900,ormana:0});
+ Object.assign(CS.bs,{trevelle:1500,terfein:1600,odei:2000,yova:800,ormana:0});
  mkArmy('trevelle','aldmoor',"King Aldous's highlanders",NARMY.trevelle);mkArmy('trevelle','ironhold','Ironhold guard',[['Spearmen'],['Crossbowmen'],['Pikemen']]);
- mkArmy('terfein','hollin',"Terfein's host",NARMY.terfein);mkArmy('odei','varda',"Odei's riders",NARMY.odei);mkArmy('yova','yovard',"Yova's woodsmen",NARMY.yova);
+ mkArmy('terfein','hollin',"Terfein's host",NARMY.terfein);mkArmy('terfein','whitefell','Whitefell axes',[['Axemen'],['Spearmen'],['Crossbowmen'],['Heavy cavalry']]);mkArmy('odei','varda',"Odei's riders",NARMY.odei);mkArmy('odei','dunmere','Dunmere riders',[['Light cavalry'],['Horse archers'],['Horse archers'],['Spearmen']]);mkArmy('odei','redsteppe','Redsteppe riders',[['Light cavalry'],['Light cavalry'],['Horse archers'],['Spearmen']]);mkArmy('yova','yovard',"Yova's woodsmen",NARMY.yova);
  CS.p2={t0:CS.turn,dl:Math.max(12,CS.turn+6),war:{},gone:{},obey:null,coal:0,reveal:0,ormT:Math.max(29,CS.turn+16),orm:0,holm:null,plotT:0,end:0,alarm:{}};
  CS.gw.trevelle=Math.max(CS.gw.trevelle,70);PIX=null;CIMG=null;cSave();}
 // ---- war ----
 async function p2Declare(k){if(CS.p2.war[k])return true;const first=k==='trevelle'&&CS.p2.obey===null;
  const v=await cDlg(first?'Betray King Aldous?':'Declare war on '+OWN[k].n+'?',first?'Aldous traded you the army that won you the crown, and his letters still call you friend. The Seer says Trevelle will be your death unless you strike first.<br><br>If you attack, every kingdom on the mainland will trust Arden less.':'Breaking the peace with '+OWN[k].n+' will alarm every other kingdom.',[[first?'Strike Trevelle':'Declare war','yes','pri'],['Not now','no']]);
  if(v!=='yes')return false;CS.p2.war[k]=1;if(first){CS.p2.obey=true;addH(-15);for(const n of NATIONS)if(n!=='trevelle')CS.gw[n]=Math.max(0,CS.gw[n]-25);
-  setTimeout(()=>p2Say('Trevelle is at war with you. Take Ironhold, Silverpass and King Aldous’s capital, Aldmoor. Their mines will pay for what comes next.'),400);}
+  setTimeout(()=>p2Say('Trevelle is at war with you. Take Trevelle’s six regions, and above all King Aldous’s capital, Aldmoor. Their mines will pay for what comes next.'),400);}
  else{addH(-5);for(const n of NATIONS)if(n!==k)CS.gw[n]=Math.max(0,CS.gw[n]-10);}cSave();cRender();return true;}
 // AI for nations, rebels and Ormana in Part 2
 async function p2AI(a){const o=a.o;if(isNation(o)&&!CS.p2.war[o])return 'skip';
@@ -1471,15 +1492,15 @@ async function p2Turn(){const P=CS.p2;
  if(P.plotT&&CS.turn>=P.plotT&&natProvs('trevelle').length){CS.done=1;cSave();await p2Scene([{img:'fall',fx:['embers'],cam:[.5,.5,1.1,.5,.5,1.0],t:'A knife in the dark',x:'While your armies were held in the highlands, your brothers bought your guards. Caelan dies in his own hall, and Arden falls to the brothers he spared.',bg:'dirt',tint:'rgba(30,0,0,.6)'}]);
   try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return false;}
  // the Seer reveals the truth about the spear
- if(P.coal&&!P.reveal&&CS.turn>=P.coal+2){P.reveal=1;await p2Scene([{img:'seernight',fx:['mist'],cam:[.55,.5,1.15,.5,.45,1.04],t:'The truth about the spear',x:'The Seer finds you in your tent between battles. “You think your father died for a crown. He died for Ormana. Their spies threw the spear from the trees, and they have been waiting for Ethrann to bleed ever since.”',bg:'leaves',tint:'rgba(20,10,30,.65)'},
+ if(P.coal&&!P.reveal&&CS.turn>=P.coal+2){P.reveal=1;PIX=null;CIMG=null;await p2Scene([{img:'seernight',fx:['mist'],cam:[.55,.5,1.15,.5,.45,1.04],t:'The truth about the spear',x:'The Seer finds you in your tent between battles. “You think your father died for a crown. He died for Ormana. Their spies threw the spear from the trees, and they have been waiting for Ethrann to bleed ever since.”',bg:'leaves',tint:'rgba(20,10,30,.65)'},
   {img:'spear',fx:['dust'],cam:[.5,.5,1.12,.5,.45,1.02],t:'Those who came for your father',x:'“Those who came for your father will come for you. Finish this war quickly, little king. The black sails are coming.”',bg:'dirt',tint:'rgba(0,0,0,.6)'}]);}
  // Ormana lands
  if(!P.orm&&CS.turn>=P.ormT)await p2Landing();
  if(P.orm===1&&(P.wave||1)<3&&CS.turn>=P.waveT){await ormWave();P.waveT=CS.turn+3;}
  if(P.orm===1&&CS.turn>P.ormT+12){CS.done=1;cSave();await p2Scene([{img:'rising',fx:['embers'],cam:[.5,.5,1.05,.5,.5,1.15],t:'Black sails over Ethrann',x:'Ormana’s grip closes on the mainland, one town at a time. The empire the Great Rising broke has come back, and Arden kneels to it.',bg:'sand',tint:'rgba(0,0,0,.6)'}]);try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return false;}
  return true;}
-async function p2Landing(){const P=CS.p2;P.orm=1;
- const coast=['frostmark','greyford','yovard','westmere','thornwood'].filter(q=>!CS.armies.some(z=>z.prov===q&&z.o==='caelan'));
+async function p2Landing(){const P=CS.p2;P.orm=1;PIX=null;CIMG=null;
+ const coast=['frostmark','yovard','whitefell','northwatch','icewater'].filter(q=>!CS.armies.some(z=>z.prov===q&&z.o==='caelan'));
  const L=coast.length?coast:['sunmere'];CS.prov[L[0]]='ormana';
  mkArmy('ormana',L[0],'The Iron Mask’s host',ORM_ARMY);
  for(const q of L.slice(1,3)){CS.prov[q]='ormana';mkArmy('ormana',q,'Ormana raiders',ORM_WAVE);}
@@ -1566,7 +1587,7 @@ async function p2Diplo(){const P=CS.p2;const peace=NATIONS.filter(k=>!P.gone[k]&
 
 function p2Go(scene){MUS.res=null;p2Begin();CSEL=null;if(MIMG.ok)p2Imgs();$('camp').style.display='none';$('load').style.display='flex';
  setTimeout(()=>{cBuild();CIMG=null;$('load').style.display='none';cShow();cFit();
-  setTimeout(()=>p2Say('Part 2. The mainland is now on the map: Trevelle in the south, Terfein in the north, Odei in the east and Yova in the west. The Seer says Trevelle will be your death unless you strike before winter of Year 3 ('+seasonName(CS.p2.dl)+'). Attack Trevelle to obey her, or keep the peace and see what comes. Knights can now be raised in Calder.'),600);},40);}
+  setTimeout(()=>p2Say('Part 2. The four other kingdoms are now on the map: Odei, the largest, then Terfein, Trevelle and Yova. The Seer says Trevelle will be your death unless you strike before winter of Year 3 ('+seasonName(CS.p2.dl)+'). Attack Trevelle to obey her, or keep the peace and see what comes. Knights can now be raised in Calder.'),600);},40);}
 // ================= Honour, Dread, titles, raising armies and the voices around the king =================
 function hon(){return CS.honour||0;}
 function addH(n){CS.honour=Math.max(0,Math.min(100,hon()+n));}
@@ -1586,6 +1607,13 @@ function renownBattle(win,size){const L=lean(),n=size;
  if(!L){if(win){addH(Math.ceil(n*.67));addD(Math.ceil(n*.67));}return;}
  if(L==='h')addH(win?n:-n);else addD(win?n:-n);}
 // raising a new army with Dread or Honour
+const TAXM=[.7,1,1.4],TAXN=['Light','Fair','Heavy'];
+async function cTreasury(){if(CBUSY)return;for(;;){const tx=CS.tax==null?1:CS.tax,mine=PROV.filter(p=>CS.prov[p.id]==='caelan'),aut=(CS.turn-1)%4===2;
+ const tax=mine.reduce((a,p)=>a+Math.round(p.s*TAXM[tx]),0),units=CS.armies.filter(a=>a.o==='caelan').reduce((a,z)=>a+z.u.length,0),harv=mine.reduce((a,p)=>a+p.g*(aut?3:1),0);
+ const rows=mine.map(p=>'<div class="gw"><b style="width:110px">'+p.n+'</b><span style="flex:1">'+Math.round(p.s*TAXM[tx])+' silver · '+p.g+' grain</span></div>').join('');
+ const v=await cDlg('Treasury','<b>Silver '+(CS.silver|0)+' · Grain '+(CS.grain|0)+'</b><br>Taxes are '+TAXN[tx]+': <b>+'+tax+' silver</b> a season from '+mine.length+(mine.length===1?' region':' regions')+'. Soldiers’ pay: −'+(units*12)+' silver.<br>Harvest: +'+harv+' grain'+(aut?' (autumn harvest)':'')+'. Soldiers eat: −'+(units*15)+' grain.<br><span style="opacity:.8">Light taxes bring 30% less silver but raise Honour. Heavy taxes bring 40% more but raise Dread and cost Honour.</span>'+rows+'<br>The grain market pays <b>40 silver for 100 grain</b>.',
+  [['Sell 100 grain','s1',CS.grain>=100?'':'dis'],['Sell 500 grain','s5',CS.grain>=500?'':'dis'],['Taxes: '+TAXN[(tx+1)%3],'tax'],['Close','no']]);
+ if(v==='s1'&&CS.grain>=100){CS.grain-=100;CS.silver+=40;}else if(v==='s5'&&CS.grain>=500){CS.grain-=500;CS.silver+=200;}else if(v==='tax'){CS.tax=(tx+1)%3;}else break;cSave();cPanel();}}
 async function cRaise(){if(CBUSY)return;const home=[PROV[PI.aurenhall],PROV[PI.calder],...PROV].find(p=>p&&CS.prov[p.id]==='caelan');if(!home){cToast('You hold no town to raise an army in.');return;}
  const d=CS.dread||0,h=hon();
  const v=await cDlg('Raise a new army','A new army gathers at '+home.n+'.<br><br><b>Conscripts</b> (40 Dread): men dragged from the villages by fear. Many of them, poorly armed, quick to run.<br><b>Volunteers</b> (40 Honour): men who come because they believe in you. Fewer, better armed, steady in battle.<br><br>Dread: '+d+' · Honour: '+h+'<br>Spending lowers the score, and with it your title.',
@@ -1596,7 +1624,7 @@ async function cRaise(){if(CBUSY)return;const home=[PROV[PI.aurenhall],PROV[PI.c
 // Ormana's waves
 const ORM_ARMY=[["General's guard"],['Masked nobles'],['Masked nobles'],['Steppe archers'],['Steppe archers'],['Ormana footmen'],['Ormana footmen'],['Ormana footmen'],['Spearmen'],['Spearmen']];
 const ORM_WAVE=[['Masked nobles'],['Steppe archers'],['Steppe archers'],['Steppe archers'],['Ormana footmen'],['Ormana footmen'],['Ormana footmen'],['Spearmen'],['Spearmen'],['Spearmen']];
-function ormCoast(n){const c=['silverpass','sunmere','aldmoor','ironhold','varda','fenreach','skarn','yovard'].filter(q=>!CS.armies.some(z=>z.prov===q));return c.slice(0,n);}
+function ormCoast(n){const c=['frostmark','yovard','whitefell','northwatch','icewater','brackwater','thornwood'].filter(q=>!CS.armies.some(z=>z.prov===q));return c.slice(0,n);}
 async function ormWave(){const P=CS.p2;P.wave=(P.wave||1)+1;const L=ormCoast(2);
  L.forEach((q,i)=>{CS.prov[q]='ormana';mkArmy('ormana',q,i?'Ormana’s second host':'Ormana’s fresh host',ORM_WAVE);});CS.bs.ormana=(CS.bs.ormana||0)+1500;cRender();cSave();
  await cDlg('More black sails',(P.wave===3?'The last and greatest of Ormana’s fleets':'Another Ormana fleet')+' comes ashore at '+L.map(q=>PROV[PI[q]].n).join(' and ')+'. They keep coming, like the sand of the shore.',[['Continue','ok','pri']]);
@@ -1673,9 +1701,9 @@ function preSpeech(foe){const o=foe.o,hasGen=foe.u.some(x=>x.t==="General's guar
  if(hasGen&&!/levy|guard/i.test(foe.name))return {who:KINGS[o],t:pick(o==='trevelle'&&CS.p2&&CS.p2.obey===false?S.council:S.king)};
  return {who:LORDS[o]+', for '+KINGS[o],t:pick(S.lord)};}
 
-function cStart(fresh){if(fresh||!cLoad())cNew();if(CS.part===2)p2Ext();CIMG=null;CSEL=null;if(!MIMG.ok){loadMapSpr().then(()=>cStart(false));return;}p2Imgs();if(!PIX){$('load').style.display='flex';setTimeout(()=>{cBuild();$('load').style.display='none';cStart2(fresh);},40);return;}cStart2(fresh);}
+function cStart(fresh){if(fresh||!cLoad())cNew();if(CS.part===2)p2Ext();cMigrate();CIMG=null;CSEL=null;if(!MIMG.ok){loadMapSpr().then(()=>cStart(false));return;}p2Imgs();if(!PIX){$('load').style.display='flex';setTimeout(()=>{cBuild();$('load').style.display='none';cStart2(fresh);},40);return;}cStart2(fresh);}
 function cStart2(fresh){if(CS.part!==2&&CS.done&&['osric','bran','varen'].every(o=>CS.bros[o]!=='free')){p2Go(false);return;}cShow();
- if(CS.turn===1&&fresh)setTimeout(()=>cAdv('Bran’s host waits in Horsemarch to the south. Varen holds the north, Osric the capital. Tap your army, then a lit province to march. March two of your armies into one province to merge them. Drag to move the map, pinch to zoom.'),600);}
+ if(CS.turn===1&&fresh)setTimeout(()=>cAdv('Arden is split between four brothers. Bran’s host waits in Horsemarch, Varen holds Northwatch, and Osric holds Kingsfield and the capital, Aurenhall. Tap your army, then a lit province to march. March two of your armies into one province to merge them. Drag to move the map, pinch to zoom.'),600);}
 window.addEventListener('resize',()=>{if($('camp')&&$('camp').style.display==='block'){cResize();cFit();}});
 
 
@@ -1994,6 +2022,7 @@ function boot(){
      await P.update(f=>{b.textContent='Downloading… '+Math.round(f*100)+'%';});
     }catch(err){b.disabled=false;b.textContent='Check for updates';toast('Could not reach the update server. Check your internet and try again.');}};}}
  $('cdlg').addEventListener('click',e=>{if(e.target.id==='cdlg')cDlgCancel();});
+ {const tb=$('cTre');if(tb)tb.onclick=()=>{buzz();cTreasury();};}
  ['bMus','cMus','tMus'].forEach(id=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();buzz();musToggle();};});musLabel();
  {const te=$('tErr');if(te)te.onclick=e=>{e.stopPropagation();buzz();errShow();};}
  {const cm=$('cmap');cm.addEventListener('pointerdown',e=>{cm.setPointerCapture(e.pointerId);cPtrDown(e);});cm.addEventListener('pointermove',cPtrMove);cm.addEventListener('pointerup',cPtrUp);cm.addEventListener('pointercancel',e=>{CPTR.delete(e.pointerId);CPINCH=null;});cm.addEventListener('wheel',cWheel,{passive:false});}$('cMrg').onclick=()=>{buzz();cMergeBtn();};$('cEnd').onclick=()=>{buzz();cEndTurn();};$('cRaise').onclick=()=>{buzz();cRaise();};$('cDip').onclick=()=>{buzz();cDiplo();};$('cRec').onclick=()=>{buzz();cRecruit();};
