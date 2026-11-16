@@ -1330,8 +1330,8 @@ async function cPrisoners(mine,foe,pm,pf){const who=OWN[foe.o].n;CS.dread=CS.dre
   const v=await cDlg(who+' holds your men',who+' has taken '+pf+' of your soldiers prisoner and demands '+ask+' silver for their return. If you refuse, they will be killed.',[['Pay '+ask+' silver','pay',can?'pri':'dis'],['Refuse','no']]);
   if(v==='pay'&&can){CS.silver-=ask;cGive(CS.armies.find(z=>z===mine)||CS.armies.find(z=>z.o==='caelan'),pf);cToast('Your men are back in the ranks.');}else cToast('Your captured men are killed.');}}
 async function cRecruit(){const a=CS.armies.find(x=>x.id===CSEL);if(!a)return;
- const opts=Object.entries(COST).filter(([t])=>t!=='Catapult'||a.u.filter(x=>x.t==='Catapult').length<3).filter(([t])=>!/knights/.test(t)||(a.prov==='calder'&&!CS.armies.some(z=>z.o==='caelan'&&z.u.some(x=>x.t===t)))).map(([t,c])=>[(SHORT[t]||t)+' · '+c,t,CS.silver>=c?'':'dis']);
- const v=await cDlg('Recruit in '+PROV[PI[a.prov]].n,'Silver: '+(CS.silver|0)+'. New units join this army at once. Catapults (up to 3 per army) only fight in sieges.'+(a.prov==='calder'?' Knights can only be raised here in Calder, one unit of each kind.':' Knights can only be raised in Calder.'),[...opts,['Cancel','no']]);
+ const opts=Object.entries(COST).filter(([t])=>t!=='Catapult'||a.u.filter(x=>x.t==='Catapult').length<3).filter(([t])=>!/knights/.test(t)||(a.prov==='calder'&&!CS.armies.some(z=>z.o==='caelan'&&z.u.some(x=>x.t===t)))).map(([t,c])=>[(SHORT[t]||t)+' · '+c+' (pay '+payOf(t)+')',t,CS.silver>=c?'':'dis']);
+ const v=await cDlg('Recruit in '+PROV[PI[a.prov]].n,'Silver: '+(CS.silver|0)+'. New units join this army at once. The second number is the unit’s pay each season. Catapults (up to 3 per army) only fight in sieges.'+(a.prov==='calder'?' Knights can only be raised here in Calder, one unit of each kind.':' Knights can only be raised in Calder.'),[...opts,['Cancel','no']]);
  if(v&&v!=='no'&&CS.silver>=COST[v]&&a.u.length<10){CS.silver-=COST[v];a.u.push(U(v));cSave();cPanel();}}
 function cMergeBtn(){const a=CS.armies.find(x=>x.id===CSEL);if(!a)return;const mate=CS.armies.find(z=>z!==a&&z.o==='caelan'&&z.prov===a.prov);if(mate)cMergeInto(a,mate);}
 async function cDiplo(){if(CS.part===2)return p2Diplo();const rows=Object.entries(NB).map(([k,v])=>'<div class="gw"><b>'+v.n+'</b><span class="bar"><i style="width:'+CS.gw[k]+'%;background:'+(CS.gw[k]<25?'#d33':CS.gw[k]<50?'#e9a21a':'#4cba58')+'"></i></span><span>'+CS.gw[k]+'</span></div>').join('');
@@ -1340,11 +1340,11 @@ async function cDiplo(){if(CS.part===2)return p2Diplo();const rows=Object.entrie
 async function cEndTurn(){try{return await cEndTurn0();}catch(e){errLog('end turn: '+String(e&&e.stack||e).slice(0,250));CBUSY=false;try{cPanel();cRender();cSave();}catch(_){}}}
 async function cEndTurn0(){if(CBUSY)return;CBUSY=true;CSEL=null;cPanel();if(CS.tax===2){addD(1);addH(-1);}else if(CS.tax===0)addH(1);
  const aut=(CS.turn-1)%4===2;
- for(const p of PROV){const o=CS.prov[p.id];if(o==='caelan'){CS.silver+=Math.round(p.s*TAXM[CS.tax==null?1:CS.tax]);CS.grain+=p.g*(aut?3:1);}else if(CS.bros[o]==='free'||isNation(o)||o==='ormana')CS.bs[o]=(CS.bs[o]||0)+p.s;}
- for(const a of CS.armies.filter(a=>a.o==='caelan')){CS.silver-=a.u.length*12;CS.grain-=a.u.length*15;
+ for(const p of PROV){const o=CS.prov[p.id];if(o==='caelan'){CS.silver+=Math.round(p.s*TAXM[CS.tax==null?1:CS.tax])-GARS;CS.grain+=harvOf(p,CS.turn)-GARG;}else if(CS.bros[o]==='free'||isNation(o)||o==='ormana')CS.bs[o]=(CS.bs[o]||0)+p.s;}
+ for(const a of CS.armies.filter(a=>a.o==='caelan')){a.u.forEach(x=>{CS.silver-=payOf(x.t);CS.grain-=eatOf(x.t);});
   if(CS.prov[a.prov]==='caelan')a.u.forEach(x=>{const mx=UT[x.t][2];x.n=Math.min(mx,x.n+Math.ceil(mx*.25));});}
  if(CS.grain<0){CS.grain=0;CS.armies.filter(a=>a.o==='caelan').forEach(a=>a.u.forEach(x=>x.n=Math.max(1,Math.floor(x.n*.9))));cToast('No grain! Your soldiers go hungry and desert.');}
- if(CS.silver<0)CS.silver=0;
+ if(CS.silver<0){CS.silver=0;CS.armies.filter(a=>a.o==='caelan').forEach(a=>a.u.forEach(x=>x.n=Math.max(1,Math.floor(x.n*.9))));cToast('No silver! Your soldiers go unpaid, and some desert.');}
  for(const [k,v] of Object.entries(NB)){if(CS.part===2&&(CS.p2.war[k]||CS.p2.gone[k]))continue;CS.gw[k]=Math.max(0,CS.gw[k]-Math.round(v.drop*((CS.dread||0)>=50?.5:1)));if(CS.gw[k]===0){CS.gw[k]=35;const lg=Math.min(CS.grain,200),ls=Math.min(CS.silver,250);CS.grain-=lg;CS.silver-=ls;
   await cDlg(v.n+' raids your lands','Their goodwill ran out. Raiders crossed the border and carried off '+lg+' grain and '+ls+' silver.',[['Continue','ok','pri']]);}}
  for(const a of CS.armies.filter(a=>a.o!=='caelan')){if(!CS.armies.includes(a))continue;await cAI(a);}
@@ -1609,11 +1609,14 @@ function renownBattle(win,size){const L=lean(),n=size;
  if(!L){if(win){addH(Math.ceil(n*.67));addD(Math.ceil(n*.67));}return;}
  if(L==='h')addH(win?n:-n);else addD(win?n:-n);}
 // raising a new army with Dread or Honour
-const TAXM=[.7,1,1.4],TAXN=['Light','Fair','Heavy'];
+const TAXM=[.7,1,1.4],TAXN=['Light','Fair','Heavy'],GARS=15,GARG=10;
+function payOf(t){return COST[t]?Math.round(COST[t]/30):15;}
+function eatOf(t){return UT[t]&&UT[t][0]==='cav'?25:15;}
+function harvOf(p,turn){const q=(turn-1)%4;return q===3?0:Math.round(p.g*.6*(q===2?3:1));}
 async function cTreasury(){if(CBUSY)return;for(;;){const tx=CS.tax==null?1:CS.tax,mine=PROV.filter(p=>CS.prov[p.id]==='caelan'),aut=(CS.turn-1)%4===2;
- const tax=mine.reduce((a,p)=>a+Math.round(p.s*TAXM[tx]),0),units=CS.armies.filter(a=>a.o==='caelan').reduce((a,z)=>a+z.u.length,0),harv=mine.reduce((a,p)=>a+p.g*(aut?3:1),0);
- const rows=mine.map(p=>'<div class="gw"><b style="width:110px">'+p.n+'</b><span style="flex:1">'+Math.round(p.s*TAXM[tx])+' silver · '+p.g+' grain</span></div>').join('');
- const v=await cDlg('Treasury','<b>Silver '+(CS.silver|0)+' · Grain '+(CS.grain|0)+'</b><br>Taxes are '+TAXN[tx]+': <b>+'+tax+' silver</b> a season from '+mine.length+(mine.length===1?' region':' regions')+'. Soldiers’ pay: −'+(units*12)+' silver.<br>Harvest: +'+harv+' grain'+(aut?' (autumn harvest)':'')+'. Soldiers eat: −'+(units*15)+' grain.<br><span style="opacity:.8">Light taxes bring 30% less silver but raise Honour. Heavy taxes bring 40% more but raise Dread and cost Honour.</span>'+rows+'<br>The grain market pays <b>40 silver for 100 grain</b>.',
+ const tax=mine.reduce((a,p)=>a+Math.round(p.s*TAXM[tx]),0),us=CS.armies.filter(a=>a.o==='caelan').flatMap(z=>z.u),pay=us.reduce((a,x)=>a+payOf(x.t),0),eat=us.reduce((a,x)=>a+eatOf(x.t),0),harv=mine.reduce((a,p)=>a+harvOf(p,CS.turn),0),win=(CS.turn-1)%4===3,gs=mine.length*GARS,gg=mine.length*GARG;
+ const rows=mine.map(p=>'<div class="gw"><b style="width:110px">'+p.n+'</b><span style="flex:1">'+Math.round(p.s*TAXM[tx])+' silver · '+harvOf(p,CS.turn)+' grain</span></div>').join('');
+ const v=await cDlg('Treasury','<b>Silver '+(CS.silver|0)+' · Grain '+(CS.grain|0)+'</b><br>Taxes are '+TAXN[tx]+': <b>+'+tax+' silver</b> a season from '+mine.length+(mine.length===1?' region':' regions')+'. Soldiers’ pay: −'+pay+'. Garrisons: −'+gs+'. <b>Net '+(tax-pay-gs>=0?'+':'')+(tax-pay-gs)+' silver.</b><br>Harvest: +'+harv+' grain'+(aut?' (autumn harvest)':win?' (nothing grows in winter)':'')+'. Soldiers eat: −'+eat+'. Garrisons: −'+gg+'. <b>Net '+(harv-eat-gg>=0?'+':'')+(harv-eat-gg)+' grain.</b><br><span style="opacity:.8">If silver or grain runs out, a tenth of every unit deserts. Better troops cost more pay; horsemen eat more.</span><br><span style="opacity:.8">Light taxes bring 30% less silver but raise Honour. Heavy taxes bring 40% more but raise Dread and cost Honour.</span>'+rows+'<br>The grain market pays <b>40 silver for 100 grain</b>.',
   [['Sell 100 grain','s1',CS.grain>=100?'':'dis'],['Sell 500 grain','s5',CS.grain>=500?'':'dis'],['Taxes: '+TAXN[(tx+1)%3],'tax'],['Close','no']]);
  if(v==='s1'&&CS.grain>=100){CS.grain-=100;CS.silver+=40;}else if(v==='s5'&&CS.grain>=500){CS.grain-=500;CS.silver+=200;}else if(v==='tax'){CS.tax=(tx+1)%3;}else break;cSave();cPanel();}}
 async function cRaise(){if(CBUSY)return;const home=[PROV[PI.aurenhall],PROV[PI.calder],...PROV].find(p=>p&&CS.prov[p.id]==='caelan');if(!home){cToast('You hold no town to raise an army in.');return;}
