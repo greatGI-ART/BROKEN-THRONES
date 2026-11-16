@@ -798,7 +798,7 @@ const ART={};
 function loadArt(){const L=[];for(const [k,v] of Object.entries(ARTSRC)){const arr=Array.isArray(v)?v:[v];ART[k]=[];arr.forEach((src,i)=>L.push(new Promise(res=>{const im=new Image();im.onload=()=>{ART[k][i]=im;res();};im.onerror=()=>res();im.src=src;})));}return Promise.all(L);}
 function art(k,i){const a=ART[k];return a&&a.length?a[(i|0)%a.length]:null;}
 function dimg(g,im,cx,cy,w,h,rot){g.save();g.translate(cx,cy);if(rot)g.rotate(rot);g.drawImage(im,-w/2,-h/2,w,h);g.restore();}
-const TEAMC={caelan:'#8e2a22',osric:'#a07a1c',bran:'#2f6a32',varen:'#5a3576',trevelle:'#6a7440',terfein:'#2f4f80',odei:'#a0582a',yova:'#256a5e',ormana:'#3a1416'};
+const TEAMC={caelan:'#8e2a22',osric:'#a07a1c',bran:'#2f6a32',varen:'#5a3576',trevelle:'#6a7440',terfein:'#2f4f80',odei:'#a0582a',yova:'#256a5e',ormana:'#3a1416',vaskar:'#a02a62'};
 const SPRB={inf:{},atk:{},die:{},cav:{}},SPRT={};
 function sprTint(im,hex){const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const g=c.getContext('2d');g.drawImage(im,0,0);
  try{const id=g.getImageData(0,0,c.width,c.height),d=id.data,R0=parseInt(hex.slice(1,3),16),G0=parseInt(hex.slice(3,5),16),B0=parseInt(hex.slice(5,7),16);
@@ -1088,7 +1088,8 @@ const MIMG={army:{},town:{},ok:false};
 function loadMapSpr(){if(MIMG.ok)return Promise.resolve();const L=[];const ld=(src,cb)=>L.push(new Promise(r=>{const im=new Image();im.onload=()=>{cb(im);r();};im.onerror=r;im.src=src;}));
  for(const [k,v] of Object.entries(MAPSPR.army))ld(v,im=>MIMG.army[k]=im);for(const [k,v] of Object.entries(MAPSPR.town))ld(v,im=>MIMG.town[k]=im);return Promise.all(L).then(()=>{MIMG.ok=true;});}
 function drawSym(g,sym,x,y,s,col){g.save();g.translate(x,y);g.scale(s,s);g.strokeStyle=col||'#f3ead3';g.fillStyle=col||'#f3ead3';g.lineWidth=1.3;g.lineCap='round';g.lineJoin='round';
- if(sym==='spears'){g.beginPath();g.moveTo(-4.5,-4);g.lineTo(4.5,4);g.moveTo(4.5,-4);g.lineTo(-4.5,4);g.stroke();g.beginPath();g.moveTo(-4.5,-4);g.lineTo(-3,-4);g.lineTo(-4.5,-2.5);g.fill();g.beginPath();g.moveTo(4.5,-4);g.lineTo(3,-4);g.lineTo(4.5,-2.5);g.fill();}
+ if(sym==='star'){g.beginPath();for(let k=0;k<10;k++){const a=-Math.PI/2+k*Math.PI/5,r=k%2?2:4.6;g.lineTo(Math.cos(a)*r,Math.sin(a)*r);}g.closePath();g.fill();}
+  else if(sym==='spears'){g.beginPath();g.moveTo(-4.5,-4);g.lineTo(4.5,4);g.moveTo(4.5,-4);g.lineTo(-4.5,4);g.stroke();g.beginPath();g.moveTo(-4.5,-4);g.lineTo(-3,-4);g.lineTo(-4.5,-2.5);g.fill();g.beginPath();g.moveTo(4.5,-4);g.lineTo(3,-4);g.lineTo(4.5,-2.5);g.fill();}
  else if(sym==='crown'){g.beginPath();g.moveTo(-4.5,3);g.lineTo(-4.5,-2.5);g.lineTo(-2.2,0);g.lineTo(0,-4);g.lineTo(2.2,0);g.lineTo(4.5,-2.5);g.lineTo(4.5,3);g.closePath();g.fill();}
  else if(sym==='horse'){g.lineWidth=1.8;g.beginPath();g.arc(0,-.5,3.6,Math.PI*.15,Math.PI*.85,true);g.stroke();g.beginPath();g.arc(0,-.5,3.6,Math.PI*.85,Math.PI*1.0);g.stroke();}
  else if(sym==='tower'){g.fillRect(-2.6,-2,5.2,6);g.fillRect(-3.4,-4,1.6,2);g.fillRect(-.8,-4,1.6,2);g.fillRect(1.8,-4,1.6,2);}
@@ -1102,7 +1103,7 @@ let CB=null,NQ=null,CS=null,CSEL=null,CBUSY=false;
 const CW=1400,CH=925;
 const OWN={caelan:{n:'Caelan',c:'#ff4d42',d:'#b3201a',sym:'spears'},osric:{n:'Osric',c:'#ffcc29',d:'#b88600',sym:'crown'},bran:{n:'Bran',c:'#3ddb6c',d:'#168a3a',sym:'horse'},varen:{n:'Varen',c:'#a866ff',d:'#6427c4',sym:'tower'}};
 const NB={terfein:{n:'Terfein',c:'#cfe8ff',seeds:[[870,340],[900,600],[700,560]],drop:12,ic:'snow'},odei:{n:'Odei',c:'#ffe08a',seeds:[[680,760],[430,730]],drop:8,ic:'grass'},
- trevelle:{n:'Trevelle',c:'#d6ea9a',seeds:[[255,360],[200,500],[270,585]],drop:5,ic:'mount'},yova:{n:'Yova',c:'#98e6b4',seeds:[[150,130],[400,190],[290,235]],drop:6,ic:'tree'}};
+ trevelle:{n:'Trevelle',c:'#d6ea9a',seeds:[[255,360],[200,500],[270,585]],drop:5,ic:'mount'},yova:{n:'Yova',c:'#98e6b4',seeds:[[150,130],[400,190],[290,235]],drop:6,ic:'tree'},vaskar:{n:'Vaskar',c:'#ffc2dc',seeds:[[830,800]],drop:7,ic:'tree'}};
 const PROV=[
  {id:'calder',n:'Calder',x:400,y:330,o:'caelan',s:120,g:140,bf:'arden_fields',ic:'wheat'},
  {id:'northwatch',n:'Northwatch',x:560,y:345,o:'varen',s:100,g:40,bf:'trevelle_glen',seat:'varen',ic:'mount'},
@@ -1167,7 +1168,7 @@ function cDeco(){const c=document.createElement('canvas');c.width=CW;c.height=CH
 function cProvAt(mx,my){if(!PIX)return -1;const x=mx|0,y=my|0;if(x<0||y<0||x>=CW||y>=CH)return -1;const k=PIX[y*CW+x];return k<PROV.length?k:-1;}
 // ---- state ----
 function U(t,n){return {t,n:n==null?UT[t][2]:n};}
-function cNew(){CS={turn:1,silver:900,grain:700,bs:{osric:600,bran:300,varen:300},prov:{},armies:[],gw:{terfein:50,odei:60,trevelle:80,yova:60},bros:{osric:'free',bran:'free',varen:'free'},fate:{},trev:0,nid:1,dread:0,honour:0};
+function cNew(){CS={turn:1,silver:900,grain:700,bs:{osric:600,bran:300,varen:300},prov:{},armies:[],gw:{terfein:50,odei:60,trevelle:80,yova:60,vaskar:55},bros:{osric:'free',bran:'free',varen:'free'},fate:{},trev:0,nid:1,dread:0,honour:0};
  PROV.forEach(p=>CS.prov[p.id]=p.o);
  const A=(o,pr,name,list)=>CS.armies.push({id:CS.nid++,o,prov:pr,name,u:list,mv:false});
  A('caelan','calder',"Caelan's army",[U("General's guard"),U('Spearmen',14),U('Swordsmen',10),U('Archers'),U('Light cavalry',5)]);
@@ -1393,9 +1394,9 @@ async function cActEnd(){$('camp').style.display='none';advHide();MUS.res='final
  p2Go(true);}
 function cExit(){$('camp').style.display='none';advHide();if(MUS.res==='finale')MUS.res=null;$('title').style.display='flex';if(window.refreshTitle)refreshTitle();}
 // ================= PART 2: the betrayal, the coalition and Ormana =================
-const NATIONS=['trevelle','terfein','odei','yova'];
+const NATIONS=['trevelle','terfein','odei','yova','vaskar'];
 Object.assign(OWN,{trevelle:{n:'Trevelle',c:'#b4d63a',d:'#6f8a12',sym:'mount'},terfein:{n:'Terfein',c:'#3d9bff',d:'#1557b8',sym:'sun'},
- odei:{n:'Odei',c:'#ff8f2e',d:'#b85608',sym:'arrow'},yova:{n:'Yova',c:'#1fd1ae',d:'#0b8a70',sym:'tree'},ormana:{n:'Ormana',c:'#2b2a30',d:'#0c0c0e',sym:'mask'}});
+ odei:{n:'Odei',c:'#ff8f2e',d:'#b85608',sym:'arrow'},yova:{n:'Yova',c:'#1fd1ae',d:'#0b8a70',sym:'tree'},ormana:{n:'Ormana',c:'#2b2a30',d:'#0c0c0e',sym:'mask'},vaskar:{n:'Vaskar',c:'#ff5fa8',d:'#b81f66',sym:'star'}});
 const PROV2=[
  {id:'thornwood',n:'Thornwood',x:110,y:100,o:'yova',s:80,g:60,bf:'yova_wood',ic:'tree'},
  {id:'brackwater',n:'Brackwater',x:215,y:170,o:'yova',s:80,g:60,bf:'yova_fen',ic:'tree'},
@@ -1412,8 +1413,8 @@ const PROV2=[
  {id:'icewater',n:'Icewater',x:1000,y:440,o:'terfein',s:80,g:30,bf:'terfein_pass',ic:'snow'},
  {id:'hollin',n:'Hollin',x:920,y:580,o:'terfein',s:160,g:50,bf:'terfein_stream',ic:'snow',walls:1,seat:'terfein'},
  {id:'skarn',n:'Skarn',x:700,y:560,o:'terfein',s:90,g:40,bf:'terfein_pass',ic:'snow'},
- {id:'karrow',n:'Karrow',x:800,y:640,o:'terfein',s:90,g:40,bf:'terfein_stream',ic:'snow'},
- {id:'northreach',n:'Northreach',x:1060,y:620,o:'terfein',s:70,g:30,bf:'terfein_pass',ic:'snow'},
+ {id:'karrow',n:'Karrow',x:800,y:640,o:'vaskar',s:90,g:40,bf:'terfein_stream',ic:'snow'},
+ {id:'northreach',n:'Northreach',x:1060,y:620,o:'vaskar',s:70,g:30,bf:'terfein_pass',ic:'snow'},
  {id:'varda',n:'Varda',x:680,y:760,o:'odei',s:150,g:70,bf:'odei_kurgans',ic:'grass',walls:1,seat:'odei'},
  {id:'sunmere',n:'Sunmere',x:430,y:730,o:'odei',s:90,g:80,bf:'odei_open',ic:'grass'},
  {id:'dunmere',n:'Dunmere',x:400,y:640,o:'odei',s:90,g:80,bf:'odei_open',ic:'grass'},
@@ -1421,7 +1422,7 @@ const PROV2=[
  {id:'kurgan',n:'Kurgan',x:300,y:800,o:'odei',s:80,g:60,bf:'odei_kurgans',ic:'grass'},
  {id:'saltplain',n:'Saltplain',x:450,y:840,o:'odei',s:80,g:60,bf:'odei_open',ic:'grass'},
  {id:'redsteppe',n:'Redsteppe',x:600,y:850,o:'odei',s:90,g:70,bf:'odei_open',ic:'grass'},
- {id:'farwood',n:'Farwood',x:830,y:800,o:'odei',s:80,g:50,bf:'yova_wood',ic:'tree'},
+ {id:'farwood',n:'Farwood',x:830,y:800,o:'vaskar',s:150,g:50,bf:'yova_wood',ic:'tree',walls:1,seat:'vaskar'},
  {id:'blackharbor',n:'Blackharbor',x:910,y:95,o:'ormana',s:120,g:40,bf:'ormana_beach',ic:'hill',isl:1},
  {id:'maskhold',n:'Maskhold',x:1050,y:105,o:'ormana',s:200,g:40,bf:'ormana_beach',ic:'hill',isl:1,walls:1,seat:'ormana'},
  {id:'ashcoast',n:'Ashcoast',x:1200,y:185,o:'ormana',s:120,g:40,bf:'ormana_beach',ic:'hill',isl:1}];
@@ -1431,7 +1432,7 @@ for(const k in NB)NB[k].seeds=PROV2.filter(q=>q.o===k).map(q=>[q.x,q.y]);
 const P1N=PROV.length;
 function p2Ext(){if(PROV.length>P1N)return;PROV2.forEach(p=>PROV.push(p));PROV.forEach((p,i)=>PI[p.id]=i);PIX=null;CIMG=null;}
 function cMigrate(){if(!CS)return;for(const p of PROV)if(!CS.prov[p.id])CS.prov[p.id]=(CS.part===2&&['osric','bran','varen'].includes(p.o))?'caelan':p.o;
- for(const a of CS.armies)if(PI[a.prov]==null)a.prov=(PROV.find(p=>CS.prov[p.id]===a.o)||PROV[0]).id;if(CS.tax==null)CS.tax=1;}
+ for(const a of CS.armies)if(PI[a.prov]==null)a.prov=(PROV.find(p=>CS.prov[p.id]===a.o)||PROV[0]).id;if(CS.tax==null)CS.tax=1;if(CS.gw.vaskar==null)CS.gw.vaskar=55;if(CS.part===2&&CS.bs.vaskar==null){CS.bs.vaskar=900;for(const q of ['farwood','karrow','northreach'])if(CS.prov[q]==='odei'||CS.prov[q]==='terfein')CS.prov[q]='vaskar';}}
 function isNation(o){return NATIONS.includes(o);}
 function natProvs(k){return PROV.filter(p=>CS.prov[p.id]===k);}
 function natArmies(k){return CS.armies.filter(a=>a.o===k);}
@@ -1453,15 +1454,16 @@ function p2Imgs(){if(!MIMG.ok||MIMG.p2)return;MIMG.p2=1;for(const k of [...NATIO
 const NARMY={trevelle:[["General's guard"],['Spearmen'],['Pikemen'],['Pikemen'],['Crossbowmen'],['Archers'],['Swordsmen']],
  terfein:[["General's guard"],['Spearmen'],['Axemen'],['Crossbowmen'],['Heavy cavalry'],['Swordsmen']],
  odei:[["General's guard"],['Light cavalry'],['Light cavalry'],['Horse archers'],['Horse archers'],['Spearmen']],
- yova:[["General's guard"],['Archers'],['Archers'],['Javelin skirmishers'],['Spearmen'],['Axemen']]};
-const NPICK={trevelle:['Pikemen','Crossbowmen','Spearmen','Swordsmen'],terfein:['Axemen','Crossbowmen','Heavy cavalry','Spearmen'],odei:['Light cavalry','Horse archers','Spearmen'],yova:['Archers','Javelin skirmishers','Axemen','Spearmen'],
+ yova:[["General's guard"],['Archers'],['Archers'],['Javelin skirmishers'],['Spearmen'],['Axemen']],
+ vaskar:[["General's guard"],['Axemen'],['Axemen'],['Archers'],['Javelin skirmishers'],['Spearmen']]};
+const NPICK={trevelle:['Pikemen','Crossbowmen','Spearmen','Swordsmen'],terfein:['Axemen','Crossbowmen','Heavy cavalry','Spearmen'],odei:['Light cavalry','Horse archers','Spearmen'],yova:['Archers','Javelin skirmishers','Axemen','Spearmen'],vaskar:['Axemen','Archers','Spearmen','Javelin skirmishers'],
  ormana:['Ormana footmen','Steppe archers','Masked nobles'],osric:['Spearmen','Swordsmen','Archers','Pikemen'],bran:['Light cavalry','Horse archers','Swordsmen'],varen:['Spearmen','Crossbowmen','Axemen']};
 function mkArmy(o,prov,name,list){const a={id:CS.nid++,o,prov,name,u:list.map(x=>U(x[0],x[1])),mv:false};CS.armies.push(a);return a;}
 function p2Begin(){p2Ext();CS.part=2;CS.done=0;for(const k in CS.prov)if(['osric','bran','varen'].includes(CS.prov[k]))CS.prov[k]='caelan';
  for(const p of PROV2)CS.prov[p.id]=p.o;
- Object.assign(CS.bs,{trevelle:1500,terfein:1600,odei:2000,yova:800,ormana:0});
+ Object.assign(CS.bs,{trevelle:1500,terfein:1400,odei:1900,yova:800,vaskar:900,ormana:0});
  mkArmy('trevelle','aldmoor',"King Aldous's highlanders",NARMY.trevelle);mkArmy('trevelle','ironhold','Ironhold guard',[['Spearmen'],['Crossbowmen'],['Pikemen']]);
- mkArmy('terfein','hollin',"Terfein's host",NARMY.terfein);mkArmy('terfein','whitefell','Whitefell axes',[['Axemen'],['Spearmen'],['Crossbowmen'],['Heavy cavalry']]);mkArmy('odei','varda',"Odei's riders",NARMY.odei);mkArmy('odei','dunmere','Dunmere riders',[['Light cavalry'],['Horse archers'],['Horse archers'],['Spearmen']]);mkArmy('odei','redsteppe','Redsteppe riders',[['Light cavalry'],['Light cavalry'],['Horse archers'],['Spearmen']]);mkArmy('yova','yovard',"Yova's woodsmen",NARMY.yova);
+ mkArmy('terfein','hollin',"Terfein's host",NARMY.terfein);mkArmy('terfein','whitefell','Whitefell axes',[['Axemen'],['Spearmen'],['Crossbowmen'],['Heavy cavalry']]);mkArmy('odei','varda',"Odei's riders",NARMY.odei);mkArmy('odei','dunmere','Dunmere riders',[['Light cavalry'],['Horse archers'],['Horse archers'],['Spearmen']]);mkArmy('odei','redsteppe','Redsteppe riders',[['Light cavalry'],['Light cavalry'],['Horse archers'],['Spearmen']]);mkArmy('yova','yovard',"Yova's woodsmen",NARMY.yova);mkArmy('vaskar','farwood',"Vaskar's hunters",NARMY.vaskar);
  CS.p2={t0:CS.turn,dl:Math.max(12,CS.turn+6),war:{},gone:{},obey:null,coal:0,reveal:0,ormT:Math.max(29,CS.turn+16),orm:0,holm:null,plotT:0,end:0,alarm:{}};
  CS.gw.trevelle=Math.max(CS.gw.trevelle,70);PIX=null;CIMG=null;cSave();}
 // ---- war ----
@@ -1528,14 +1530,14 @@ async function p2Coalition(){const P=CS.p2;P.coal=CS.turn;const mem=NATIONS.filt
  cRender();cSave();
  await p2Scene([{img:'crowns',fx:['embers'],cam:[.5,.5,1.12,.5,.45,1.02],t:'The Coalition',x:(mem.length?mem.map(k=>OWN[k].n).join(', ')+' sign a pact against you and declare war together.':'The last kingdoms of the mainland sign a pact against you.')+(taken.length?' At the same hour your pardoned brothers rise in rebellion and seize '+taken.join(' and ')+'.':''),bg:'dirt',tint:'rgba(30,10,5,.55)'},
   {img:'holm',fx:['dust'],cam:[.5,.5,1.05,.5,.5,1.12],t:'Holm',x:holmTxt+' The man who taught you to fight is now your enemy. Captain Edda Thorne, who has led Calder’s archers since your first battle, becomes your battle advisor.',bg:'grass',tint:'rgba(20,10,0,.5)'},
-  {t:'Captain Thorne',x:'“My lord, four crowns have joined against one. No king of Ethrann has ever stood against such odds. Break them, and men will call you the luckiest king who ever lived, and the greatest.”',bg:'dirt',tint:'rgba(20,10,0,.6)'}]);
+  {t:'Captain Thorne',x:'“My lord, the crowns of the mainland have joined against one. No king of Ethrann has ever stood against such odds. Break them, and men will call you the luckiest king who ever lived, and the greatest.”',bg:'dirt',tint:'rgba(20,10,0,.6)'}]);
  p2Say('Every kingdom still standing is at war with you. Break the coalition: take a kingdom’s capital or destroy its armies and it will surrender. You can also bribe one out of the pact from the Neighbours menu.');}
 async function p2Check(){const P=CS.p2;if(!P||CS.done)return;
  // conquered kingdoms
  for(const k of NATIONS){if(P.gone[k])continue;if(!natProvs(k).length){P.gone[k]='conq';P.war[k]=0;CS.armies=CS.armies.filter(a=>a.o!==k);
    if(k==='trevelle'){P.plotT=0;const v=await cDlg('King Aldous','Aldmoor has fallen and King Aldous is brought before you in chains. He asks only why.',[['Imprison him','jail','pri'],['Exile him','exile'],['Execute him','exec']]);P.aldous=v;
     const d=v==='exec'?20:v==='jail'?10:5;for(const n of NATIONS)if(!P.gone[n])CS.gw[n]=Math.max(0,CS.gw[n]-d);if(v==='exec'){CS.dread=Math.min(100,(CS.dread||0)+15);addH(-15);}else if(v==='jail')addH(-3);else addH(3);
-    p2Say('Trevelle is yours, and its mines with it. '+(P.coal?'':'Conquer one more kingdom of your choice (Terfein, Odei or Yova) and the mainland will be yours to fear. They are already talking to each other.'));}
+    p2Say('Trevelle is yours, and its mines with it. '+(P.coal?'':'Conquer one more kingdom of your choice (Terfein, Odei, Yova or Vaskar) and the mainland will be yours to fear. They are already talking to each other.'));}
    else cToast(OWN[k].n+' is conquered!');
    for(const n of NATIONS)if(!P.gone[n])CS.gw[n]=Math.max(0,CS.gw[n]-15);}
   else if(P.coal&&P.war[k]){const cap=PROV.find(p=>p.seat===k);const capLost=cap&&CS.prov[cap.id]!==k;
@@ -1587,7 +1589,7 @@ async function p2Diplo(){const P=CS.p2;const peace=NATIONS.filter(k=>!P.gone[k]&
 
 function p2Go(scene){MUS.res=null;p2Begin();CSEL=null;if(MIMG.ok)p2Imgs();$('camp').style.display='none';$('load').style.display='flex';
  setTimeout(()=>{cBuild();CIMG=null;$('load').style.display='none';cShow();cFit();
-  setTimeout(()=>p2Say('Part 2. The four other kingdoms are now on the map: Odei, the largest, then Terfein, Trevelle and Yova. The Seer says Trevelle will be your death unless you strike before winter of Year 3 ('+seasonName(CS.p2.dl)+'). Attack Trevelle to obey her, or keep the peace and see what comes. Knights can now be raised in Calder.'),600);},40);}
+  setTimeout(()=>p2Say('Part 2. The five other kingdoms are now on the map: Odei, the largest, then Trevelle, Terfein, Yova and Vaskar. The Seer says Trevelle will be your death unless you strike before winter of Year 3 ('+seasonName(CS.p2.dl)+'). Attack Trevelle to obey her, or keep the peace and see what comes. Knights can now be raised in Calder.'),600);},40);}
 // ================= Honour, Dread, titles, raising armies and the voices around the king =================
 function hon(){return CS.honour||0;}
 function addH(n){CS.honour=Math.max(0,Math.min(100,hon()+n));}
@@ -1660,8 +1662,8 @@ async function ormWarn(){const P=CS.p2;if(!P||P.orm||P.ormT==null)return;const l
  else if(left>0&&left<4){const m=CS.armies.filter(a=>a.o==='caelan').reduce((s,a)=>s+armyMen(a),0);say('We have '+m+' men under arms, '+lord()+'. It is not enough for what is coming. Raise every man you can: recruit, call a levy, buy back the kingdoms’ friendship. '+left+(left>1?' seasons':' season')+', the scouts say.');}}
 
 // ================= the enemy commander speaks before battle =================
-const LORDS={osric:'Lord Edric Vane',bran:'Sir Rodric Hale, master of horse',varen:'Brother-Captain Anselm',trevelle:'Lord Ewan Mor',terfein:'Jarl Hakon Grey',odei:'Lord-Rider Tamar',yova:'Warden Corrin of the Deepwood',ormana:'A masked war-lord of Ormana'};
-const KINGS={trevelle:'King Aldous of Trevelle',terfein:'King Sigvald of Terfein',odei:'Rider-King Arslan of Odei',yova:'Queen Maren of Yova',ormana:'The Iron Mask of Ormana'};
+const LORDS={osric:'Lord Edric Vane',bran:'Sir Rodric Hale, master of horse',varen:'Brother-Captain Anselm',trevelle:'Lord Ewan Mor',terfein:'Jarl Hakon Grey',odei:'Lord-Rider Tamar',yova:'Warden Corrin of the Deepwood',vaskar:'Huntmaster Bror of the Far Wood',ormana:'A masked war-lord of Ormana'};
+const KINGS={trevelle:'King Aldous of Trevelle',terfein:'King Sigvald of Terfein',odei:'Rider-King Arslan of Odei',yova:'Queen Maren of Yova',vaskar:'High Chief Yrsa of Vaskar',ormana:'The Iron Mask of Ormana'};
 const pick=a=>a[(Math.random()*a.length)|0];
 const SPEECH={
  osric:{self:[
@@ -1684,6 +1686,8 @@ const SPEECH={
   lord:['King Sigvald sends you his greetings, Arden: these axes. Terfein does not kneel. Shields together!']},
  odei:{king:['The grass of Odei has no walls and no masters. Every king who has tried to fence it has been ridden down. Riders of Odei, today another one learns!'],
   lord:['The Rider-King has spoken: no Arden banner will fly over the steppe. Draw your bows. Make them chase us, then make them die.']},
+ vaskar:{king:['You have marched a long way to die in the cold, king of Arden. Vaskar bows to no crown: not Ormana’s two hundred years ago, not Odei’s, not yours. Hunters of the Far Wood, the quarry has come to us!'],
+  lord:['The High Chief sent us to see what kind of men follow the last son. Now we see them, and we are not afraid. Axes up! The Far Wood keeps what it kills.']},
  yova:{king:['You came into my forest with fire and banners, as if the trees would kneel. The Deepwood has eaten armies before yours. Men of Yova, let them come between the trees!'],
   lord:['Queen Maren trusts the Deepwood to protect her people. So do we. Every tree is a wall, every shadow a bow. Loose!']},
  holm:['I taught you to hold a line, boy. I taught you when to charge and when to wait. I served your father’s blood with my whole life, and I watched you dishonour it. Today the student learns one last lesson from his master.'],
