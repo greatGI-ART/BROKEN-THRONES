@@ -60,7 +60,7 @@ button{font-family:inherit;cursor:pointer}
 #title{background:radial-gradient(ellipse at 50% 40%,rgba(60,40,20,.55),rgba(0,0,0,.92));z-index:6}
 #scene{position:fixed;inset:0;z-index:7;background:#000;overflow:hidden}#sbg{position:absolute;inset:-6%;background-size:420px;filter:blur(1px) brightness(.95) saturate(.9);animation:kb 18s linear infinite alternate}@keyframes kb{from{transform:scale(1)}to{transform:scale(1.08) translate(-1%,1%)}}
 #stint{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,transparent 30%,rgba(0,0,0,.85))}#sbox{position:absolute;left:8%;right:8%;bottom:9%;color:#f3e6c4;text-shadow:0 2px 8px #000,0 0 18px rgba(0,0,0,.8)}#sprog{position:absolute;left:0;bottom:0;height:3px;background:rgba(241,213,138,.7);width:0}
-#stitle{font:700 30px Georgia,serif;color:#f1d58a;margin-bottom:10px;letter-spacing:.04em}#stext{font:19px/1.55 Georgia,serif;max-width:760px}#shint{margin-top:14px;font-size:12px;opacity:.6}
+#stitle{font:700 30px Georgia,serif;color:#f1d58a;margin-bottom:10px;letter-spacing:.04em}#stext{font:19px/1.55 Georgia,serif;max-width:760px;white-space:pre-line}#shint{margin-top:14px;font-size:12px;opacity:.6}
 #sbox.in{animation:fin .9s ease}@keyframes fin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 #sskip{position:absolute;top:12px;right:14px;background:rgba(0,0,0,.4);color:#f3e6c4;border:1px solid #b08a46;border-radius:16px;padding:6px 14px;font:600 13px system-ui}
 #adv{position:fixed;left:8px;top:50px;max-width:min(380px,56vw);display:flex;gap:8px;z-index:3;background:linear-gradient(#f2e5c2,#dcc791);border:2px solid var(--edge);border-radius:8px;padding:8px 10px;box-shadow:0 6px 20px rgba(0,0,0,.5);color:#3a2a14}
@@ -1297,7 +1297,7 @@ function cBattle(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P
  const rset=new Set();rf.forEach(z=>z.u.forEach(x=>rset.add(x)));if(rf.length){mine.u=mine.u.concat(...rf.map(z=>z.u));cToast(rf.length+(rf.length>1?' armies march':' army marches')+' to reinforce.');}
  const split=()=>{if(!rf.length)return;mine.u=mine.u.filter(x=>!rset.has(x));rf.forEach(z=>{z.u=z.u.filter(x=>x.n>0);});rf.length=0;};
  const finish=(win,lostGen,pm,pf)=>{CB=null;pm=pm||0;pf=pf||0;split();{const fin=foe.o==='ormana'&&foe.u.some(x=>x.t==="General's guard");renownBattle(win,fin?10:(P.walls||P.seat||lostGen)?6:3);}const loser=win?foe:mine,winner=win?mine:foe;
-  if(lostGen&&foe.o!=='caelan'&&CS.bros[foe.o]==='free'){CS.bros[foe.o]='dead';cToast(OWN[foe.o].n+' has fallen in battle!');foe.u=foe.u.filter(x=>x.t!=="General's guard");}
+  let fell=null;if(lostGen&&foe.o!=='caelan'&&CS.bros[foe.o]==='free'){if(foe.o==='osric'){CS.bros.osric='captured';CS.armies=CS.armies.filter(z=>z!==foe);cToast('Osric is struck from his horse and taken alive!');}else{CS.bros[foe.o]='dead';fell=foe.o;foe.u=foe.u.filter(x=>x.t!=="General's guard");}}
   loser.u=loser.u.filter(x=>x.n>0);winner.u=winner.u.filter(x=>x.n>0);
   const back=[...CADJ[PI[loser.prov]]].map(j2=>PROV[j2].id).find(q=>CS.prov[q]===loser.o&&!CS.armies.some(z=>z.prov===q&&z.o!==loser.o));
   if(loser.u.length&&loser===att&&loser.prov!==pid){/* beaten attacker falls back to where it came from */}
@@ -1307,7 +1307,7 @@ function cBattle(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P
   if(!win&&att===foe){foe.prov=pid;CS.prov[pid]=foe.o;}
   CS.armies.forEach(z=>z.u=z.u.filter(x=>x.n>0));CS.armies=CS.armies.filter(z=>z.u.length);
   cCheckBros();cRender();cSave();$('camp').style.display='block';cResize();if(!CRAF)cLoop();cPanel();
-  cDlg(win?'Victory':'Defeat',win?'The field is yours. '+(foe.u.length?OWN[foe.o].n+'’s men fall back.':''):'Your army is beaten'+(mine.u.length?' and falls back.':' and scattered.'),[['Continue','ok','pri']]).then(async()=>{await cPrisoners(mine,foe,pm,pf);cRender();cPanel();cSave();cCheckEnd();res(win);});};
+  (fell?broFallen(fell):Promise.resolve()).then(()=>cDlg(win?'Victory':'Defeat',win?'The field is yours. '+(foe.u.length?OWN[foe.o].n+'’s men fall back.':''):'Your army is beaten'+(mine.u.length?' and falls back.':' and scattered.'),[['Continue','ok','pri']]).then(async()=>{await cPrisoners(mine,foe,pm,pf);cRender();cPanel();cSave();cCheckEnd();res(win);}));};
  if(auto){const pa=power(mine)*(.85+Math.random()*.3),pb=power(foe)*(.85+Math.random()*.3)*(P.walls&&foe===def?Math.max(1,1.3-.1*mine.u.filter(x=>x.t==='Catapult'&&x.n>0).length):1),win=pa>pb,r=Math.min(pa,pb)/Math.max(pa,pb);
   const cut=(a,f)=>a.u.forEach(x=>{x.n=Math.max(0,Math.round(x.n*(1-f*(.7+Math.random()*.6))));});const lb=armyMen(win?foe:mine);cut(win?mine:foe,.15+.35*r);cut(win?foe:mine,.55+.3*(1-r));
   const pr=Math.round((lb-armyMen(win?foe:mine))*.3);finish(win,win&&Math.random()<.08,win?pr:0,win?0:pr);return;}
@@ -1338,14 +1338,14 @@ async function cDiplo(){if(CS.part===2)return p2Diplo();const rows=Object.entrie
  const v=await cDlg('Neighbours','Goodwill falls every season. At zero, that kingdom raids your lands. Send 100 grain to raise it by 20.<br>Dread: '+(CS.dread|0)+(CS.dread>=50?' (feared: goodwill falls half as fast)':'')+'. Executing prisoners raises dread; releasing them lowers it.<br>Grain: '+(CS.grain|0)+rows,[...Object.entries(NB).map(([k,x])=>['Send grain to '+x.n,k,CS.grain>=100?'':'dis']),['Close','no']]);
  if(v&&v!=='no'&&CS.grain>=100){CS.grain-=100;CS.gw[v]=Math.min(100,CS.gw[v]+20);addH(2);cSave();cPanel();cDiplo();}}
 async function cEndTurn(){try{return await cEndTurn0();}catch(e){errLog('end turn: '+String(e&&e.stack||e).slice(0,250));CBUSY=false;try{cPanel();cRender();cSave();}catch(_){}}}
-async function cEndTurn0(){if(CBUSY)return;CBUSY=true;CSEL=null;cPanel();if(CS.tax===2){addD(1);addH(-1);}else if(CS.tax===0)addH(1);
+async function cEndTurn0(){if(CBUSY)return;CBUSY=true;CSEL=null;cPanel();await loanPay();if(CS.tax===2){addD(1);addH(-1);}else if(CS.tax===0)addH(1);
  const aut=(CS.turn-1)%4===2;
  for(const p of PROV){const o=CS.prov[p.id];if(o==='caelan'){CS.silver+=Math.round(p.s*TAXM[CS.tax==null?1:CS.tax])-GARS;CS.grain+=harvOf(p,CS.turn)-GARG;}else if(CS.bros[o]==='free'||isNation(o)||o==='ormana')CS.bs[o]=(CS.bs[o]||0)+p.s;}
  for(const a of CS.armies.filter(a=>a.o==='caelan')){a.u.forEach(x=>{CS.silver-=payOf(x.t);CS.grain-=eatOf(x.t);});
   if(CS.prov[a.prov]==='caelan')a.u.forEach(x=>{const mx=UT[x.t][2];x.n=Math.min(mx,x.n+Math.ceil(mx*.25));});}
  if(CS.grain<0){CS.grain=0;CS.armies.filter(a=>a.o==='caelan').forEach(a=>a.u.forEach(x=>x.n=Math.max(1,Math.floor(x.n*.9))));cToast('No grain! Your soldiers go hungry and desert.');}
  if(CS.silver<0){CS.silver=0;CS.armies.filter(a=>a.o==='caelan').forEach(a=>a.u.forEach(x=>x.n=Math.max(1,Math.floor(x.n*.9))));cToast('No silver! Your soldiers go unpaid, and some desert.');}
- for(const [k,v] of Object.entries(NB)){if(CS.part===2&&(CS.p2.war[k]||CS.p2.gone[k]))continue;CS.gw[k]=Math.max(0,CS.gw[k]-Math.round(v.drop*((CS.dread||0)>=50?.5:1)));if(CS.gw[k]===0){CS.gw[k]=35;const lg=Math.min(CS.grain,200),ls=Math.min(CS.silver,250);CS.grain-=lg;CS.silver-=ls;
+ for(const [k,v] of Object.entries(NB)){if(CS.part===2&&(CS.p2.war[k]||CS.p2.gone[k]||(CS.p2.ally&&CS.p2.ally[k])))continue;CS.gw[k]=Math.max(0,CS.gw[k]-Math.round(v.drop*((CS.dread||0)>=50?.5:1)));if(CS.gw[k]===0){CS.gw[k]=35;const lg=Math.min(CS.grain,200),ls=Math.min(CS.silver,250);CS.grain-=lg;CS.silver-=ls;
   await cDlg(v.n+' raids your lands','Their goodwill ran out. Raiders crossed the border and carried off '+lg+' grain and '+ls+' silver.',[['Continue','ok','pri']]);}}
  for(const a of CS.armies.filter(a=>a.o!=='caelan')){if(!CS.armies.includes(a))continue;await cAI(a);}
  if(CS.part!==2)for(const o of ['osric','bran','varen']){if(CS.bros[o]!=='free')continue;const a=CS.armies.find(x=>x.o===o);if(a&&a.u.length<10){const pick=o==='bran'?['Light cavalry','Horse archers','Swordsmen']:o==='varen'?['Spearmen','Crossbowmen','Axemen']:['Spearmen','Swordsmen','Archers','Pikemen'];const t=pick[(Math.random()*pick.length)|0];if(CS.bs[o]>=COST[t]){CS.bs[o]-=COST[t];a.u.push(U(t));}}
@@ -1372,25 +1372,38 @@ async function cAI(a){if(CS.part===2){if(isNation(a.o)&&!CS.p2.war[a.o])return;}
 function cCheckBros(){for(const o of ['osric','bran','varen']){if(CS.bros[o]!=='free')continue;const has=PROV.some(p=>CS.prov[p.id]===o),army=CS.armies.some(a=>a.o===o);
  if(!army&&!has){CS.bros[o]='captured';cToast(OWN[o].n+' is captured!');}}}
 async function cEvents(){if(CS.part===2){const ok=await p2Turn();if(ok){await p2Check();await ormWarn();chat();}cSave();return;}chat();
- if(CS.turn===2&&!CS.trev){CS.trev=1;const v=await cDlg('A message from Trevelle','King Aldous of Trevelle offers you an army: four companies of his highlanders, in return for 400 grain. "Arden’s grain for Trevelle’s steel, as in your father’s day."',[['Accept (400 grain)','yes',CS.grain>=400?'pri':'dis'],['Decline','no']]);
-  if(v==='yes'&&CS.grain>=400){CS.grain-=400;CS.gw.trevelle=Math.min(100,CS.gw.trevelle+30);const home=PROV.find(p=>CS.prov[p.id]==='caelan');CS.armies.push({id:CS.nid++,o:'caelan',prov:home?home.id:'calder',name:'Trevelle company',u:[U('Spearmen'),U('Pikemen'),U('Crossbowmen'),U('Light cavalry')],mv:false});cPanel();cAdv('Trevelle’s highlanders have arrived. March them into the same province as your army to merge them, or use them as a second army.');}}
+ if(CS.turn===3&&!CS.trev){CS.trev=1;const v=await cDlg('A letter from King Aldous','“To Caelan, son of my old friend. I hear you hold Calder alone against three brothers. Trevelle cannot choose your war for you, but it can lend you steel. Four companies of my highlanders are yours. Pay me 150 silver a season for six seasons, when you can. I will charge you nothing more.”',[['Accept his help','yes','pri'],['Decline politely','no']]);
+  if(v==='yes'){CS.loan={left:6,amt:150,missed:0};CS.gw.trevelle=Math.min(100,CS.gw.trevelle+20);const home=PROV.find(p=>CS.prov[p.id]==='caelan');CS.armies.push({id:CS.nid++,o:'caelan',prov:home?home.id:'calder',name:'Trevelle company',u:[U('Spearmen'),U('Pikemen'),U('Crossbowmen'),U('Light cavalry')],mv:false});cPanel();cAdv('Trevelle’s highlanders have arrived. March them into the same province as your army to merge them, or use them as a second army.');}
+  else cAdv('Aldous writes back within the month: “As you wish, my boy. The offer stands, if you ever need it.”');}
  if(CS.turn===4)cAdv('Winter. Your brothers will not wait for spring, and neither will the neighbours: keep an eye on their goodwill.');
  cSave();}
 async function cCheckEnd(){if(!CS||CS.done)return;if(CS.part===2&&!CS.armies.some(a=>a.o==='caelan')&&!PROV.some(p=>CS.prov[p.id]==='caelan')){CS.done=1;cSave();await cDlg('Arden is lost','Your armies are gone and your lands taken.',[['Back to the title','ok','pri']]);try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return;}if(CS.part===2){await p2Check();return;}
  if(!CS.armies.some(a=>a.o==='caelan')&&!PROV.some(p=>CS.prov[p.id]==='caelan')){CS.done=1;cSave();await cDlg('Arden is lost','Your armies are gone and your lands taken. Your brothers will divide the crown between them.',[['Back to the title','ok','pri']]);try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return;}
  if(['osric','bran','varen'].every(o=>CS.bros[o]!=='free')){CS.done=1;cSave();await cActEnd();}}
+// ---- the realm takes note: consequence scenes ----
+function sceneHere(list){return new Promise(r=>{const camp=$('camp').style.display==='block';if(camp){$('camp').style.display='none';advHide();}playScenes(list,()=>{if(camp){$('camp').style.display='block';cResize();if(!CRAF)cLoop();cPanel();}r();});});}
+function noted(img,x,who){return sceneHere([{img,fx:['embers'],cam:[.5,.5,1.1,.5,.5,1.02],t:'The realm has noted',x:x+'\n\n'+(who||'The realm')+' has noted your decision.',bg:'dirt',tint:'rgba(0,0,0,.55)'}]);}
+const BROFALL={bran:'Bran lies in the trampled grass, his great sword still in his hand. The man who said the crown belongs to the strongest was not strong enough today.',varen:'Varen lies among the dead with his prayer beads wrapped around his fist. Whatever voice told him to rule, it is silent now.'};
+function broFallen(o){return sceneHere([{img:'fall',fx:['dust'],cam:[.5,.5,1.12,.5,.5,1.0],t:'Fallen',x:'When the dust settles, your men find him. '+BROFALL[o]+'\n\nYou had three brothers this morning. Now you have '+(['osric','bran','varen'].filter(q=>CS.bros[q]!=='dead').length===1?'one.':'two.'),bg:'dirt',tint:'rgba(20,0,0,.45)',fall:o}]);}
 async function cActEnd(){$('camp').style.display='none';advHide();MUS.res='finale';MUS.resT=performance.now()+600000;musTick();
- await new Promise(r=>playScenes([{img:'chains',fx:['embers','dust'],cam:[.5,.5,1.04,.5,.45,1.18],t:'The last banner falls',x:'Your brothers’ armies are broken, and Aurenhall’s gates stand open. Those of your brothers who still live are brought before you in chains.',bg:'dirt',tint:'rgba(30,10,5,.5)'},
-  {img:'seernight',fx:['mist'],cam:[.55,.5,1.15,.5,.45,1.04],t:'The Seer',x:'That night a woman in a grey hood walks past your guards as if they were not there. “Kill them,” she says, “if you want peace.” Then she is gone.',bg:'leaves',tint:'rgba(20,10,30,.65)'}],r));
+ CS.bros.osric=CS.bros.osric==='dead'?'captured':CS.bros.osric;
+ await new Promise(r=>playScenes([{img:'chains',fx:['embers','dust'],cam:[.5,.5,1.04,.5,.45,1.18],t:'The last banner falls',x:'Your brothers’ armies are broken. Aurenhall’s gates stand open. Those of your brothers who still live are brought before you in chains.',bg:'dirt',tint:'rgba(30,10,5,.5)'},
+  {img:'coronation',fx:['candles','dust'],cam:[.5,.55,1.02,.5,.4,1.18],t:'The coronation',x:'The great hall of Aurenhall. The crown of Arden is set on your head. Lords who fought against you a season ago kneel and swear. Marshal Holm stands at your right hand.',bg:'grass',tint:'rgba(40,30,0,.45)'},
+  {img:'feast',fx:['candles'],cam:[.5,.5,1.1,.5,.45,1.02],t:'Marshal Holm’s counsel',x:'At the feast, Holm leans close. “My king. While your brothers live, every lord who hates you has a king to follow. You saw how the stands chose Osric. Kill them, and this war is over tonight. Spare them, and it is only resting.”',bg:'dirt',tint:'rgba(20,10,0,.55)'}],r));
+ const left=()=>['osric','bran','varen'].filter(q=>CS.bros[q]==='captured').length;
  for(const o of ['osric','bran','varen']){if(CS.bros[o]!=='captured')continue;
-  const v=await cDlg('The fate of '+OWN[o].n,'Your brother kneels before you. What is your judgement?',[['Execute','execute'],['Exile','exile'],['Pardon','pardon','pri']]);CS.fate[o]=v;if(v==='execute')deed(-10,10);else if(v==='pardon')deed(10,-5);else deed(3,0);}
+  const v=await cDlg('The fate of '+OWN[o].n,(o==='osric'?'Osric, the eldest, the crowned king, kneels before you in chains. He does not beg.':'Your brother '+OWN[o].n+' kneels before you in chains.')+' Holm watches you. What is your judgement?',
+   [['Execute','execute'],['Head on a pike','pike'],['Exile','exile'],['Pardon','pardon','pri']]);
+  CS.fate[o]=v==='pike'?'execute':v;
+  if(v==='pike'){deed(-15,20);await noted('chains',OWN[o].n+'’s head rises above the gate of Aurenhall. Lords ride beneath it with their eyes on the ground. No one in Arden will call him king again.');}
+  else if(v==='execute'){deed(-10,10);await noted('chains',OWN[o].n+' dies at dawn, behind closed doors. Holm says nothing, but he nods.');}
+  else if(v==='exile'){deed(3,0);await noted('brotherswar',OWN[o].n+' rides out of Aurenhall under guard, towards the border. He does not look back. Holm watches him go and says nothing at all.');}
+  else{deed(10,-5);await noted('feast',OWN[o].n+' walks free from your hall. Some lords call it mercy. Holm calls it a mistake, and says so to your face.');}}
  for(const o of ['osric','bran','varen'])if(CS.bros[o]==='dead')CS.fate[o]='died in battle';
- cSave();const merciful=Object.values(CS.fate).some(f=>f==='pardon'||f==='exile');
- await new Promise(r=>playScenes([{img:'coronation',fx:['candles','dust'],cam:[.5,.55,1.02,.5,.4,1.18],t:'The coronation',x:'In the great hall of Aurenhall, the crown of Arden is set on your head. Lords who fought against you a season ago kneel and swear. Marshal Holm stands at your right hand.',bg:'grass',tint:'rgba(40,30,0,.45)'},
-  {t:'The feast',x:(merciful?'“You were merciful, little king,”':'“You were not merciful, little king,”')+' says the Seer, standing among your guests though no one saw her enter. “Mercy is a fine crown, but it will not keep one on your head. Will you be merciful again?”',bg:'dirt',tint:'rgba(20,10,30,.6)'},
-  {t:'The prophecy',x:'“Trevelle will be your death. Take their mountains and their silver before the next winter’s end, or Arden will not see three more years.” Across the hall, King Aldous’s envoy raises a cup to your health.',bg:'leaves',tint:'rgba(10,0,20,.7)'},
-  {img:'decree',fx:['candles'],cam:[.5,.5,1.05,.5,.45,1.15],t:'A letter from Trevelle',x:'The same day, a rider brings a letter from King Aldous. “To my friend and brother king: Trevelle rejoices with Arden. Whatever you need, ask, and it is yours.”',bg:'dirt',tint:'rgba(20,10,0,.55)'},
-  {t:'Part 2',x:'Betray the friend who won you the crown, or trust him and risk everything?',bg:'dirt',tint:'rgba(0,0,0,.7)'}],r));
+ cSave();
+ await new Promise(r=>playScenes([{img:'seernight',fx:['mist'],cam:[.55,.5,1.15,.5,.45,1.04],t:'The prophecy',x:'Among your guests stands a woman in a grey hood. No one saw her enter. “Trevelle will be your death, little king. Take their mountains and their silver before next winter’s end, or Arden will not see three more years.” Across the hall, King Aldous’s envoy raises a cup to your health.',bg:'leaves',tint:'rgba(10,0,20,.7)'},
+  {img:'letter',fx:['candles'],cam:[.5,.5,1.05,.5,.45,1.15],t:'A letter from Trevelle',x:'Of all the kings of the mainland, only one sends word. A rider brings it from King Aldous: “To my friend and brother king. Trevelle rejoices with Arden. Whatever you need, ask, and it is yours.”',bg:'dirt',tint:'rgba(20,10,0,.55)'},
+  {t:'Part 2',x:'Betray the friend who stood by you, or trust him and risk everything?',bg:'dirt',tint:'rgba(0,0,0,.7)'}],r));
  p2Go(true);}
 function cExit(){$('camp').style.display='none';advHide();if(MUS.res==='finale')MUS.res=null;$('title').style.display='flex';if(window.refreshTitle)refreshTitle();}
 // ================= PART 2: the betrayal, the coalition and Ormana =================
@@ -1469,11 +1482,24 @@ function p2Begin(){p2Ext();CS.part=2;CS.done=0;for(const k in CS.prov)if(['osric
 // ---- war ----
 async function p2Declare(k){if(CS.p2.war[k])return true;const first=k==='trevelle'&&CS.p2.obey===null;
  const v=await cDlg(first?'Betray King Aldous?':'Declare war on '+OWN[k].n+'?',first?'Aldous traded you the army that won you the crown, and his letters still call you friend. The Seer says Trevelle will be your death unless you strike first.<br><br>If you attack, every kingdom on the mainland will trust Arden less.':'Breaking the peace with '+OWN[k].n+' will alarm every other kingdom.',[[first?'Strike Trevelle':'Declare war','yes','pri'],['Not now','no']]);
- if(v!=='yes')return false;CS.p2.war[k]=1;if(first){CS.p2.obey=true;addH(-15);for(const n of NATIONS)if(n!=='trevelle')CS.gw[n]=Math.max(0,CS.gw[n]-25);
+ if(v!=='yes')return false;CS.p2.war[k]=1;if(CS.p2.ally)CS.p2.ally[k]=0;if(first){CS.p2.obey=true;await noted('trevstrikes','Your army crosses into Trevelle. In Aldmoor, King Aldous reads the news twice before he believes it.','Every kingdom');addH(-15);for(const n of NATIONS)if(n!=='trevelle')CS.gw[n]=Math.max(0,CS.gw[n]-25);
   setTimeout(()=>p2Say('Trevelle is at war with you. Take Trevelle’s six regions, and above all King Aldous’s capital, Aldmoor. Their mines will pay for what comes next.'),400);}
  else{addH(-5);for(const n of NATIONS)if(n!==k)CS.gw[n]=Math.max(0,CS.gw[n]-10);}cSave();cRender();return true;}
 // AI for nations, rebels and Ormana in Part 2
-async function p2AI(a){const o=a.o;if(isNation(o)&&!CS.p2.war[o])return 'skip';
+function aiClash(A,D,pid){const wall=PROV[PI[pid]].walls&&CS.prov[pid]===D.o?1.2:1,pa=power(A)*(.85+Math.random()*.3),pb=power(D)*(.85+Math.random()*.3)*wall,win=pa>pb,r=Math.min(pa,pb)/Math.max(pa,pb);
+ const cut=(a,f)=>a.u.forEach(x=>{x.n=Math.max(0,Math.round(x.n*(1-f*(.7+Math.random()*.6))));});const W=win?A:D,L=win?D:A;cut(W,.15+.3*r);cut(L,.55+.3*(1-r));
+ [W,L].forEach(z=>z.u=z.u.filter(x=>x.n>0));
+ if(L.u.length&&power(L)>80){const back=[...CADJ[PI[L.prov]]].map(j=>PROV[j].id).find(q=>CS.prov[q]===L.o&&!CS.armies.some(z=>z.prov===q&&z!==L));if(back&&L===D)L.prov=back;else if(L===D)CS.armies=CS.armies.filter(z=>z!==L);}
+ else CS.armies=CS.armies.filter(z=>z!==L);
+ if(win){A.prov=pid;CS.prov[pid]=A.o;}
+ cToast(OWN[W.o].n+' defeats '+OWN[L.o].n+' at '+PROV[PI[pid]].n+'.');cRender();}
+async function allyAI(a){const adj=[...CADJ[PI[a.prov]]].map(j=>PROV[j]);
+ for(const p of adj){const e=CS.armies.find(z=>z.prov===p.id&&z.o==='ormana');if(e&&power(a)>=power(e)*.8){aiClash(a,e,p.id);return;}}
+ for(const p of adj){if(CS.prov[p.id]==='ormana'&&!CS.armies.some(z=>z.prov===p.id)){await cWalk(a,p.id);CS.prov[p.id]=a.o;cRender();cToast(OWN[a.o].n+' retakes '+p.n+' from Ormana.');return;}}
+ const step=cPath(a.prov,c=>CS.prov[PROV[c].id]==='ormana'&&!PROV[c].isl);if(step&&!CS.armies.some(z=>z!==a&&z.prov===step)&&CS.prov[step]===a.o){await cWalk(a,step);}}
+async function p2AI(a){const o=a.o;if(CS.p2.ally&&CS.p2.ally[o]&&!CS.p2.war[o]){await allyAI(a);return 'done';}if(isNation(o)&&!CS.p2.war[o])return 'skip';
+ if(o==='ormana'&&CS.p2.ally){for(const j2 of CADJ[PI[a.prov]]){const p=PROV[j2],e=CS.armies.find(z=>z.prov===p.id&&CS.p2.ally[z.o]&&!CS.p2.war[z.o]);if(e&&power(a)>=power(e)*.9){aiClash(a,e,p.id);return 'done';}}
+  for(const j2 of CADJ[PI[a.prov]]){const p=PROV[j2];const ow=CS.prov[p.id];if(CS.p2.ally[ow]&&!CS.armies.some(z=>z.prov===p.id)&&!p.isl){await cWalk(a,p.id);CS.prov[p.id]='ormana';cRender();cToast('Ormana takes '+p.n+' from '+OWN[ow].n+'.');return 'done';}}}
  const mine=CS.armies.filter(x=>x.o==='caelan');const bold=o==='ormana'?.8:isNation(o)?1.25:1.15;
  for(const j2 of CADJ[PI[a.prov]]){const pid=PROV[j2].id,t=mine.find(m=>m.prov===pid);if(t&&power(a)>=power(t)*bold)return 'fight';}
  for(const j2 of CADJ[PI[a.prov]]){const pid=PROV[j2].id;if(CS.prov[pid]==='caelan'&&!mine.some(m=>m.prov===pid)&&power(a)>180){await cWalk(a,pid);CS.prov[pid]=o;cRender();cToast(OWN[o].n+' takes '+PROV[j2].n+'!');return 'done';}}
@@ -1481,7 +1507,7 @@ async function p2AI(a){const o=a.o;if(isNation(o)&&!CS.p2.war[o])return 'skip';
  return 'done';}
 async function p2Turn(){const P=CS.p2;
  // recruiting and refilling for everyone at war with Arden
- const foes=[...NATIONS.filter(k=>P.war[k]),'ormana',...['osric','bran','varen'].filter(o=>CS.bros[o]==='free')];
+ const foes=[...NATIONS.filter(k=>P.war[k]||(P.ally&&P.ally[k])),'ormana',...['osric','bran','varen'].filter(o=>CS.bros[o]==='free')];
  for(const o of foes){const ar=natArmies(o);for(const a of ar){if(a.u.length<10){const pick=NPICK[o],t=pick[(Math.random()*pick.length)|0];if((CS.bs[o]||0)>=COST[t]){CS.bs[o]-=COST[t];a.u.push(U(t));}}
    if(CS.prov[a.prov]===o)a.u.forEach(x=>{const mx=UT[x.t][2];x.n=Math.min(mx,x.n+Math.ceil(mx*.2));});}
   if(isNation(o)&&!ar.length&&(CS.bs[o]||0)>=1400){const seat=natProvs(o).find(p=>p.seat===o)||natProvs(o)[0];if(seat&&!CS.armies.some(z=>z.prov===seat.id)){CS.bs[o]-=1400;mkArmy(o,seat.id,OWN[o].n+"'s new levy",NARMY[o].slice(0,5));cToast(OWN[o].n+' raises a new army at '+seat.n+'.');}}}
@@ -1489,17 +1515,19 @@ async function p2Turn(){const P=CS.p2;
  if(P.obey===null&&CS.turn>=P.dl){P.obey=false;P.war.trevelle=1;const b=PROV.find(p=>CS.prov[p.id]==='trevelle'&&[...CADJ[PI[p.id]]].some(j=>CS.prov[PROV[j].id]==='caelan'))||PROV[PI.aldmoor];
   mkArmy('trevelle',b.id,"Trevelle's council army",[["General's guard"],['Pikemen'],['Pikemen'],['Spearmen'],['Swordsmen'],['Crossbowmen'],['Crossbowmen'],['Heavy cavalry']]);
   await p2Scene([{img:'seer',fx:['mist'],cam:[.5,.5,1.05,.5,.45,1.15],t:'Trevelle strikes',x:'Famine has come to the highlands. Trevelle’s council has overruled King Aldous and sent its army over the border to take Arden’s granaries. The Seer was right.',bg:'leaves',tint:'rgba(10,0,20,.6)'}]);
-  if(['osric','bran','varen'].some(o=>CS.fate[o]==='pardon')){P.plotT=CS.turn+6;p2Say('Worse news: your pardoned brothers are whispering with the lords while you fight. Win the war with Trevelle within six seasons, or they will move against you.');}
-  else p2Say('Trevelle is at war with you. Drive them back and take their three provinces.');}
- if(P.plotT&&CS.turn>=P.plotT&&natProvs('trevelle').length){CS.done=1;cSave();await p2Scene([{img:'fall',fx:['embers'],cam:[.5,.5,1.1,.5,.5,1.0],t:'A knife in the dark',x:'While your armies were held in the highlands, your brothers bought your guards. Caelan dies in his own hall, and Arden falls to the brothers he spared.',bg:'dirt',tint:'rgba(30,0,0,.6)'}]);
-  try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return false;}
+  p2Say('Trevelle is at war with you. Drive them back, and take their six regions if you can.');}
+ if(P.coal&&!P.plotDone&&['exile','pardon'].includes(CS.fate.osric)&&CS.turn>=P.coal+2){P.plotDone=1;
+  if(hon()>=50){await p2Scene([{img:'knife',fx:['embers'],cam:[.5,.5,1.1,.5,.5,1.0],t:'Osric’s attempt',x:'Midnight. Two of your guards wake you, pale and shaking. Osric’s men offered them a fortune in gold to open your door tonight. They refused, and told you instead. “They love you, my king,” Thorne says. “That is worth more than walls.”\n\nBy dawn, Osric has fled to the coalition.',bg:'dirt',tint:'rgba(30,0,0,.6)'}]);
+   CS.bros.osric='free';const k=NATIONS.find(n=>P.war[n]&&natProvs(n).length);const seat=k&&(natProvs(k).find(p=>p.seat===k)||natProvs(k)[0]);if(seat)mkArmy('osric',seat.id,'Osric’s exiles',[["General's guard"],['Spearmen'],['Swordsmen'],['Archers'],['Heavy cavalry']]);cRender();cSave();}
+  else{CS.done=1;cSave();await p2Scene([{img:'knife',fx:['embers'],cam:[.5,.5,1.1,.5,.5,1.0],t:'A knife in the dark',x:'Midnight. Your guards were paid well, and they do not love you enough to refuse the gold. Osric’s men find you asleep.\n\nCaelan dies in his own bed. Holm told you what mercy would cost.',bg:'dirt',tint:'rgba(30,0,0,.6)'}]);
+  try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return false;}}
  // the Seer reveals the truth about the spear
- if(P.coal&&!P.reveal&&CS.turn>=P.coal+2){P.reveal=1;PIX=null;CIMG=null;await p2Scene([{img:'seernight',fx:['mist'],cam:[.55,.5,1.15,.5,.45,1.04],t:'The truth about the spear',x:'The Seer finds you in your tent between battles. “You think your father died for a crown. He died for Ormana. Their spies threw the spear from the trees, and they have been waiting for Ethrann to bleed ever since.”',bg:'leaves',tint:'rgba(20,10,30,.65)'},
-  {img:'spear',fx:['dust'],cam:[.5,.5,1.12,.5,.45,1.02],t:'Those who came for your father',x:'“Those who came for your father will come for you. Finish this war quickly, little king. The black sails are coming.”',bg:'dirt',tint:'rgba(0,0,0,.6)'}]);}
+ if(P.coal&&!P.reveal&&CS.turn>=P.coal+2){P.reveal=1;PIX=null;CIMG=null;await p2Scene([{img:'seernight',fx:['mist'],cam:[.55,.5,1.15,.5,.45,1.04],t:'The knight in plain armour',x:'The Seer finds you in your tent between battles. “You think your father died for a crown. He died for Ormana. The knight in plain armour who killed him wore no colours because his colour is black. Ormana has been watching Ethrann for years, waiting for it to bleed.”',bg:'leaves',tint:'rgba(20,10,30,.65)'},
+  {img:'spear',fx:['dust'],cam:[.5,.5,1.12,.5,.45,1.02],t:'Those who came for your father',x:'“Those who came for your father will come for you. Do not destroy these kingdoms, little king. Make peace with them as soon as they will take it. When the black sails come, you will need their strength, or you will fight on every shore alone.”',bg:'dirt',tint:'rgba(0,0,0,.6)'}]);}
  // Ormana lands
  if(!P.orm&&CS.turn>=P.ormT)await p2Landing();
  if(P.orm===1&&(P.wave||1)<3&&CS.turn>=P.waveT){await ormWave();P.waveT=CS.turn+3;}
- if(P.orm===1&&CS.turn>P.ormT+12){CS.done=1;cSave();await p2Scene([{img:'rising',fx:['embers'],cam:[.5,.5,1.05,.5,.5,1.15],t:'Black sails over Ethrann',x:'Ormana’s grip closes on the mainland, one town at a time. The empire the Great Rising broke has come back, and Arden kneels to it.',bg:'sand',tint:'rgba(0,0,0,.6)'}]);try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return false;}
+ if(P.orm===1&&CS.turn>P.ormT+16){CS.done=1;cSave();await p2Scene([{img:'rising',fx:['embers'],cam:[.5,.5,1.05,.5,.5,1.15],t:'Black sails over Ethrann',x:'Ormana’s grip closes on the mainland, one town at a time. The black sails fill every harbour, and Arden kneels to the Iron Mask.',bg:'sand',tint:'rgba(0,0,0,.6)'}]);try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return false;}
  return true;}
 async function p2Landing(){const P=CS.p2;P.orm=1;PIX=null;CIMG=null;
  const coast=['frostmark','yovard','whitefell','northwatch','icewater'].filter(q=>!CS.armies.some(z=>z.prov===q&&z.o==='caelan'));
@@ -1508,13 +1536,14 @@ async function p2Landing(){const P=CS.p2;P.orm=1;PIX=null;CIMG=null;
  for(const q of L.slice(1,3)){CS.prov[q]='ormana';mkArmy('ormana',q,'Ormana raiders',ORM_WAVE);}
  CS.bs.ormana=2000;P.wave=1;P.waveT=CS.turn+3;
  // former enemies who would rather fight Ormana than serve it
- const allies=NATIONS.filter(k=>P.gone[k]==='surr'||(!P.war[k]&&natProvs(k).length));const home=PROV.find(p=>CS.prov[p.id]==='caelan');
- allies.forEach(k=>{if(home)mkArmy('caelan',home.id,OWN[k].n+' company',[['Spearmen'],['Archers'],['Light cavalry']]);});
+ const allies=NATIONS.filter(k=>!P.war[k]&&P.gone[k]!=='conq'&&natProvs(k).length);P.ally={};
+ allies.forEach(k=>{P.ally[k]=1;CS.bs[k]=(CS.bs[k]||0)+1200;const seat=natProvs(k).find(p=>p.seat===k)||natProvs(k)[0];if(seat&&!natArmies(k).length)mkArmy(k,seat.id,OWN[k].n+"'s host",NARMY[k]);});
+ if(!CS.armies.some(a=>a.prov==='maskhold'))mkArmy('ormana','maskhold','Maskhold guard',[["General's guard"],['Ormana footmen'],['Ormana footmen'],['Steppe archers'],['Masked nobles']]);
  cRender();cSave();
  await p2Scene([{img:'ethrann',fx:['spray','mist'],cam:[.5,.55,1.0,.5,.5,1.15],t:'Black sails',x:'Out of the morning mist come the black-sailed ships of Ormana. Their riders wear steel faces that never change, and every man of them wears the same black cloak. They have come to take back their old empire.',bg:'sand',tint:'rgba(0,0,0,.55)'},
-  {img:'holm',fx:['dust'],cam:[.5,.5,1.05,.5,.5,1.12],t:'Gather everything',x:allies.length?'Not every kingdom will kneel to Ormana. '+allies.map(k=>OWN[k].n).join(', ')+(allies.length>1?' send':' sends')+' you soldiers. Gather every man you have and drive Ormana back into the sea.':'No kingdom is left to stand beside you. Gather every man you have and drive Ormana back into the sea.',bg:'grass',tint:'rgba(20,10,0,.5)'},
-  {t:voice(),x:'“My king, I once said that if you broke the coalition you would be the luckiest king who ever lived. I was wrong to call it luck. Against these godless men of Ormana, luck will not be enough. If you throw them back into the sea, no one will say Caelan was lucky. They will say he was inevitable, as certain as death itself.”',bg:'dirt',tint:'rgba(0,0,0,.6)'}]);
- p2Say('Ormana has landed at '+L.slice(0,3).map(q=>PROV[PI[q]].n).join(', ')+', and more ships will follow. Their masked nobles are the deadliest riders in the world. Destroy every Ormana army, including the waves still at sea, within twelve seasons.');}
+  {img:'holm',fx:['dust'],cam:[.5,.5,1.05,.5,.5,1.12],t:'Gather everything',x:allies.length?'Not every kingdom will kneel to Ormana. '+allies.map(k=>OWN[k].n).join(', ')+(allies.length>1?' march':' marches')+' against the invaders on '+(allies.length>1?'their':'its')+' own fronts. Gather every man you have, drive Ormana back into the sea, then follow them across it.':'No kingdom is left to stand beside you. You will fight on every shore alone. Gather every man you have, drive Ormana back into the sea, then follow them across it.',bg:'grass',tint:'rgba(20,10,0,.5)'},
+  {t:voice(),x:'“My lord, war is upon us. War such as Ethrann has never seen. The odds are not in your favour. Should you win, men will say you were lucky. But you and I, my lord, will know it was not luck.”',bg:'dirt',tint:'rgba(0,0,0,.6)'}]);
+ p2Say('Ormana has landed at '+L.slice(0,3).map(q=>PROV[PI[q]].n).join(', ')+', and more ships will follow. Their masked nobles are the deadliest riders in the world. Destroy every Ormana army, including the waves still at sea, then sail across and take Maskhold, their capital. You have sixteen seasons.');}
 async function p2Coalition(){const P=CS.p2;P.coal=CS.turn;const mem=NATIONS.filter(k=>!P.gone[k]&&natProvs(k).length);
  mem.forEach(k=>{P.war[k]=1;CS.bs[k]=(CS.bs[k]||0)+1500;const seat=natProvs(k).find(p=>p.seat===k)||natProvs(k)[0];if(seat&&!natArmies(k).length)mkArmy(k,seat.id,OWN[k].n+"'s host",NARMY[k]);});
  // pardoned brothers rebel
@@ -1524,26 +1553,27 @@ async function p2Coalition(){const P=CS.p2;P.coal=CS.turn;const mem=NATIONS.filt
  // Marshal Holm defects
  let holmTxt;const host=reb.includes('osric')?'osric':reb[0];
  if(host){const a=natArmies(host)[0];if(a){a.name=OWN[host].n+' and Marshal Holm';a.u.push(U('Heavy cavalry'),U('Pikemen'),U('Crossbowmen'));P.holm={army:a.id,o:host};}
-  holmTxt='Marshal Holm swore his life to King Halvard’s blood. When '+OWN[host].n+' rose, Holm went with him.';}
+  holmTxt='Marshal Holm has been gone from your court for a month. Now you know where: when '+OWN[host].n+' rose, Holm rode with him.';}
  else{const k=mem[0];const seat=k&&(natProvs(k).find(p=>p.seat===k)||natProvs(k)[0]);if(seat){const a=mkArmy(k,seat.id,'Marshal Holm’s host',[["General's guard"],['Heavy cavalry'],['Pikemen'],['Pikemen'],['Swordsmen'],['Crossbowmen'],['Crossbowmen'],['Spearmen']]);P.holm={army:a.id,o:k};}
-  holmTxt='Marshal Holm left your court in disgust after your brothers died. Now he commands the coalition’s army.';}
+  holmTxt=(['osric','bran','varen'].every(o=>CS.fate[o]!=='pardon'&&CS.fate[o]!=='exile')?'With Halvard’s other sons dead, Marshal Holm is the greatest lord left in Arden. The coalition has promised him your crown, and he has taken their side.':'Marshal Holm has watched you for a year and decided you are not the king Arden needs. The coalition has promised him your crown.')+' Now he commands their army.';}
  cRender();cSave();
  await p2Scene([{img:'crowns',fx:['embers'],cam:[.5,.5,1.12,.5,.45,1.02],t:'The Coalition',x:(mem.length?mem.map(k=>OWN[k].n).join(', ')+' sign a pact against you and declare war together.':'The last kingdoms of the mainland sign a pact against you.')+(taken.length?' At the same hour your pardoned brothers rise in rebellion and seize '+taken.join(' and ')+'.':''),bg:'dirt',tint:'rgba(30,10,5,.55)'},
-  {img:'holm',fx:['dust'],cam:[.5,.5,1.05,.5,.5,1.12],t:'Holm',x:holmTxt+' The man who taught you to fight is now your enemy. Captain Edda Thorne, who has led Calder’s archers since your first battle, becomes your battle advisor.',bg:'grass',tint:'rgba(20,10,0,.5)'},
-  {t:'Captain Thorne',x:'“My lord, the crowns of the mainland have joined against one. No king of Ethrann has ever stood against such odds. Break them, and men will call you the luckiest king who ever lived, and the greatest.”',bg:'dirt',tint:'rgba(20,10,0,.6)'}]);
+  {img:'holm',fx:['dust'],cam:[.5,.5,1.05,.5,.5,1.12],t:'Holm turns',x:holmTxt+' The man who taught you to fight is now your enemy. Captain Edric Thorne, who has led Calder’s archers since your first battle, becomes your battle advisor.',bg:'grass',tint:'rgba(20,10,0,.5)'},
+  {t:'Captain Thorne',x:'“My king, Holm taught me as well. I know how he thinks: he will be patient, and he will wait for you to make the first mistake. Do not give him one. And make peace with these kingdoms the moment they will take it. We will need every one of them before this is over.”',bg:'dirt',tint:'rgba(20,10,0,.6)'}]);
  p2Say('Every kingdom still standing is at war with you. Break the coalition: take a kingdom’s capital or destroy its armies and it will surrender. You can also bribe one out of the pact from the Neighbours menu.');}
 async function p2Check(){const P=CS.p2;if(!P||CS.done)return;
  // conquered kingdoms
  for(const k of NATIONS){if(P.gone[k])continue;if(!natProvs(k).length){P.gone[k]='conq';P.war[k]=0;CS.armies=CS.armies.filter(a=>a.o!==k);
    if(k==='trevelle'){P.plotT=0;const v=await cDlg('King Aldous','Aldmoor has fallen and King Aldous is brought before you in chains. He asks only why.',[['Imprison him','jail','pri'],['Exile him','exile'],['Execute him','exec']]);P.aldous=v;
     const d=v==='exec'?20:v==='jail'?10:5;for(const n of NATIONS)if(!P.gone[n])CS.gw[n]=Math.max(0,CS.gw[n]-d);if(v==='exec'){CS.dread=Math.min(100,(CS.dread||0)+15);addH(-15);}else if(v==='jail')addH(-3);else addH(3);
+    await noted('chains',v==='exec'?'King Aldous dies in the square of his own capital. He never stopped calling you his friend.':v==='jail'?'King Aldous goes to a cell in Aldmoor’s tower. He asks for books, and for news of your health.':'King Aldous rides into exile with a single servant. At the border he turns and raises his hand to you.');
     p2Say('Trevelle is yours, and its mines with it. '+(P.coal?'':'Conquer one more kingdom of your choice (Terfein, Odei, Yova or Vaskar) and the mainland will be yours to fear. They are already talking to each other.'));}
    else cToast(OWN[k].n+' is conquered!');
    for(const n of NATIONS)if(!P.gone[n])CS.gw[n]=Math.max(0,CS.gw[n]-15);}
   else if(P.coal&&P.war[k]){const cap=PROV.find(p=>p.seat===k);const capLost=cap&&CS.prov[cap.id]!==k;
    if(capLost||(!natArmies(k).length&&natProvs(k).length<=1)){P.gone[k]='surr';P.war[k]=0;CS.armies=CS.armies.filter(a=>a.o!==k);await cDlg(OWN[k].n+' surrenders',OWN[k].n+' asks for peace and leaves the coalition. Its remaining lands are left in peace.',[['Continue','ok','pri']]);}}}
  // Holm captured
- if(P.holm&&!P.holm.done&&!CS.armies.some(a=>a.id===P.holm.army)){P.holm.done=1;const v=await cDlg('Marshal Holm is taken','Your old marshal is brought before you, wounded but unbowed. “I served your father’s blood,” he says. “Do what you must.”',[['Spare him','spare','pri'],['Execute him','exec']]);P.holm.fate=v;if(v==='exec')deed(-10,10);else deed(8,-3);}
+ if(P.holm&&!P.holm.done&&!CS.armies.some(a=>a.id===P.holm.army)){P.holm.done=1;const v=await cDlg('Marshal Holm is taken','Your old marshal is brought before you, wounded but unbowed. “I served your father’s blood,” he says. “Do what you must.”',[['Spare him','spare','pri'],['Execute him','exec']]);P.holm.fate=v;if(v==='exec')deed(-10,10);else deed(8,-3);await noted('holmdefects',v==='exec'?'Marshal Holm dies as a soldier, standing. The men he trained watch in silence.':'Marshal Holm is sent home to his estates under guard. He does not thank you, and you did not expect him to.');}
  const conq=NATIONS.filter(k=>P.gone[k]==='conq').length;
  if(!P.coal&&conq>=2)await p2Coalition();
  if(P.coal&&!P.coalDone&&!NATIONS.some(k=>P.war[k])&&!['osric','bran','varen'].some(o=>CS.bros[o]==='free')){P.coalDone=CS.turn;P.ormT=Math.min(P.ormT,CS.turn+2);
@@ -1571,10 +1601,10 @@ function showCredits(){return new Promise(res=>{const by={};for(const k of musUs
  let done=false;const fin=()=>{if(done)return;done=true;d.remove();res();};d.onclick=fin;
  const step=()=>{if(done)return;const k=Math.min(1,(performance.now()-T0)/dur);el.style.transform='translateY('+(-k*H())+'px)';if(k<1)requestAnimationFrame(step);else setTimeout(fin,1500);};requestAnimationFrame(step);});}
 async function p2End(){const P=CS.p2;P.orm=2;CS.done=2;cSave();$('camp').style.display='none';advHide();MUS.res='finale';MUS.resT=performance.now()+600000;musTick();
- await new Promise(r=>playScenes([{img:'ethrann',fx:['spray','birds'],cam:[.5,.5,1.15,.5,.5,1.0],t:'The sea takes them back',x:'The last Ormana banners go down on the shore. Their ships burn in the bay, and the men with steel faces lie where they fell. For the first time in two hundred years, Ormana has nothing on the mainland.',bg:'sand',tint:'rgba(20,10,0,.4)'},
+ await new Promise(r=>playScenes([{img:'ethrann',fx:['spray','birds'],cam:[.5,.5,1.15,.5,.5,1.0],t:'The sea takes them back',x:'The last Ormana banners go down on the shore. Their ships burn in the bay, and the men with steel faces lie where they fell. Maskhold burns behind them. Ormana will not come again in your lifetime.',bg:'sand',tint:'rgba(20,10,0,.4)'},
   {img:'coronation',fx:['candles','dust'],cam:[.5,.55,1.02,.5,.4,1.18],t:'King of Ethrann',x:'The kings of the mainland come to Aurenhall and kneel. Caelan, the youngest son, rules Ethrann unchallenged.',bg:'grass',tint:'rgba(40,30,0,.45)'},
   {img:'seernight',fx:['mist'],cam:[.55,.5,1.15,.5,.45,1.04],t:'The Seer',x:P.obey?'“You struck down a friend because I told you to,” the Seer says, one last time. “Trevelle would have been your death. Was his life worth your crown? Only you will ever know.” Then she is gone, and she never returns.':'“You would not betray your friend, and still you stand,” the Seer says, one last time. “Perhaps you did not need me after all.” Then she is gone, and she never returns.',bg:'leaves',tint:'rgba(20,10,30,.65)'},
-  {t:voice(),x:'“You, my king. Caelan the Inevitable. History will say that your rise was as inevitable as death.”',bg:'dirt',tint:'rgba(20,10,0,.6)'},
+  {t:voice(),x:'“They will call it luck, my lord. It was never luck. You have become as inevitable as death.”',bg:'dirt',tint:'rgba(20,10,0,.6)'},
   {t:'The End',x:'Thank you for playing The Broken Thrones.',bg:'dirt',tint:'rgba(0,0,0,.7)'}],r));
  await showCredits();cExit();}
 async function p2Diplo(){const P=CS.p2;const peace=NATIONS.filter(k=>!P.gone[k]&&!P.war[k]),war=NATIONS.filter(k=>P.war[k]&&P.coal);
@@ -1602,7 +1632,7 @@ function kTitle(){if(CS&&CS.p2&&CS.p2.orm===2)return 'Caelan the Inevitable';con
  const v=Math.max(h,d),i=v>=100?3:v>=75?2:v>=50?1:v>=25?0:-1;if(i<0)return CS.part===2?'King Caelan':'Prince Caelan';
  return h>=d?'Caelan '+H[i]:(i===1?'Caelan Ironhand':i===3?'Caelan, King of the Dead':'Caelan '+D[i]);}
 function lord(){return CS&&CS.part===2?'my king':'my lord';}
-function voice(){return CS&&CS.part===2&&CS.p2&&CS.p2.coal?'Captain Thorne':'Marshal Holm';}
+function voice(){return CS&&CS.part===2&&CS.p2&&CS.p2.coal?'Captain Edric Thorne':'Marshal Holm';}
 function say(t){cAdv(voice()+': “'+t+'”');}
 // battles push the king further along the path he walks
 function renownBattle(win,size){const L=lean(),n=size;
@@ -1613,10 +1643,13 @@ const TAXM=[.7,1,1.4],TAXN=['Light','Fair','Heavy'],GARS=15,GARG=10;
 function payOf(t){return COST[t]?Math.round(COST[t]/30):15;}
 function eatOf(t){return UT[t]&&UT[t][0]==='cav'?25:15;}
 function harvOf(p,turn){const q=(turn-1)%4;return q===3?0:Math.round(p.g*.6*(q===2?3:1));}
+async function loanPay(){const L=CS.loan;if(!L||L.left<=0)return;
+ if(CS.silver>=L.amt){CS.silver-=L.amt;L.left--;if(L.left===0){CS.loan=null;CS.gw.trevelle=Math.min(100,(CS.gw.trevelle||0)+10);await cDlg('A letter from King Aldous','“Paid in full, and early by my reckoning. Your father would be proud of you, Caelan. If Arden ever needs Trevelle again, you have only to write.”',[['Continue','ok','pri']]);}}
+ else{L.missed++;await cDlg('A letter from King Aldous',L.missed===1?'“My dear Caelan, the season’s payment did not come. Think nothing of it. War is expensive, and you have more pressing creditors than an old friend. Take your time.”':'“Another season, and still nothing. No matter. Pay me when the war is won. I would rather have a living friend than a paid debt.”',[['Continue','ok','pri']]);}}
 async function cTreasury(){if(CBUSY)return;for(;;){const tx=CS.tax==null?1:CS.tax,mine=PROV.filter(p=>CS.prov[p.id]==='caelan'),aut=(CS.turn-1)%4===2;
  const tax=mine.reduce((a,p)=>a+Math.round(p.s*TAXM[tx]),0),us=CS.armies.filter(a=>a.o==='caelan').flatMap(z=>z.u),pay=us.reduce((a,x)=>a+payOf(x.t),0),eat=us.reduce((a,x)=>a+eatOf(x.t),0),harv=mine.reduce((a,p)=>a+harvOf(p,CS.turn),0),win=(CS.turn-1)%4===3,gs=mine.length*GARS,gg=mine.length*GARG;
  const rows=mine.map(p=>'<div class="gw"><b style="width:110px">'+p.n+'</b><span style="flex:1">'+Math.round(p.s*TAXM[tx])+' silver · '+harvOf(p,CS.turn)+' grain</span></div>').join('');
- const v=await cDlg('Treasury','<b>Silver '+(CS.silver|0)+' · Grain '+(CS.grain|0)+'</b><br>Taxes are '+TAXN[tx]+': <b>+'+tax+' silver</b> a season from '+mine.length+(mine.length===1?' region':' regions')+'. Soldiers’ pay: −'+pay+'. Garrisons: −'+gs+'. <b>Net '+(tax-pay-gs>=0?'+':'')+(tax-pay-gs)+' silver.</b><br>Harvest: +'+harv+' grain'+(aut?' (autumn harvest)':win?' (nothing grows in winter)':'')+'. Soldiers eat: −'+eat+'. Garrisons: −'+gg+'. <b>Net '+(harv-eat-gg>=0?'+':'')+(harv-eat-gg)+' grain.</b><br><span style="opacity:.8">If silver or grain runs out, a tenth of every unit deserts. Better troops cost more pay; horsemen eat more.</span><br><span style="opacity:.8">Light taxes bring 30% less silver but raise Honour. Heavy taxes bring 40% more but raise Dread and cost Honour.</span>'+rows+'<br>The grain market pays <b>40 silver for 100 grain</b>.',
+ const v=await cDlg('Treasury','<b>Silver '+(CS.silver|0)+' · Grain '+(CS.grain|0)+'</b><br>Taxes are '+TAXN[tx]+': <b>+'+tax+' silver</b> a season from '+mine.length+(mine.length===1?' region':' regions')+'. Soldiers’ pay: −'+pay+'. Garrisons: −'+gs+'. <b>Net '+(tax-pay-gs>=0?'+':'')+(tax-pay-gs)+' silver.</b><br>'+(CS.loan?'Owed to King Aldous: '+CS.loan.left+' payments of '+CS.loan.amt+' silver. ':'')+'<br>Harvest: +'+harv+' grain'+(aut?' (autumn harvest)':win?' (nothing grows in winter)':'')+'. Soldiers eat: −'+eat+'. Garrisons: −'+gg+'. <b>Net '+(harv-eat-gg>=0?'+':'')+(harv-eat-gg)+' grain.</b><br><span style="opacity:.8">If silver or grain runs out, a tenth of every unit deserts. Better troops cost more pay; horsemen eat more.</span><br><span style="opacity:.8">Light taxes bring 30% less silver but raise Honour. Heavy taxes bring 40% more but raise Dread and cost Honour.</span>'+rows+'<br>The grain market pays <b>40 silver for 100 grain</b>.',
   [['Sell 100 grain','s1',CS.grain>=100?'':'dis'],['Sell 500 grain','s5',CS.grain>=500?'':'dis'],['Taxes: '+TAXN[(tx+1)%3],'tax'],['Close','no']]);
  if(v==='s1'&&CS.grain>=100){CS.grain-=100;CS.silver+=40;}else if(v==='s5'&&CS.grain>=500){CS.grain-=500;CS.silver+=200;}else if(v==='tax'){CS.tax=(tx+1)%3;}else break;cSave();cPanel();}}
 async function cRaise(){if(CBUSY)return;const home=[PROV[PI.aurenhall],PROV[PI.calder],...PROV].find(p=>p&&CS.prov[p.id]==='caelan');if(!home){cToast('You hold no town to raise an army in.');return;}
@@ -1689,14 +1722,14 @@ const SPEECH={
   lord:['King Sigvald sends you his greetings, Arden: these axes. Terfein does not kneel. Shields together!']},
  odei:{king:['The grass of Odei has no walls and no masters. Every king who has tried to fence it has been ridden down. Riders of Odei, today another one learns!'],
   lord:['The Rider-King has spoken: no Arden banner will fly over the steppe. Draw your bows. Make them chase us, then make them die.']},
- vaskar:{king:['You have marched a long way to die in the cold, king of Arden. Vaskar bows to no crown: not Ormana’s two hundred years ago, not Odei’s, not yours. Hunters of the Far Wood, the quarry has come to us!'],
+ vaskar:{king:['You have marched a long way to die in the cold, king of Arden. Vaskar bows to no crown: not Odei’s, not Terfein’s, not yours. Hunters of the Far Wood, the quarry has come to us!'],
   lord:['The High Chief sent us to see what kind of men follow the last son. Now we see them, and we are not afraid. Axes up! The Far Wood keeps what it kills.']},
  yova:{king:['You came into my forest with fire and banners, as if the trees would kneel. The Deepwood has eaten armies before yours. Men of Yova, let them come between the trees!'],
   lord:['Queen Maren trusts the Deepwood to protect her people. So do we. Every tree is a wall, every shadow a bow. Loose!']},
- holm:['I taught you to hold a line, boy. I taught you when to charge and when to wait. I served your father’s blood with my whole life, and I watched you dishonour it. Today the student learns one last lesson from his master.'],
+ holm:['I taught you to hold a line, boy. I taught you when to charge and when to wait. I gave your father thirty years and you a winter of my life. Arden needs a king who will last. Today the student learns one last lesson from his master.'],
  rebel:o=>['You spared me, little brother, and you thought that made me yours. Mercy is not a crown, and a pardon is not a chain. I am still Halvard’s son. Today I take back what is mine.'],
- ormana:{king:['For two hundred years your fathers bowed to Ormana. They paid us in grain and timber and sons. Then they forgot. Today they remember. Ride them down, and leave none to tell it.'],
-  lord:['The Iron Mask commands, and Ormana obeys. Your kingdom was ours before it was yours. It will be ours again before the sun sets.']}};
+ ormana:{king:['We killed your high king in front of all his lords, and none of you saw it. We have been watching you ever since. Today you see us. Ride them down, and leave none to tell it.'],
+  lord:['The Iron Mask commands, and Ormana obeys. Ethrann bled itself white fighting over a dead man’s crown. Now it belongs to whoever is strong enough to take it.']}};
 function preSpeech(foe){const o=foe.o,hasGen=foe.u.some(x=>x.t==="General's guard"&&x.n>0);
  if(CS.part===2&&CS.p2&&CS.p2.holm&&foe.id===CS.p2.holm.army)return {who:'Marshal Holm',t:pick(SPEECH.holm)};
  if(['osric','bran','varen'].includes(o)){
@@ -1732,14 +1765,14 @@ const SCMUS={ethrann:'k_exploration',rising:'k_finalbattle',hunt:'k_confront',fi
  calderholds:'k_btA',watched:'k_darkquest',brotherswar:'k_btB',lastbanner:'k_btA',seernight:'k_darkquest',coronation:'k_fanfare',feast:'k_kingsfeast',prophecy:'k_darkforest',letter:'k_laments',part2:'k_lament',
  trevstrikes:'k_laments',knife:'k_lamentpe',coalition:'k_mystery',holmdefects:'k_mystery',thorne1:'k_sinister',truth:'k_sinister',cameforfather:'k_sinister',seerwarn:'k_darkquest',blacksails:'k_runaway',gather:'k_runaway',
  thorne2:'k_melancholy',ormwins:'k_defeat',seatakes:'k_hordedrums',kingeth:'k_legend',seerlast:'k_depressed',thornelast:'k_atwhatcost',theend:'k_lament'};
-const SCK={'Ethrann':'ethrann','The Great Rising':'rising','The royal hunt':'hunt','By the fire':'fire','Out of nowhere':'spear','The king falls':'fall','The old decree':'decree','Three crowns':'crowns','The marshal’s choice':'holm','Calder Fields':'calder',
+const SCK={'The high king':'highking','The tournament':'joust','The last joust':'spear','Holm':'holmtrain','The Iron Mask':'ironmask','Ethrann':'ethrann','The Great Rising':'rising','The royal hunt':'hunt','By the fire':'fire','Out of nowhere':'spear','The realm has noted':'noted','Marshal Holm’s counsel':'holmcounsel','The knight in plain armour':'truth','Captain Thorne':'thorne1','Osric’s attempt':'knife','Fallen':'fallen','The king falls':'fall','The old decree':'decree','Three crowns':'crowns','The marshal’s choice':'holm','Calder Fields':'calder',
  'Calder holds':'calderholds','Watched':'watched','The Brothers’ War begins':'brotherswar','The last banner falls':'lastbanner','The coronation':'coronation','The feast':'feast','The prophecy':'prophecy','A letter from Trevelle':'letter','Part 2':'part2',
- 'Trevelle strikes':'trevstrikes','A knife in the dark':'knife','The Coalition':'coalition','Holm':'holmdefects','The truth about the spear':'truth','Those who came for your father':'cameforfather','Black sails':'blacksails','Gather everything':'gather',
+ 'Trevelle strikes':'trevstrikes','A knife in the dark':'knife','The Coalition':'coalition','Holm turns':'holmdefects','The truth about the spear':'truth','Those who came for your father':'cameforfather','Black sails':'blacksails','Gather everything':'gather',
  'Black sails over Ethrann':'ormwins','The sea takes them back':'seatakes','King of Ethrann':'kingeth','The End':'theend'};
 function sceneKey(q){const t=q.t||'',x=q.x||'';if(SCK[t])return SCK[t];
  if(t==='The Seer')return x.startsWith('That night')?'seernight':x.startsWith('“Across')?'seerwarn':'seerlast';
- if(x.startsWith('“My lord, four'))return 'thorne1';if(x.startsWith('“My king, I once'))return 'thorne2';if(x.startsWith('“You, my king'))return 'thornelast';return null;}
-const SEQMUS={ethrann:'k_exploration',calderholds:'k_btA',lastbanner:'k_btA',coronation:'k_fanfare',trevstrikes:'k_laments',coalition:'k_mystery',seerwarn:'k_darkquest',truth:'k_sinister',blacksails:'k_runaway',seatakes:'k_hordedrums',knife:'k_lamentpe',ormwins:'k_defeat'};
+ if(x.startsWith('“My lord, war is upon'))return 'thorne2';if(x.startsWith('“They will call it luck'))return 'thornelast';return null;}
+const SEQMUS={highking:'k_exploration',fallen:'k_lamentpe',noted:'k_darkquest',knife:'k_lamentpe',calderholds:'k_btA',lastbanner:'k_btA',coronation:'k_fanfare',trevstrikes:'k_laments',coalition:'k_mystery',seerwarn:'k_darkquest',truth:'k_sinister',blacksails:'k_runaway',seatakes:'k_hordedrums',knife:'k_lamentpe',ormwins:'k_defeat'};
 function sceneMus(q){const k=sceneKey(q),f=k&&(SEQMUS[k]||SCMUS[k]);if(!f)return;MUS.res='f:'+f;MUS.resT=performance.now()+1e9;musTick();}
 function sceneMusEnd(){if(MUS.res&&String(MUS.res).startsWith('f:')){MUS.res=null;musTick();}}
 let BOSSB=false;
@@ -1769,15 +1802,14 @@ setInterval(musTick,500);
 document.addEventListener('visibilitychange',()=>{if(!MUS.el)return;if(document.hidden)MUS.el.pause();else if(MUS.on)MUS.el.play().catch(()=>{});});
 let AIHOLD=false,STORY=false,ADV='full';try{ADV=localStorage.getItem('eth_adv')||'full';}catch(e){}
 const INTRO=[
- {img:'ethrann',fx:['rain','spray','lightning'],cam:[.62,.5,1.12,.42,.52,1.04],t:'Ethrann',x:'For two hundred years the island of Ormana ruled the mainland of Ethrann. Its black-sailed ships took our grain, our timber and our sons.',bg:'sand',tint:'rgba(10,20,40,.35)'},
- {img:'rising',fx:['dust','spray'],cam:[.5,.5,1.02,.55,.45,1.18],t:'The Great Rising',x:'Then the mainland rose as one and drove Ormana back into the sea. The victors divided the land into five kingdoms. Across the water, Ormana did not forget.',bg:'dirt',tint:'rgba(40,10,5,.2)'},
- {img:'hunt',fx:['dust','birds'],cam:[.35,.5,1.12,.6,.5,1.04],t:'The royal hunt',x:'Two generations on, Arden is the richest of the kingdoms. In autumn, old King Halvard rides out to hunt with his four sons: Osric, Bran, Varen, and you, Caelan, the youngest.',bg:'leaves',tint:'rgba(30,20,0,.15)'},
- {img:'fire',fx:['embers'],cam:[.4,.5,1.15,.5,.5,1.04],t:'By the fire',x:'That night the king speaks to you and his counsellors. “Your brothers drink, gamble and quarrel. They are not fit to rule. When we return, I will disinherit them.” Across the camp, your brothers laugh, and hear nothing.',bg:'dirt',tint:'rgba(0,0,20,.15)'},
- {img:'spear',fx:['dust'],cam:[.5,.45,1.02,.6,.35,1.22],t:'Out of nowhere',x:'The next morning the hunt is in full cry. From a hidden stand high in an oak, a spear flies.',bg:'leaves',tint:'rgba(0,0,0,.1)'},
- {img:'fall',fx:['dust'],cam:[.5,.5,1.04,.48,.52,1.2],t:'The king falls',x:'Your father falls among the leaves. With the whole hunt gathered round, he grips your hand. “Caelan is my heir. Caelan.” Every man there hears it. Then he is gone.',bg:'dirt',tint:'rgba(0,0,0,.2)'},
- {img:'decree',fx:['candles','dust'],cam:[.5,.55,1.18,.5,.45,1.04],t:'The old decree',x:'But words spoken in a forest are not law. In Aurenhall the royal decree is unsealed, and it still names Osric. The king never changed it.',bg:'dirt',tint:'rgba(20,10,0,.15)'},
- {img:'crowns',fx:['dust','birds'],cam:[.5,.5,1.04,.5,.45,1.16],t:'Three crowns',x:'Osric is crowned, and most lords kneel to him. Bran and Varen will not: each raises his own banner and calls himself king. Arden has three kings, and you are none of them.',bg:'grass',tint:'rgba(20,10,0,.15)'},
- {img:'holm',fx:['dust','birds'],cam:[.45,.5,1.1,.55,.48,1.2],t:'The marshal’s choice',x:'Only Marshal Holm, who heard your father’s last words, comes to you at Calder with his soldiers. “Your father named you. I am yours, my prince.” Or so it seems.',bg:'grass',tint:'rgba(30,15,0,.15)'},
+ {img:'decree',fx:['candles','dust'],cam:[.5,.5,1.12,.5,.45,1.02],t:'The high king',x:'Aurenhall. Your father, King Halvard of Arden, is high king of all Ethrann, and for thirty years there has been peace. Peace has made his three eldest sons fat and idle: Osric, Bran and Varen. You are Caelan, the youngest.',bg:'dirt',tint:'rgba(20,10,0,.25)'},
+ {img:'calderholds',fx:['dust','birds'],cam:[.4,.5,1.12,.6,.5,1.04],t:'The tournament',x:'The summer tournament. Lords from every kingdom fill the stands. Your brothers watch with wine cups in their hands; not one of them will ride. You ride. Lance after lance breaks on your shield, and when the trumpets sound you are still in the saddle.',bg:'grass',tint:'rgba(30,20,0,.15)'},
+ {img:'fire',fx:['embers'],cam:[.4,.5,1.15,.5,.5,1.04],t:'By the fire',x:'That night your father speaks to you and his counsellors. “Three sons sat in the stands today. One rode. They drink, they gamble, they quarrel. They are not fit to rule. When the tournament ends, I will disinherit them.” Across the hall, your brothers laugh, and hear nothing.',bg:'dirt',tint:'rgba(0,0,20,.15)'},
+ {img:'spear',fx:['dust'],cam:[.5,.45,1.02,.6,.35,1.22],t:'The last joust',x:'The final day. The crowd roars as the high king himself rides into the lists, against a knight in plain armour whose name no herald calls. The lances come down. The stranger’s lance is not blunted.',bg:'dirt',tint:'rgba(0,0,0,.1)'},
+ {img:'fall',fx:['dust'],cam:[.5,.5,1.04,.48,.52,1.2],t:'The king falls',x:'Your father lies in the sand. The stranger is gone. You kneel and he grips your hand. “Caelan… is king.” Most of the stands hear it. Not all. Then he is gone.',bg:'dirt',tint:'rgba(0,0,0,.2)'},
+ {img:'decree',fx:['candles','dust'],cam:[.5,.55,1.18,.5,.45,1.04],t:'The old decree',x:'The royal decree is unsealed. It still names Osric. The great lords have already made their plans: a fat, pliant king suits them better than one who rides. “Words spoken in the sand are not law,” they say.',bg:'dirt',tint:'rgba(20,10,0,.15)'},
+ {img:'crowns',fx:['dust','birds'],cam:[.5,.5,1.04,.5,.45,1.16],t:'Three crowns',x:'Osric is crowned. Bran and Varen will not kneel: each raises his own banner and calls himself king. Arden has three kings, and you are none of them. Only Calder stands with you.',bg:'grass',tint:'rgba(20,10,0,.15)'},
+ {img:'holm',fx:['dust','snow'],cam:[.45,.5,1.1,.55,.48,1.2],t:'Holm',x:'Marshal Holm, who taught your father to fight, rides to Calder. All winter he drills you and your men in the frozen fields. “Your brothers have the lords,” he says. “You will have soldiers.”',bg:'grass',tint:'rgba(30,15,0,.15)'},
  {img:'calder',fx:['dust'],cam:[.5,.5,1.06,.62,.45,1.18],t:'Calder Fields',x:'Spring, Year 1. Bran’s riders are coming for the granaries of Calder.',bg:'grass',tint:'rgba(0,0,0,.15)'}];
 const AFTER=[
  {img:'calder',fx:['embers','dust'],cam:[.5,.5,1.2,.5,.5,1.06],t:'Calder holds',x:'Bran’s raiders are broken and scattered. Across the trampled wheat, your men shout your name.',bg:'grass',tint:'rgba(30,20,5,.3)'},
