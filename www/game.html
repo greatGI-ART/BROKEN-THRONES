@@ -1549,7 +1549,10 @@ function p2Begin(){p2Ext();CS.part=2;CS.done=0;for(const k in CS.prov)if(['osric
  CS.p2={t0:CS.turn,dl:Math.max(12,CS.turn+6),war:{},gone:{},obey:null,coal:0,reveal:0,ormT:Math.max(29,CS.turn+16),orm:0,holm:null,plotT:0,end:0,alarm:{}};
  CS.gw.trevelle=Math.max(CS.gw.trevelle,70);PIX=null;CIMG=null;cSave();}
 // ---- war ----
-async function p2Declare(k){if(CS.p2.war[k])return true;const first=k==='trevelle'&&CS.p2.obey===null;
+async function p2Declare(k){if(CS.p2.war[k])return true;
+ if(k==='yova'&&CS.p2.wed){const w=await cDlg('Betray Queen Maren?','Maren is your wife, and Yova is bound to Arden by your marriage. If you march on her people, no king on the mainland will ever trust your word again.',[['Break the alliance','yes'],['Not now','no','pri']]);if(w!=='yes')return false;
+  CS.p2.wed=0;CS.p2.war.yova=1;if(CS.p2.ally)CS.p2.ally.yova=0;addH(-40);addD(10);for(const n of NATIONS)CS.gw[n]=Math.max(0,(CS.gw[n]||0)-40);
+  await noted('natpeace_yova','Maren leaves Aurenhall before dawn with her women and her guard. By noon, Yova is at war with you.','Every kingdom');return true;}const first=k==='trevelle'&&CS.p2.obey===null;
  const v=await cDlg(first?'Betray King Aldous?':'Declare war on '+OWN[k].n+'?',first?'Aldous traded you the army that won you the crown, and his letters still call you friend. The Seer says Trevelle will be your death unless you strike first.<br><br>If you attack, every kingdom on the mainland will trust Arden less.':'Breaking the peace with '+OWN[k].n+' will alarm every other kingdom.',[[first?'Strike Trevelle':'Declare war','yes','pri'],['Not now','no']]);
  if(v!=='yes')return false;CS.p2.war[k]=1;if(CS.p2.ally)CS.p2.ally[k]=0;if(first){CS.p2.obey=true;await noted('trevstrikes','Your army crosses into Trevelle. In Aldmoor, King Aldous reads the news twice before he believes it.','Every kingdom');addH(-15);for(const n of NATIONS)if(n!=='trevelle')CS.gw[n]=Math.max(0,CS.gw[n]-25);
   setTimeout(()=>p2Say('Trevelle is at war with you. Take Trevelle’s six regions, and above all King Aldous’s capital, Aldmoor. Their mines will pay for what comes next.'),400);}
@@ -1613,7 +1616,7 @@ async function p2Landing(){const P=CS.p2;P.orm=1;PIX=null;CIMG=null;
   {img:'holm',fx:['dust'],cam:[.5,.5,1.05,.5,.5,1.12],t:'Gather everything',x:allies.length?'Not every kingdom will kneel to Ormana. '+allies.map(k=>OWN[k].n).join(', ')+(allies.length>1?' march':' marches')+' against the invaders on '+(allies.length>1?'their':'its')+' own fronts. Gather every man you have, drive Ormana back into the sea, then follow them across it.':'No kingdom is left to stand beside you. You will fight on every shore alone. Gather every man you have, drive Ormana back into the sea, then follow them across it.',bg:'grass',tint:'rgba(20,10,0,.5)'},
   {t:voice(),x:'“My lord, war is upon us. War such as Ethrann has never seen. The odds are not in your favour. Should you win, men will say you were lucky. But you and I, my lord, will know it was not luck.”',bg:'dirt',tint:'rgba(0,0,0,.6)'}]);
  p2Say('Ormana has landed at '+L.slice(0,3).map(q=>PROV[PI[q]].n).join(', ')+', and more ships will follow. Their masked nobles are the deadliest riders in the world. Destroy every Ormana army, including the waves still at sea, then sail across and take Maskhold, their capital. You have sixteen seasons.');}
-async function p2Coalition(){const P=CS.p2;P.coal=CS.turn;const mem=NATIONS.filter(k=>!P.gone[k]&&natProvs(k).length);
+async function p2Coalition(){const P=CS.p2;P.coal=CS.turn;const mem=NATIONS.filter(k=>!P.gone[k]&&natProvs(k).length&&!(k==='yova'&&P.wed));
  mem.forEach(k=>{P.war[k]=1;CS.bs[k]=(CS.bs[k]||0)+1500;const seat=natProvs(k).find(p=>p.seat===k)||natProvs(k)[0];if(seat&&!natArmies(k).length)mkArmy(k,seat.id,OWN[k].n+"'s host",NARMY[k]);});
  // pardoned brothers rebel
  const reb=['osric','bran','varen'].filter(o=>CS.fate[o]==='pardon');const taken=[];
@@ -1650,6 +1653,7 @@ async function p2Check(){const P=CS.p2;if(!P||CS.done)return;
    for(const n of NATIONS)if(!P.gone[n])CS.gw[n]=Math.max(0,CS.gw[n]-15);}
   else if(P.coal&&P.war[k]){const cap=PROV.find(p=>p.seat===k);const capLost=cap&&CS.prov[cap.id]!==k;
    if(capLost||(!natArmies(k).length&&natProvs(k).length<=1)){P.gone[k]='surr';P.war[k]=0;CS.armies=CS.armies.filter(a=>a.o!==k);await natPeace(k,'Envoys of '+OWN[k].n+' ride into your camp under a flag of truce, bearing gifts. '+OWN[k].n+' asks for peace and leaves the coalition. Its remaining lands are left in peace.');}}}
+ await marenOffer();
  // Holm captured
  if(P.holm&&!P.holm.done&&!CS.armies.some(a=>a.id===P.holm.army)){P.holm.done=1;const v=await cDlg('Marshal Holm is taken','Your old marshal is brought before you, wounded but unbowed. “I served your father’s blood,” he says. “Do what you must.”',[['Spare him','spare','pri'],['Execute him','exec']]);P.holm.fate=v;if(v==='exec')deed(-10,10);else deed(8,-3);await noted('holmdefects',v==='exec'?'Marshal Holm dies as a soldier, standing. The men he trained watch in silence.':'Marshal Holm is sent home to his estates under guard. He does not thank you, and you did not expect him to.');}
  const conq=NATIONS.filter(k=>P.gone[k]==='conq').length;
@@ -1680,7 +1684,7 @@ function showCredits(){return new Promise(res=>{const by={};for(const k of musUs
  const step=()=>{if(done)return;const k=Math.min(1,(performance.now()-T0)/dur);el.style.transform='translateY('+(-k*H())+'px)';if(k<1)requestAnimationFrame(step);else setTimeout(fin,1500);};requestAnimationFrame(step);});}
 async function p2End(){const P=CS.p2;P.orm=2;CS.done=2;cSave();$('camp').style.display='none';advHide();MUS.res='finale';MUS.resT=performance.now()+600000;musTick();
  await new Promise(r=>playScenes([{img:'ethrann',fx:['spray','birds'],cam:[.5,.5,1.15,.5,.5,1.0],t:'The sea takes them back',x:'The last Ormana banners go down on the shore. Their ships burn in the bay, and the men with steel faces lie where they fell. Maskhold burns behind them. Ormana will not come again in your lifetime.',bg:'sand',tint:'rgba(20,10,0,.4)'},
-  {img:'coronation',fx:['candles','dust'],cam:[.5,.55,1.02,.5,.4,1.18],t:'King of Ethrann',x:'The kings of the mainland come to Aurenhall and kneel. Caelan, the youngest son, rules Ethrann unchallenged.',bg:'grass',tint:'rgba(40,30,0,.45)'},
+  {img:'coronation',fx:['candles','dust'],cam:[.5,.55,1.02,.5,.4,1.18],t:'King of Ethrann',x:'The kings of the mainland come to Aurenhall and kneel. Caelan, the youngest son, rules Ethrann unchallenged.'+(P.wed?' Queen Maren sits at his side.':''),bg:'grass',tint:'rgba(40,30,0,.45)'},
   {img:'seernight',fx:['mist'],cam:[.55,.5,1.15,.5,.45,1.04],t:'The Seer',x:P.obey?'“You struck down a friend because I told you to,” the Seer says, one last time. “Trevelle would have been your death. Was his life worth your crown? Only you will ever know.” Then she is gone, and she never returns.':'“You would not betray your friend, and still you stand,” the Seer says, one last time. “Perhaps you did not need me after all.” Then she is gone, and she never returns.',bg:'leaves',tint:'rgba(20,10,30,.65)'},
   {t:voice(),x:'“They will call it luck, my lord. It was never luck. You have become as inevitable as death.”',bg:'dirt',tint:'rgba(20,10,0,.6)'},
   {t:'The End',x:'Thank you for playing The Broken Thrones.',bg:'dirt',tint:'rgba(0,0,0,.7)'}],r));
@@ -1688,13 +1692,31 @@ async function p2End(){const P=CS.p2;P.orm=2;CS.done=2;cSave();$('camp').style.d
 // bribe price: 1,000 + 600 per region held; grain at market value (2.5 grain per silver); each bribe costs half as much again
 function bribeS(k){return Math.round((1000+600*natProvs(k).length)*Math.pow(1.5,CS.p2.bribes||0)/50)*50;}
 function bribeG(k){return Math.round(bribeS(k)*2.5/50)*50;}
+// ---- Queen Maren of Yova: marriage and alliance ----
+function marenAlive(){const P=CS.p2;return P&&!P.gone.yova&&natProvs('yova').length>0;}
+function marenCan(){const P=CS.p2;return marenAlive()&&!P.wed&&CS.turn>=(P.wedT||0);}
+async function marenWed(how){const P=CS.p2;P.wed=1;P.war.yova=0;if(P.ally)P.ally.yova=1;CS.gw.yova=100;addH(10);CS.silver=Math.max(0,CS.silver-500);
+ if(P.holm&&P.holm.o==='yova'){const a=CS.armies.find(z=>z.id===P.holm.army),o2=NATIONS.find(n=>n!=='yova'&&P.war[n]);if(a&&o2){a.o=o2;P.holm.o=o2;}}
+ await sceneHere([{img:'wedding',fx:['candles','dust'],cam:[.5,.5,1.04,.5,.46,1.14],t:'A royal wedding',x:(how==='offer'?'You accept Queen Maren’s hand. ':'Queen Maren accepts your hand. ')+'In the great hall of Aurenhall, Caelan of Arden and Maren of Yova are wed before the lords of both kingdoms. Yova is bound to Arden now, in war and in peace.',bg:'grass',tint:'rgba(40,30,0,.4)'}]);
+ cRender();cSave();cPanel();p2Say('Yova is your ally now. It will never join a coalition against you, and when the black sails come, Maren’s army will fight beside yours.');}
+async function marenPropose(){const P=CS.p2,war=!!P.war.yova,h=hon(),d=CS.dread||0;
+ const yes=war?(h>=75&&d<40):(h>=60&&(CS.gw.yova||0)>=50&&d<50);
+ if(yes){await marenWed('propose');return;}
+ P.wedT=CS.turn+4;if(!war)CS.gw.yova=Math.max(0,(CS.gw.yova||0)-10);
+ const why=d>=(war?40:50)?'“I will not marry a butcher,” she says. The tales of your cruelty have reached the Deepwood.':war?'“You ask for my hand with your soldiers still burning my forest,” she says. “Earn a better name first.”':(CS.gw.yova||0)<50?'“Yova barely knows you, king of Arden,” she says. “Show us friendship first.”':'“I have heard you called many things,” she says, “but not yet a man of honour.”';
+ await cDlg('Queen Maren refuses',why+'<br><br>You may ask again in four seasons.',[['Continue','ok','pri']]);}
+async function marenOffer(){const P=CS.p2;if(P.marenOffer||P.wed||!marenAlive()||hon()<100)return;P.marenOffer=1;
+ await sceneHere([{img:'natpeace_yova',fx:['dust','birds'],cam:[.5,.5,1.04,.5,.48,1.14],t:'Envoys from Yova',x:'Envoys of Yova ride in under a flag of truce, carrying a letter sealed with Queen Maren’s own ring. Every tale of you that reaches the Deepwood speaks of honour. The queen offers you her hand, and Yova with it.',bg:'grass',tint:'rgba(20,15,0,.35)'}]);
+ const v=await cDlg('Queen Maren’s offer','Marry Queen Maren and Yova becomes your ally for good. '+(P.war.yova?'The war with Yova ends at once. ':'')+'The wedding feast costs 500 silver.',[['Accept her hand','yes','pri'],['Decline politely','no']]);
+ if(v==='yes')await marenWed('offer');else{CS.gw.yova=Math.max(0,(CS.gw.yova||0)-10);cToast('Maren’s envoys ride home. She does not offer twice.');}}
 async function p2Diplo(){const P=CS.p2;const peace=NATIONS.filter(k=>!P.gone[k]&&!P.war[k]),war=NATIONS.filter(k=>P.war[k]&&P.coal);
  const rows=peace.map(k=>'<div class="gw"><b>'+OWN[k].n+'</b><span class="bar"><i style="width:'+CS.gw[k]+'%;background:'+(CS.gw[k]<25?'#d33':CS.gw[k]<50?'#e9a21a':'#4cba58')+'"></i></span><span>'+CS.gw[k]+'</span></div>').join('');
  const st=NATIONS.map(k=>OWN[k].n+': '+(P.gone[k]==='conq'?'conquered':P.gone[k]==='surr'?'at peace (surrendered)':P.war[k]?'<b style="color:#d33">at war</b>':'at peace')).join('<br>');
  const v=await cDlg('Kingdoms',st+'<br><br>'+(peace.length?'Goodwill falls every season. At zero, that kingdom raids your lands. Send 100 grain to raise it by 20.'+rows:'')+(war.length?'<br>Bribe a coalition member to leave the war. The price depends on its size, and every bribe you pay makes the next one cost half as much again.<br>'+war.map(k=>OWN[k].n+' ('+natProvs(k).length+' regions): '+bribeS(k).toLocaleString()+' silver or '+bribeG(k).toLocaleString()+' grain').join('<br>'):'')+'<br>Silver: '+(CS.silver|0)+' · Grain: '+(CS.grain|0),
-  [...peace.map(k=>['Send grain to '+OWN[k].n,'g:'+k,CS.grain>=100?'':'dis']),...war.map(k=>['Bribe '+OWN[k].n+' ('+bribeS(k).toLocaleString()+' silver)','s:'+k,CS.silver>=bribeS(k)?'':'dis']),...war.map(k=>['Bribe '+OWN[k].n+' ('+bribeG(k).toLocaleString()+' grain)','r:'+k,CS.grain>=bribeG(k)?'':'dis']),['Close','no']]);
+  [...peace.map(k=>['Send grain to '+OWN[k].n,'g:'+k,CS.grain>=100?'':'dis']),...(marenCan()?[['Propose marriage to Queen Maren (feast: 500 silver)','m:yova',CS.silver>=500?'':'dis']]:[]),...war.map(k=>['Bribe '+OWN[k].n+' ('+bribeS(k).toLocaleString()+' silver)','s:'+k,CS.silver>=bribeS(k)?'':'dis']),...war.map(k=>['Bribe '+OWN[k].n+' ('+bribeG(k).toLocaleString()+' grain)','r:'+k,CS.grain>=bribeG(k)?'':'dis']),['Close','no']]);
  if(!v||v==='no')return;const [t,k]=v.split(':');
- if(t==='g'&&CS.grain>=100){CS.grain-=100;CS.gw[k]=Math.min(100,CS.gw[k]+20);addH(2);}
+ if(t==='m'){await marenPropose();}
+ else if(t==='g'&&CS.grain>=100){CS.grain-=100;CS.gw[k]=Math.min(100,CS.gw[k]+20);addH(2);}
  else if((t==='s'&&CS.silver>=bribeS(k))||(t==='r'&&CS.grain>=bribeG(k))){if(t==='s')CS.silver-=bribeS(k);else CS.grain-=bribeG(k);P.bribes=(P.bribes||0)+1;P.war[k]=0;P.gone[k]='surr';CS.armies=CS.armies.filter(a=>a.o!==k);await natPeace(k,'Envoys of '+OWN[k].n+' come to Aurenhall under a flag of truce. They accept your gift, and '+OWN[k].n+' leaves the coalition. There will be peace between you.');await p2Check();}
  cSave();cPanel();cRender();p2Diplo();}
 
