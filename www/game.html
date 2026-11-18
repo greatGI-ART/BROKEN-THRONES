@@ -1292,7 +1292,7 @@ async function cMove(a,pid){if(CS.part===2){const fo=CS.armies.find(x=>x.prov===
   if(v==='siege'){a.mv=true;CS.sg=CS.sg||{};if(!isBesieged(pid))CS.sg[pid]={a:a.id,h:0};else CS.sg[pid].a=a.id;cRender();cToast('You lay siege to '+PROV[PI[pid]].n+'. Keep this army next to the city.');cSave();cPanel();return;}const rf=near.length?cRfPick():[];a.mv=true;rf.forEach(z=>z.mv=true);await cBattle(a,f,pid,v==='auto',true,rf);}
  else{CBUSY=true;a.mv=true;await cWalk(a,pid);CBUSY=false;const o=CS.prov[pid];if(o!=='caelan'){CS.prov[pid]='caelan';cRender();cToast(PROV[PI[pid]].n+' is yours.');cCheckBros();}
   const mate=CS.armies.find(z=>z!==a&&z.o==='caelan'&&z.prov===pid);if(mate)cMergeInto(a,mate);}
- cPanel();cSave();cCheckEnd();}
+ await broFallQ();cPanel();cSave();cCheckEnd();}
 function cToast(t){toast(t);}
 // ---- battles ----
 function cNearby(pid,main){return CS.armies.filter(z=>z!==main&&z.o==='caelan'&&!z.anim&&z.prov!==pid&&CADJ[PI[pid]].has(PI[z.prov])&&z.u.length);}
@@ -1309,12 +1309,12 @@ function cBattle(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P
   const back=[...CADJ[PI[loser.prov]]].map(j2=>PROV[j2].id).find(q=>CS.prov[q]===loser.o&&!CS.armies.some(z=>z.prov===q&&z.o!==loser.o));
   if(loser.u.length&&loser===att&&loser.prov!==pid){/* beaten attacker falls back to where it came from */}
   else if(loser.u.length&&back&&(loser.prov===pid||loser!==att)){loser.prov=back;}
-  else{CS.armies=CS.armies.filter(z=>z!==loser);if(loser.o!=='caelan'&&CS.bros[loser.o]==='free'){CS.bros[loser.o]='captured';cToast(OWN[loser.o].n+' is captured!');}}
+  else{CS.armies=CS.armies.filter(z=>z!==loser);if(loser.o!=='caelan'&&CS.bros[loser.o]==='free')broTake(loser.o);}
   if(win&&att===mine){mine.prov=pid;if(CS.prov[pid]!=='caelan'){CS.prov[pid]='caelan';}}
   if(!win&&att===foe){foe.prov=pid;CS.prov[pid]=foe.o;}
   CS.armies.forEach(z=>z.u=z.u.filter(x=>x.n>0));CS.armies=CS.armies.filter(z=>z.u.length);
   cCheckBros();cRender();cSave();$('camp').style.display='block';cResize();if(!CRAF)cLoop();cPanel();
-  (fell?broFallen(fell):Promise.resolve()).then(()=>cDlg(win?'Victory':'Defeat',win?'The field is yours. '+(foe.u.length?OWN[foe.o].n+'’s men fall back.':''):'Your army is beaten'+(mine.u.length?' and falls back.':' and scattered.'),[['Continue','ok','pri']]).then(async()=>{await cPrisoners(mine,foe,pm,pf);cRender();cPanel();cSave();cCheckEnd();res(win);}));};
+  (fell?broFallen(fell):Promise.resolve()).then(()=>cDlg(win?'Victory':'Defeat',win?'The field is yours. '+(foe.u.length?OWN[foe.o].n+'’s men fall back.':''):'Your army is beaten'+(mine.u.length?' and falls back.':' and scattered.'),[['Continue','ok','pri']]).then(async()=>{await cPrisoners(mine,foe,pm,pf);await broFallQ();cRender();cPanel();cSave();cCheckEnd();res(win);}));};
  if(auto){const pa=power(mine)*(.85+Math.random()*.3),pb=power(foe)*(.85+Math.random()*.3)*(P.walls&&foe===def?Math.max(1,1.3-.1*mine.u.filter(x=>x.t==='Catapult'&&x.n>0).length):1),win=pa>pb,r=Math.min(pa,pb)/Math.max(pa,pb);
   const cut=(a,f)=>a.u.forEach(x=>{x.n=Math.max(0,Math.round(x.n*(1-f*(.7+Math.random()*.6))));});const lb=armyMen(win?foe:mine);cut(win?mine:foe,.15+.35*r);cut(win?foe:mine,.55+.3*(1-r));
   const pr=Math.round((lb-armyMen(win?foe:mine))*.3);finish(win,win&&Math.random()<.08,win?pr:0,win?0:pr);return;}
@@ -1359,7 +1359,8 @@ async function cEndTurn0(){if(CBUSY)return;CBUSY=true;CSEL=null;cPanel();await l
  await surrTurn();
  if(CS.part!==2)for(const o of ['osric','bran','varen']){if(CS.bros[o]!=='free')continue;const a=CS.armies.find(x=>x.o===o);if(a&&a.u.length<10){const pick=o==='bran'?['Light cavalry','Horse archers','Swordsmen']:o==='varen'?['Spearmen','Crossbowmen','Axemen']:['Spearmen','Swordsmen','Archers','Pikemen'];const t=pick[(Math.random()*pick.length)|0];if(CS.bs[o]>=COST[t]){CS.bs[o]-=COST[t];a.u.push(U(t));}}
   if(a&&CS.prov[a.prov]===o&&!isBesieged(a.prov))a.u.forEach(x=>{const mx=UT[x.t][2];x.n=Math.min(mx,x.n+Math.ceil(mx*.2));});}
- if((CS.dread||0)>=60){const top=Math.max(0,...CS.armies.filter(a=>a.o==='caelan').map(power));for(const o of ['osric','bran','varen']){if(CS.bros[o]!=='free')continue;const ar=CS.armies.find(a=>a.o===o);if(!ar||power(ar)<top*.5){await cDlg(OWN[o].n+' surrenders','Terrified by the tales of what you do to prisoners, '+OWN[o].n+' lays down his sword and gives himself up.',[['Continue','ok','pri']]);CS.bros[o]='captured';CS.armies=CS.armies.filter(a=>a.o!==o);PROV.forEach(p=>{if(CS.prov[p.id]===o)CS.prov[p.id]='caelan';});cRender();}}}
+ if((CS.dread||0)>=60){const top=Math.max(0,...CS.armies.filter(a=>a.o==='caelan').map(power));for(const o of ['osric']){if(CS.bros[o]!=='free')continue;const ar=CS.armies.find(a=>a.o===o);if(!ar||power(ar)<top*.5){await cDlg(OWN[o].n+' surrenders','Terrified by the tales of what you do to prisoners, '+OWN[o].n+' lays down his sword and gives himself up.',[['Continue','ok','pri']]);CS.bros[o]='captured';CS.armies=CS.armies.filter(a=>a.o!==o);PROV.forEach(p=>{if(CS.prov[p.id]===o)CS.prov[p.id]='caelan';});cRender();}}}
+ await broFallQ();
  CS.turn++;CS.armies.forEach(a=>a.mv=false);cSave();cPanel();CBUSY=false;
  await cEvents();cCheckEnd();}
 function cPath(from,goal){const prev={},q=[PI[from]],seen=new Set(q);while(q.length){const c=q.shift();if(goal(c))break;for(const n of CADJ[c])if(!seen.has(n)){seen.add(n);prev[n]=c;q.push(n);}}
@@ -1406,9 +1407,9 @@ function surrOdds(f,threat,extra){if(!f||f.o==='ormana'||!threat||!f.u.length)re
 function surrScene(x){return sceneHere([{img:'surrender',fx:['dust'],cam:[.5,.5,1.1,.5,.52,1.0],t:'They lay down their arms',x,bg:'dirt',tint:'rgba(0,0,0,.5)'}]);}
 async function armySurr(f,why,a){const gen=f.u.some(x=>x.t==="General's guard"&&x.n>0),men=armyMen(f),who=OWN[f.o].n,bro=CS.bros[f.o]==='free'&&gen;
  await surrScene(why+'\n\nOne by one, '+who+'’s soldiers throw down their spears and shields and kneel in the mud. Their banners are lowered into the dirt.');
- CS.armies=CS.armies.filter(z=>z!==f);if(bro)CS.bros[f.o]='captured';addD(3);cCheckBros();cRender();cSave();
- await cDlg('Surrender of '+f.name,men+' men lay down their arms'+(bro?', and '+who+' himself is taken.':'.')+' Dread +3.',[['Continue','ok','pri']]);
- await cPrisoners(a||{o:'caelan',u:[]},f,men,0);cRender();cPanel();cSave();}
+ CS.armies=CS.armies.filter(z=>z!==f);if(bro)broTake(f.o);addD(3);cCheckBros();cRender();cSave();
+ await cDlg('Surrender of '+f.name,men+' men lay down their arms'+(bro?(f.o==='osric'?', and Osric himself is taken alive.':'. '+who+' alone will not yield, and dies fighting.'):'.')+' Dread +3.',[['Continue','ok','pri']]);
+ await cPrisoners(a||{o:'caelan',u:[]},f,men,0);await broFallQ();cRender();cPanel();cSave();}
 // one season of every siege; granaries refill where there is no siege
 async function sgTurn(){CS.sg=CS.sg||{};
  for(const p of PROV){if(!p.walls||(p.isl&&!ormSeen()))continue;cityGr(p.id);if(!CS.sg[p.id])CS.gran[p.id]=Math.min(grCap(p),CS.gran[p.id]+Math.round(harvOf(p,CS.turn)*.5));}
@@ -1434,8 +1435,11 @@ async function surrTurn(){for(const f of CS.armies.slice()){if(f.o==='caelan'||!
   if(CS.part===2&&isNation(f.o)&&!CS.p2.war[f.o])continue;const th=threatOn(f);
   if(th&&Math.random()<surrOdds(f,th)*.5){const a=CS.armies.filter(z=>z.o==='caelan'&&CADJ[PI[z.prov]].has(PI[f.prov])).sort((x,y)=>power(y)-power(x))[0];
    await armySurr(f,'Hopelessly outnumbered, with '+(CS.dread>=50?'tales of your cruelty in their ears':'no help coming')+', '+f.name+' sends riders under a white cloth.',a);}}}
+// Only Osric can be taken alive; Bran and Varen always die fighting
+function broTake(o){if(o==='osric'){CS.bros.osric='captured';cToast('Osric is taken alive!');return;}CS.bros[o]='dead';CS.armies=CS.armies.filter(a=>a.o!==o);(CS.fallQ=CS.fallQ||[]).push(o);}
+async function broFallQ(){while(CS.fallQ&&CS.fallQ.length)await broFallen(CS.fallQ.shift());}
 function cCheckBros(){for(const o of ['osric','bran','varen']){if(CS.bros[o]!=='free')continue;const has=PROV.some(p=>CS.prov[p.id]===o),army=CS.armies.some(a=>a.o===o);
- if(!army&&!has){CS.bros[o]='captured';cToast(OWN[o].n+' is captured!');}}}
+ if(!army&&!has)broTake(o);}}
 async function cEvents(){if(CS.part===2){const ok=await p2Turn();if(ok){await p2Check();await ormWarn();chat();}cSave();return;}chat();
  if(CS.turn===3&&!CS.trev){CS.trev=1;const v=await cDlg('A letter from King Aldous','“To Caelan, son of my old friend. I hear you hold Calder alone against three brothers. Trevelle cannot choose your war for you, but it can lend you steel. Four companies of my highlanders are yours. Pay me 150 silver a season for six seasons, when you can. I will charge you nothing more.”',[['Accept his help','yes','pri'],['Decline politely','no']]);
   if(v==='yes'){CS.loan={left:6,amt:150,missed:0};CS.gw.trevelle=Math.min(100,CS.gw.trevelle+20);const home=PROV.find(p=>CS.prov[p.id]==='caelan');CS.armies.push({id:CS.nid++,o:'caelan',prov:home?home.id:'calder',name:'Trevelle company',u:[U('Spearmen'),U('Pikemen'),U('Crossbowmen'),U('Light cavalry')],mv:false});cPanel();cAdv('Trevelle’s highlanders have arrived. March them into the same province as your army to merge them, or use them as a second army.');}
