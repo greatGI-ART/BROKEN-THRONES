@@ -1630,17 +1630,26 @@ async function p2Coalition(){const P=CS.p2;P.coal=CS.turn;const mem=NATIONS.filt
   {img:'holm',fx:['dust'],cam:[.5,.5,1.05,.5,.5,1.12],t:'Holm turns',x:holmTxt+' The man who taught you to fight is now your enemy. Captain Edric Thorne, who has led Calder’s archers since your first battle, becomes your battle advisor.',bg:'grass',tint:'rgba(20,10,0,.5)'},
   {t:'Captain Thorne',x:'“My king, Holm taught me as well. I know how he thinks: he will be patient, and he will wait for you to make the first mistake. Do not give him one. And make peace with these kingdoms the moment they will take it. We will need every one of them before this is over.”',bg:'dirt',tint:'rgba(20,10,0,.6)'}]);
  p2Say('Every kingdom still standing is at war with you. Break the coalition: take a kingdom’s capital or destroy its armies and it will surrender. You can also bribe one out of the pact from the Neighbours menu.');}
+// a kingdom conquered: its banners lie among its dead
+const RULERDEATH={
+ terfein:['King Sigvald','King Sigvald is found at his own table in the great hall of Hollin, a cup of poison spilled beside him. He would not kneel to a southern king, alive or dead.'],
+ yova:['Queen Maren','Queen Maren is found in her hall. She chose the rope over your chains. She left a few words for you, in her own hand: “Tell the boy-king the forest remembers. Every tree he burned will grow back over his grave.”'],
+ odei:['Rider-King Arslan','Rider-King Arslan rode out with the last of his riders against your spears. At dusk his horse came back across the grass without him.'],
+ vaskar:['High Chief Yrsa','High Chief Yrsa walked into the snow of the Far Wood with her hunting spear and never came back. Her people say the wolves took her as one of their own.']};
+function natFallen(k){const n=OWN[k].n,L=[{img:'natfall_'+k,fx:['dust','embers'],cam:[.5,.5,1.12,.5,.52,1.0],t:n+' has fallen',x:k==='trevelle'?'The banners of Trevelle lie torn in the mud among its dead. Aldmoor has fallen, and the highlands are yours. King Aldous is found alive in his hall.':'The banners of '+n+' lie torn in the mud among its dead. '+n+' is no more.',bg:'dirt',tint:'rgba(20,0,0,.45)'}];
+ if(RULERDEATH[k])L.push({img:'natdeath_'+k,fx:['dust'],cam:[.5,.5,1.06,.5,.48,1.16],t:RULERDEATH[k][0],x:RULERDEATH[k][1],bg:'dirt',tint:'rgba(10,0,0,.5)'});return sceneHere(L);}
+// a kingdom makes peace: only its envoys are shown
+function natPeace(k,x){return sceneHere([{img:'natpeace_'+k,fx:['dust','birds'],cam:[.5,.5,1.04,.5,.48,1.14],t:'Envoys from '+OWN[k].n,x,bg:'grass',tint:'rgba(20,15,0,.35)'}]);}
 async function p2Check(){const P=CS.p2;if(!P||CS.done)return;
  // conquered kingdoms
- for(const k of NATIONS){if(P.gone[k])continue;if(!natProvs(k).length){P.gone[k]='conq';P.war[k]=0;CS.armies=CS.armies.filter(a=>a.o!==k);
+ for(const k of NATIONS){if(P.gone[k])continue;if(!natProvs(k).length){P.gone[k]='conq';P.war[k]=0;CS.armies=CS.armies.filter(a=>a.o!==k);await natFallen(k);
    if(k==='trevelle'){P.plotT=0;const v=await cDlg('King Aldous','Aldmoor has fallen and King Aldous is brought before you in chains. He asks only why.',[['Imprison him','jail','pri'],['Exile him','exile'],['Execute him','exec']]);P.aldous=v;
     const d=v==='exec'?20:v==='jail'?10:5;for(const n of NATIONS)if(!P.gone[n])CS.gw[n]=Math.max(0,CS.gw[n]-d);if(v==='exec'){CS.dread=Math.min(100,(CS.dread||0)+15);addH(-15);}else if(v==='jail')addH(-3);else addH(3);
     await noted('chains',v==='exec'?'King Aldous dies in the square of his own capital. He never stopped calling you his friend.':v==='jail'?'King Aldous goes to a cell in Aldmoor’s tower. He asks for books, and for news of your health.':'King Aldous rides into exile with a single servant. At the border he turns and raises his hand to you.');
     p2Say('Trevelle is yours, and its mines with it. '+(P.coal?'':'Conquer one more kingdom of your choice (Terfein, Odei, Yova or Vaskar) and the mainland will be yours to fear. They are already talking to each other.'));}
-   else cToast(OWN[k].n+' is conquered!');
    for(const n of NATIONS)if(!P.gone[n])CS.gw[n]=Math.max(0,CS.gw[n]-15);}
   else if(P.coal&&P.war[k]){const cap=PROV.find(p=>p.seat===k);const capLost=cap&&CS.prov[cap.id]!==k;
-   if(capLost||(!natArmies(k).length&&natProvs(k).length<=1)){P.gone[k]='surr';P.war[k]=0;CS.armies=CS.armies.filter(a=>a.o!==k);await cDlg(OWN[k].n+' surrenders',OWN[k].n+' asks for peace and leaves the coalition. Its remaining lands are left in peace.',[['Continue','ok','pri']]);}}}
+   if(capLost||(!natArmies(k).length&&natProvs(k).length<=1)){P.gone[k]='surr';P.war[k]=0;CS.armies=CS.armies.filter(a=>a.o!==k);await natPeace(k,'Envoys of '+OWN[k].n+' ride into your camp under a flag of truce, bearing gifts. '+OWN[k].n+' asks for peace and leaves the coalition. Its remaining lands are left in peace.');}}}
  // Holm captured
  if(P.holm&&!P.holm.done&&!CS.armies.some(a=>a.id===P.holm.army)){P.holm.done=1;const v=await cDlg('Marshal Holm is taken','Your old marshal is brought before you, wounded but unbowed. “I served your father’s blood,” he says. “Do what you must.”',[['Spare him','spare','pri'],['Execute him','exec']]);P.holm.fate=v;if(v==='exec')deed(-10,10);else deed(8,-3);await noted('holmdefects',v==='exec'?'Marshal Holm dies as a soldier, standing. The men he trained watch in silence.':'Marshal Holm is sent home to his estates under guard. He does not thank you, and you did not expect him to.');}
  const conq=NATIONS.filter(k=>P.gone[k]==='conq').length;
@@ -1676,14 +1685,17 @@ async function p2End(){const P=CS.p2;P.orm=2;CS.done=2;cSave();$('camp').style.d
   {t:voice(),x:'“They will call it luck, my lord. It was never luck. You have become as inevitable as death.”',bg:'dirt',tint:'rgba(20,10,0,.6)'},
   {t:'The End',x:'Thank you for playing The Broken Thrones.',bg:'dirt',tint:'rgba(0,0,0,.7)'}],r));
  await showCredits();cExit();}
+// bribe price: 1,000 + 600 per region held; grain at market value (2.5 grain per silver); each bribe costs half as much again
+function bribeS(k){return Math.round((1000+600*natProvs(k).length)*Math.pow(1.5,CS.p2.bribes||0)/50)*50;}
+function bribeG(k){return Math.round(bribeS(k)*2.5/50)*50;}
 async function p2Diplo(){const P=CS.p2;const peace=NATIONS.filter(k=>!P.gone[k]&&!P.war[k]),war=NATIONS.filter(k=>P.war[k]&&P.coal);
  const rows=peace.map(k=>'<div class="gw"><b>'+OWN[k].n+'</b><span class="bar"><i style="width:'+CS.gw[k]+'%;background:'+(CS.gw[k]<25?'#d33':CS.gw[k]<50?'#e9a21a':'#4cba58')+'"></i></span><span>'+CS.gw[k]+'</span></div>').join('');
  const st=NATIONS.map(k=>OWN[k].n+': '+(P.gone[k]==='conq'?'conquered':P.gone[k]==='surr'?'at peace (surrendered)':P.war[k]?'<b style="color:#d33">at war</b>':'at peace')).join('<br>');
- const v=await cDlg('Kingdoms',st+'<br><br>'+(peace.length?'Goodwill falls every season. At zero, that kingdom raids your lands. Send 100 grain to raise it by 20.'+rows:'')+(war.length?'<br>Bribe a coalition member to leave the war: 1,000 silver or 800 grain.':'')+'<br>Silver: '+(CS.silver|0)+' · Grain: '+(CS.grain|0),
-  [...peace.map(k=>['Send grain to '+OWN[k].n,'g:'+k,CS.grain>=100?'':'dis']),...war.map(k=>['Bribe '+OWN[k].n+' (silver)','s:'+k,CS.silver>=1000?'':'dis']),...war.map(k=>['Bribe '+OWN[k].n+' (grain)','r:'+k,CS.grain>=800?'':'dis']),['Close','no']]);
+ const v=await cDlg('Kingdoms',st+'<br><br>'+(peace.length?'Goodwill falls every season. At zero, that kingdom raids your lands. Send 100 grain to raise it by 20.'+rows:'')+(war.length?'<br>Bribe a coalition member to leave the war. The price depends on its size, and every bribe you pay makes the next one cost half as much again.<br>'+war.map(k=>OWN[k].n+' ('+natProvs(k).length+' regions): '+bribeS(k).toLocaleString()+' silver or '+bribeG(k).toLocaleString()+' grain').join('<br>'):'')+'<br>Silver: '+(CS.silver|0)+' · Grain: '+(CS.grain|0),
+  [...peace.map(k=>['Send grain to '+OWN[k].n,'g:'+k,CS.grain>=100?'':'dis']),...war.map(k=>['Bribe '+OWN[k].n+' ('+bribeS(k).toLocaleString()+' silver)','s:'+k,CS.silver>=bribeS(k)?'':'dis']),...war.map(k=>['Bribe '+OWN[k].n+' ('+bribeG(k).toLocaleString()+' grain)','r:'+k,CS.grain>=bribeG(k)?'':'dis']),['Close','no']]);
  if(!v||v==='no')return;const [t,k]=v.split(':');
  if(t==='g'&&CS.grain>=100){CS.grain-=100;CS.gw[k]=Math.min(100,CS.gw[k]+20);addH(2);}
- else if((t==='s'&&CS.silver>=1000)||(t==='r'&&CS.grain>=800)){if(t==='s')CS.silver-=1000;else CS.grain-=800;P.war[k]=0;P.gone[k]='surr';CS.armies=CS.armies.filter(a=>a.o!==k);cToast(OWN[k].n+' takes your gift and leaves the coalition.');await p2Check();}
+ else if((t==='s'&&CS.silver>=bribeS(k))||(t==='r'&&CS.grain>=bribeG(k))){if(t==='s')CS.silver-=bribeS(k);else CS.grain-=bribeG(k);P.bribes=(P.bribes||0)+1;P.war[k]=0;P.gone[k]='surr';CS.armies=CS.armies.filter(a=>a.o!==k);await natPeace(k,'Envoys of '+OWN[k].n+' come to Aurenhall under a flag of truce. They accept your gift, and '+OWN[k].n+' leaves the coalition. There will be peace between you.');await p2Check();}
  cSave();cPanel();cRender();p2Diplo();}
 
 function p2Go(scene){MUS.res=null;p2Begin();CSEL=null;if(MIMG.ok)p2Imgs();$('camp').style.display='none';$('load').style.display='flex';
