@@ -1300,7 +1300,7 @@ function cRfHtml(list,attack){if(!list.length)return '';return '<div style="marg
 function cRfPick(){return (window._rf||[]).map(id=>CS.armies.find(z=>z.id===id)).filter(Boolean);}
 
 function cBattle(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P=PROV[PI[pid]];
- const mine=att.o==='caelan'?att:def,foe=att.o==='caelan'?def:att;rf=(rf||[]).filter(z=>z!==mine&&CS.armies.includes(z));
+ const mine=att.o==='caelan'?att:def,foe=att.o==='caelan'?def:att;rf=(rf||[]).filter(z=>z!==mine&&CS.armies.includes(z));const hadGen=mine.u.some(x=>x.t==="General's guard"&&x.n>0);
  const rset=new Set();rf.forEach(z=>z.u.forEach(x=>rset.add(x)));if(rf.length){mine.u=mine.u.concat(...rf.map(z=>z.u));cToast(rf.length+(rf.length>1?' armies march':' army marches')+' to reinforce.');}
  const split=()=>{if(!rf.length)return;mine.u=mine.u.filter(x=>!rset.has(x));rf.forEach(z=>{z.u=z.u.filter(x=>x.n>0);});rf.length=0;};
  const finish=(win,lostGen,pm,pf)=>{CB=null;pm=pm||0;pf=pf||0;split();{const fin=foe.o==='ormana'&&foe.u.some(x=>x.t==="General's guard");renownBattle(win,fin?10:(P.walls||P.seat||lostGen)?6:3);}const loser=win?foe:mine,winner=win?mine:foe;
@@ -1313,6 +1313,7 @@ function cBattle(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P
   if(win&&att===mine){mine.prov=pid;if(CS.prov[pid]!=='caelan'){CS.prov[pid]='caelan';}}
   if(!win&&att===foe){foe.prov=pid;CS.prov[pid]=foe.o;}
   CS.armies.forEach(z=>z.u=z.u.filter(x=>x.n>0));CS.armies=CS.armies.filter(z=>z.u.length);
+  if(hadGen&&!(CS.armies.includes(mine)&&mine.u.some(x=>x.t==="General's guard"&&x.n>0))){cRender();caelanDies('battle').then(()=>res(false));return;}
   cCheckBros();cRender();cSave();$('camp').style.display='block';cResize();if(!CRAF)cLoop();cPanel();
   (fell?broFallen(fell):Promise.resolve()).then(()=>cDlg(win?'Victory':'Defeat',win?'The field is yours. '+(foe.u.length?OWN[foe.o].n+'’s men fall back.':''):'Your army is beaten'+(mine.u.length?' and falls back.':' and scattered.'),[['Continue','ok','pri']]).then(async()=>{await cPrisoners(mine,foe,pm,pf);await broFallQ();cRender();cPanel();cSave();cCheckEnd();res(win);}));};
  if(auto){const pa=power(mine)*(.85+Math.random()*.3),pb=power(foe)*(.85+Math.random()*.3)*(P.walls&&foe===def?Math.max(1,1.3-.1*mine.u.filter(x=>x.t==='Catapult'&&x.n>0).length):1),win=pa>pb,r=Math.min(pa,pb)/Math.max(pa,pb);
@@ -1446,8 +1447,12 @@ async function cEvents(){if(CS.part===2){const ok=await p2Turn();if(ok){await p2
   else cAdv('Aldous writes back within the month: “As you wish, my boy. The offer stands, if you ever need it.”');}
  if(CS.turn===4)cAdv('Winter. Your brothers will not wait for spring, and neither will the neighbours: keep an eye on their goodwill.');
  cSave();}
-async function cCheckEnd(){if(!CS||CS.done)return;if(CS.part===2&&!CS.armies.some(a=>a.o==='caelan')&&!PROV.some(p=>CS.prov[p.id]==='caelan')){CS.done=1;cSave();await cDlg('Arden is lost','Your armies are gone and your lands taken.',[['Back to the title','ok','pri']]);try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return;}if(CS.part===2){await p2Check();return;}
- if(!CS.armies.some(a=>a.o==='caelan')&&!PROV.some(p=>CS.prov[p.id]==='caelan')){CS.done=1;cSave();await cDlg('Arden is lost','Your armies are gone and your lands taken. Your brothers will divide the crown between them.',[['Back to the title','ok','pri']]);try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return;}
+// Caelan falls: defeat scene, then the game is over
+async function caelanDies(why){if(CS.done===9)return;CS.done=9;cSave();
+ await sceneHere([{img:'defeat',fx:['dust','embers'],cam:[.5,.5,1.12,.5,.52,1.0],t:'Defeat',x:(why==='lands'?'Your last army is gone and your lands are taken. ':'Your army is broken. ')+'Arden’s banner lies in the mud among your dead.\n\nAfter the battle, your body is found among them. Caelan, the youngest son of King Halvard, is dead, and Arden dies with him.',bg:'dirt',tint:'rgba(20,0,0,.55)'}]);
+ try{localStorage.removeItem('tbt_save');}catch(e){}cExit();}
+async function cCheckEnd(){if(!CS||CS.done)return;if(CS.part===2&&!CS.armies.some(a=>a.o==='caelan')&&!PROV.some(p=>CS.prov[p.id]==='caelan')){await caelanDies('lands');return;}if(CS.part===2){await p2Check();return;}
+ if(!CS.armies.some(a=>a.o==='caelan')&&!PROV.some(p=>CS.prov[p.id]==='caelan')){await caelanDies('lands');return;}
  if(['osric','bran','varen'].every(o=>CS.bros[o]!=='free')){CS.done=1;cSave();await cActEnd();}}
 // ---- the realm takes note: consequence scenes ----
 function sceneHere(list){return new Promise(r=>{const camp=$('camp').style.display==='block';if(camp){$('camp').style.display='none';advHide();}playScenes(list,()=>{if(camp){$('camp').style.display='block';cResize();if(!CRAF)cLoop();cPanel();}r();});});}
