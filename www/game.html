@@ -187,7 +187,7 @@ const UT={
  'Pikemen':['inf','Spear',16,8,'pike',3,4,6,2,0,0,6,0],
  'Swordsmen':['inf','Infantry',12,6,'sword',5,7,6,4,0,0,6,1],
  'Axemen':['inf','Infantry',12,6,'axe',4,9,4,5,0,0,7,0],
- 'Archers':['mis','Missile',10,5,'bow',5,2,2,1,8,28,4,0],
+ 'Archers':['mis','Missile',10,5,'bow',5,2,2,1,8,35,4,0],
  'Crossbowmen':['mis','Missile',10,5,'xbow',4,3,4,1,6,15,5,0],
  'Javelin skirmishers':['mis','Missile',10,5,'jav',7,3,2,2,3,6,3,1],
  'Light cavalry':['cav','Cavalry',6,3,'spear',9,5,3,6,0,0,4,1],
@@ -643,7 +643,7 @@ function kill(d){d.alive=false;d.u.lost++;const dk=kitOf(d.u)||'spear';if(d.u.cl
 function volley(u,t){
  const tal=t.alive;if(!tal.length)return;
  for(const m of u.alive){if(m.fight)continue;const tm=tal[(Math.random()*tal.length)|0];const D=dist(m.x,m.y,tm.x,tm.y);
-  proj.push({ab:u.type==='Archers'?.12:0,x0:m.x,y0:m.y,tm,tx:tm.x+(Math.random()-.5)*1.4,ty:tm.y+(Math.random()-.5)*1.4,t:-Math.random()*.7,T:D/(u.wpn=='jav'?22:38)+.25,jav:u.wpn=='jav',dmg:PDMG[u.wpn],dh:elp(m.x,m.y)-elp(tm.x,tm.y)+(m.onWall?6:0),fw:!!m.onWall});m.thr=.4;}
+  proj.push({ab:u.type==='Archers'?.2:0,x0:m.x,y0:m.y,tm,tx:tm.x+(Math.random()-.5)*1.4,ty:tm.y+(Math.random()-.5)*1.4,t:-Math.random()*.7,T:D/(u.wpn=='jav'?22:38)+.25,jav:u.wpn=='jav',dmg:PDMG[u.wpn]*(u.type==='Archers'?1.5:1),dh:elp(m.x,m.y)-elp(tm.x,tm.y)+(m.onWall?6:0),fw:!!m.onWall});m.thr=.4;}
  t.arT=3;}
 function updProj(dt){
  updParts(dt);
@@ -696,7 +696,7 @@ function updUnit(u,dt){
  assignSlots(u);
  if(u.rng>0&&u.ammo>0&&u.fightN==0&&!u.moving&&u.wpn!=='cat'){u.rl-=dt;
   if(u.rl<=0){let t=(u.order=='attack'&&u.tgt&&!u.tgt.gone&&!u.tgt.rout&&dist(u.cx,u.cy,u.tgt.cx,u.tgt.cy)<=rngTo(u,u.tgt))?u.tgt:nearestEnemyUnit(u);
-   if(t){volley(u,t);u.rl=RELOAD[u.wpn]*(u.type==='Archers'?.75:1)*(.9+Math.random()*.2);u.ammo--;}else u.rl=.5;}}
+   if(t){volley(u,t);u.rl=RELOAD[u.wpn]*(u.type==='Archers'?.6:1)*(.9+Math.random()*.2);u.ammo--;}else u.rl=.5;}}
 }
 function turnTo(a,b,rate){const d=angDiff(b,a);return a+Math.max(-rate,Math.min(rate,d));}
 function updMan(m,dt){
@@ -1184,7 +1184,7 @@ function cLoad(){try{const s=rawSave();if(s){CS=JSON.parse(s);return true;}}catc
 function hasSave(){return !!rawSave();}
 function saveCode(){const str=cSaveStr();return 'TBT1.'+btoa(unescape(encodeURIComponent(str)));}
 function readCode(c){c=(c||'').trim().replace(/\s+/g,'');if(!c.startsWith('TBT1.'))throw 0;const o=JSON.parse(decodeURIComponent(escape(atob(c.slice(5)))));if(!o||!o.prov||!o.armies)throw 0;return o;}
-function power(a){return a.u.reduce((s,x)=>{const d=UT[x.t];return s+x.n*(d[6]+d[7]+d[8]*.5)*(d[0]=='cav'?1.25:1);},0);}
+function power(a){return a.u.reduce((s,x)=>{const d=UT[x.t];return s+x.n*(d[6]+d[7]+d[8]*.5+(d[0]=='mis'?d[9]*(x.t==='Archers'?.6:.4):0))*(d[0]=='cav'?1.25:1);},0);}
 function armyMen(a){return a.u.reduce((s,x)=>s+x.n,0);}
 function seasonName(t){return SEASON[(t-1)%4]+', Year '+(((t-1)/4|0)+1);}
 // ---- view, input, animation ----
