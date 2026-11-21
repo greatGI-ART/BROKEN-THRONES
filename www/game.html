@@ -107,6 +107,26 @@ button{font-family:inherit;cursor:pointer}
 .tbtn{border:0;border-radius:16px;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;font:700 16px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.3)}
 .tbtn.main{background:linear-gradient(135deg,#ff9a1f,#ff3d57);box-shadow:0 8px 26px rgba(255,90,60,.55)}
 @media(max-height:480px){.tbtn{margin:6px auto;padding:8px 16px;font-size:15px}}
+
+/* every button shows it was tapped */
+button{transition:transform .08s ease,filter .08s ease,box-shadow .08s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button:active:not(:disabled),button.tapd:not(:disabled){transform:scale(.93)!important;filter:brightness(1.4) saturate(1.15)!important;box-shadow:0 0 0 3px rgba(255,214,120,.55),0 0 14px rgba(255,190,80,.6)!important}
+button:disabled{opacity:.38!important;filter:grayscale(.85)!important;cursor:not-allowed}
+
+/* heavier, solid UI (build 36) */
+#ctop{background:linear-gradient(#2b2f45,#151827)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-bottom:2px solid #c9a24a!important;box-shadow:0 3px 0 #0b0d16,0 6px 14px rgba(0,0,0,.45);height:48px!important}
+#ctop #cseason{flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ctop .res{background:#0e1120!important;border:1px solid #4a4f6e;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+#ctop button,#cpan button{background:linear-gradient(#4a4f6e,#2a2e44)!important;border:1px solid #8a8fb0!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 3px 0 #0b0d16!important;border-radius:10px!important;text-shadow:0 1px 0 rgba(0,0,0,.6)}
+#ctop button.pri,#cpan button.pri{background:linear-gradient(#ffae3a,#d8452c)!important;border:1px solid #ffd27a!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 3px 0 #6a1d10,0 4px 14px rgba(255,90,60,.4)!important}
+#cpan{background:linear-gradient(#262a40,#121524)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border:2px solid #c9a24a!important;box-shadow:0 4px 0 #0b0d16,0 10px 30px rgba(0,0,0,.5)!important}
+.panel{background:linear-gradient(170deg,#272c48,#14172a)!important;border:2px solid #c9a24a!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),0 6px 0 #0b0d16,0 24px 70px rgba(0,0,0,.65)!important;border-radius:16px!important}
+.panel h2,#cdT{color:#ffd98a;letter-spacing:.3px;text-shadow:0 2px 0 rgba(0,0,0,.5);border-bottom:1px solid rgba(201,162,74,.45);padding-bottom:6px}
+#cdF button{border:1px solid #8a8fb0;background:linear-gradient(#4a4f6e,#2a2e44);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 3px 0 #0b0d16;border-radius:10px}
+#cdF button.pri{background:linear-gradient(#ffae3a,#d8452c);border-color:#ffd27a;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 3px 0 #6a1d10}
+#adv #advb{background:linear-gradient(#272c48,#14172a)!important;border:2px solid #c9a24a!important}
+@media (max-width:900px){#ctop{gap:4px!important;padding:0 5px!important}#ctop button{padding:7px 9px!important;font-size:12px!important}#ctop #cMus,#ctop #cSaveB{display:none!important}#ctop #cseason{position:absolute;left:6px;top:52px;max-width:70vw;padding:3px 10px;border-radius:8px;background:#151827;border:1px solid #c9a24a;font-size:11.5px;flex:none}#ctop .res{padding:3px 6px 3px 3px!important;font-size:12px!important}}
+@media (max-width:640px){#ctop .res .dot{width:16px;height:16px;font-size:9px}#ctop button{padding:6px 7px!important;font-size:11px!important}}
 </style>
 </head>
 <body>
@@ -538,8 +558,8 @@ function drawCloak(m,hx,sc,img,sx,sy,sw,sh,dx,dy,dw,dh){const c=m.ck||'#6b4a2b',
  // helmet + crest back on top, cut from the same sprite frame
  ctx.save();ctx.beginPath();ctx.ellipse(hx,0,.31*sc,.31*sc,0,0,6.283);ctx.ellipse(hx,0,.34*sc,.1*sc,0,0,6.283);ctx.clip();ctx.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh);ctx.restore();}
 function mkUnit(side,type,cx,cy,face){
- const d=UT[type];let NN=d[2];if(NQ&&NQ[side]&&NQ[side][type]&&NQ[side][type].length)NN=Math.max(1,Math.min(d[2],NQ[side][type].shift()));
- const u={id:units.length,side,type,cls:d[0],grp:d[1],n0:NN,cols:d[3],wpn:d[4],spdS:d[5],atk:d[6],def:d[7],chg:d[8],rng:d[9]*10,ammo:d[10],mor:d[11],shield:d[12],
+ const d=UT[type];let NN=d[2],BAN=null;if(NBQ&&NBQ[side]&&NBQ[side][type]&&NBQ[side][type].length)BAN=NBQ[side][type].shift();if(NQ&&NQ[side]&&NQ[side][type]&&NQ[side][type].length)NN=Math.max(1,Math.min(d[2],NQ[side][type].shift()));
+ const u={ban:BAN,id:units.length,side,type,cls:d[0],grp:d[1],n0:NN,cols:d[3],wpn:d[4],spdS:d[5],atk:d[6],def:d[7],chg:d[8],rng:d[9]*10,ammo:d[10],mor:d[11],shield:d[12],
   x:cx,y:cy,face,path:[],order:'idle',tgt:null,run:false,runO:false,rout:false,lost:0,M:100,flT:0,arT:0,rl:2+Math.random()*2,rt:0,group:0,fighting:0,fightN:0,rallied:false,rB:0,
   general:type==="General's guard",hid:false,gone:false,moving:false,chargeNow:false,grpSpd:0,narrow:false,cx:cx,cy:cy,alive:[],men:[]};
  u.sp=u.cls=='cav'?2.2:1.15;u.dp=u.cls=='cav'?3.6:1.4;u.walk=.9+u.spdS*.17;
@@ -1015,7 +1035,7 @@ function render(){
  const g=ctx.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*.45,VW/2,VH/2,Math.max(VW,VH)*.75);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.28)');ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH);
  for(const u of units){u.bx=-999;if(u.gone)continue;if(u.side==1&&u.hid)continue;
   const sx=(u.cx-cam.x)*z+VW/2,sy=(u.cy-cam.y)*z+VH/2-Math.max(18,z*3.2);if(sx<-30||sx>VW+30||sy<-30||sy>VH+30)continue;
-  u.bx=sx;u.by=sy;const S=SIDE[u.side],isSel=sel.has(u);
+  u.bx=sx;u.by=sy;const S=u.ban&&typeof OWN!=='undefined'&&OWN[u.ban]?{col:OWN[u.ban].c,sym:OWN[u.ban].sym}:SIDE[u.side],isSel=sel.has(u);
   ctx.strokeStyle='#3b2a1a';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(sx-9,sy+13);ctx.lineTo(sx-9,sy-10);ctx.stroke();
   ctx.fillStyle='#e0b23c';ctx.beginPath();ctx.arc(sx-9,sy-10.5,1.8,0,6.283);ctx.fill();
   const wv=Math.sin(performance.now()/300+u.id)*1.4;
@@ -1099,7 +1119,7 @@ function drawSym(g,sym,x,y,s,col){g.save();g.translate(x,y);g.scale(s,s);g.strok
  else if(sym==='mask'){g.beginPath();g.ellipse(0,0,3.6,4.6,0,0,6.283);g.fill();g.fillStyle='#111';g.fillRect(-2.4,-1.4,1.7,.9);g.fillRect(.7,-1.4,1.7,.9);g.fillRect(-.4,-1,.8,2.4);}
  else{g.beginPath();g.arc(0,0,2.3,0,6.283);g.fill();for(let k=0;k<8;k++){const a=k*.785;g.beginPath();g.moveTo(Math.cos(a)*3.2,Math.sin(a)*3.2);g.lineTo(Math.cos(a)*4.3,Math.sin(a)*4.3);g.stroke();}}
  g.restore();}
-let CB=null,NQ=null,CS=null,CSEL=null,CBUSY=false;
+let CB=null,NQ=null,NBQ=null,CS=null,CSEL=null,CBUSY=false;
 const CW=1400,CH=925;
 const OWN={caelan:{n:'Caelan',c:'#ff4d42',d:'#b3201a',sym:'spears'},osric:{n:'Osric',c:'#ffcc29',d:'#b88600',sym:'crown'},bran:{n:'Bran',c:'#3ddb6c',d:'#168a3a',sym:'horse'},varen:{n:'Varen',c:'#a866ff',d:'#6427c4',sym:'tower'}};
 const NB={terfein:{n:'Terfein',c:'#cfe8ff',seeds:[[870,340],[900,600],[700,560]],drop:12,ic:'snow'},odei:{n:'Odei',c:'#ffe08a',seeds:[[680,760],[430,730]],drop:8,ic:'grass'},
@@ -1129,7 +1149,7 @@ function cBuild(){const S=cSeeds(),N=CW*CH,seen=ormSeen();PIX=new Int8Array(N);C
   for(let y=CH-1;y>=0;y--)for(let x=CW-1;x>=0;x--){const i=y*CW+x;let v=D[i];if(x<CW-1)v=Math.min(v,D[i+1]+1);if(y<CH-1)v=Math.min(v,D[i+CW]+1);D[i]=v;}return D;};
  DSEA=cham((a,b)=>(a===-1)===(b===-1));DEP=cham((a,b)=>a===b);DER=cham((a,b)=>realm(a)===realm(b));
  CADJ=PROV.map(()=>new Set());const CNT={};for(let y=0;y<CH-2;y++)for(let x=0;x<CW-2;x++){const a=PIX[y*CW+x];if(a<0||a>=PROV.length)continue;for(const b of [PIX[y*CW+x+1],PIX[(y+1)*CW+x]]){if(b>=0&&a!==b&&b<PROV.length){const key=a<b?a+'_'+b:b+'_'+a;CNT[key]=(CNT[key]||0)+1;}}}
- for(const [key,n] of Object.entries(CNT)){if(n<12)continue;const [a,b]=key.split('_').map(Number);CADJ[a].add(b);CADJ[b].add(a);}
+ for(const [key,n] of Object.entries(CNT)){if(n<5)continue;const [a,b]=key.split('_').map(Number);CADJ[a].add(b);CADJ[b].add(a);}
  if(seen)for(const [a,b] of SEALINK){if(PI[a]!=null&&PI[b]!=null){CADJ[PI[a]].add(PI[b]);CADJ[PI[b]].add(PI[a]);}}
  CBASE=S;cDeco();}
 function hexRgb(h){const n=parseInt(h.slice(1),16);return [n>>16,(n>>8)&255,n&255];}
@@ -1157,6 +1177,7 @@ function cDeco(){const c=document.createElement('canvas');c.width=CW;c.height=CH
  for(let k=0;k<S.length;k++){const s=S[k],ic=s.k==='p'?PROV[s.i].ic:NB[s.k].ic,n=s.k==='p'?7:9;
   for(let t=0;t<n*4&&items.filter(q=>q.k===k).length<n;t++){const a=hs(k*31+t,7)*6.283,r=30+hs(t,k*13)*70,x=s.x+Math.cos(a)*r,y=s.y+Math.sin(a)*r*.8;
    if(!inside(x,y,k)||Math.hypot(x-s.x,y-s.y)<34)continue;items.push({k,x,y,ic,s:hs(k,t+5)});}}
+ for(let k=0;k<S.length;k++){const s=S[k];if(s.k!=='p'||PROV[s.i].ic==='wheat'||PROV[s.i].g<60)continue;let n=0;for(const q of items)if(q.k===k&&n<3){q.ic='wheat';n++;}}
  items.sort((a,b)=>a.y-b.y);
  for(const q of items){const sz=7+q.s*5;
   if(q.ic==='tree'){for(let j=0;j<3;j++)tree(q.x+(j-1)*sz*.9,q.y+(j%2)*4,sz,j%2?'#4f9a3a':'#3d8a30');}
@@ -1254,7 +1275,7 @@ function cDraw(T){if(!CS)return;if(!CIMG)cRender();T=T||performance.now()/1000;c
  g.restore();}
 function cWalk(a,to){return new Promise(res=>{const p0=PROV[PI[a.prov]],p1=PROV[PI[to]];const sx=a._x!=null?a._x:p0.x+58,sy=a._y!=null?a._y:p0.y+22;
  a.anim={x0:sx,y0:sy,x1:p1.x+(p1.walls?71:58),y1:p1.y+22,t0:performance.now(),dur:Math.min(1400,500+Math.hypot(p1.x-p0.x,p1.y-p0.y)*4)};setTimeout(()=>{a.anim=null;a.prov=to;res();},a.anim.dur);});}
-function cPanel(){$('cseason').textContent=seasonName(CS.turn)+' · '+kTitle();$('chon').textContent=hon();$('csil').textContent=CS.silver|0;$('cgr').textContent=CS.grain|0;$('cdr').textContent=CS.dread|0;
+function cPanel(){$('cseason').textContent=seasonName(CS.turn)+' · '+kTitle()+(CS.part===2&&CS.p2&&CS.p2.orm===1?' · '+ormStatus():'');$('chon').textContent=hon();$('csil').textContent=CS.silver|0;$('cgr').textContent=CS.grain|0;$('cdr').textContent=CS.dread|0;
  const a=CSEL&&CS.armies.find(x=>x.id===CSEL),P=$('cpan');if(!a){P.style.display='none';return;}P.style.display='flex';
  const own=a.o==='caelan';$('cpn').textContent=a.name+' · '+armyMen(a)+' men · '+a.u.length+'/10 units'+(own?(a.mv?' · has moved':' · tap a lit province to march'):'');
  $('cpu').innerHTML=a.u.map(x=>'<span class="cu">'+(SHORT[x.t]||x.t)+' <b>'+x.n+'</b></span>').join('');
@@ -1262,7 +1283,7 @@ function cPanel(){$('cseason').textContent=seasonName(CS.turn)+' · '+kTitle();$
  const mate=own&&CS.armies.find(z=>z!==a&&z.o==='caelan'&&z.prov===a.prov);$('cMrg').style.display=mate&&mate.u.length<10?'':'none';}
 let CDLG_CANCEL=null;
 function cDlgCancel(){if(!CDLG_CANCEL)return true;const b=CDLG_CANCEL;b.click();return true;}
-function cDlg(title,html,btns){return new Promise(res=>{CDLG_CANCEL=null;const t0=performance.now();$('cdT').textContent=title;$('cdB').innerHTML=html;const f=$('cdF');f.innerHTML='';btns.forEach(([lab,val,cls])=>{const b=document.createElement('button');b.textContent=lab;b.className=cls||'';if(cls==='dis')b.disabled=true;if(/^(no|x|r|cancel|later|close|done)$/i.test(String(val))||/^(cancel|later|resume|keep fighting|close|done|not now)$/i.test(lab))CDLG_CANCEL=b;b.onclick=()=>{if(performance.now()-t0<900)return;buzz();CDLG_CANCEL=null;const ci=$('codeIn');window._codeVal=ci?ci.value:'';window._rf=[...document.querySelectorAll('#cdB input.rf:checked')].map(e=>+e.value);$('cdlg').style.display='none';res(val);};f.appendChild(b);});$('cdlg').style.display='flex';});}
+function cDlg(title,html,btns){return new Promise(res=>{CDLG_CANCEL=null;const t0=performance.now();$('cdT').textContent=title;$('cdB').innerHTML=html;const f=$('cdF');f.innerHTML='';btns.forEach(([lab,val,cls])=>{const b=document.createElement('button');b.textContent=lab;b.className=cls||'';if(cls==='dis')b.disabled=true;if(/^(no|x|r|cancel|later|close|done)$/i.test(String(val))||/^(cancel|later|resume|keep fighting|close|done|not now)$/i.test(lab))CDLG_CANCEL=b;b.onclick=()=>{if(performance.now()-t0<300)return;buzz();CDLG_CANCEL=null;const ci=$('codeIn');window._codeVal=ci?ci.value:'';window._rf=[...document.querySelectorAll('#cdB input.rf:checked')].map(e=>+e.value);$('cdlg').style.display='none';res(val);};f.appendChild(b);});$('cdlg').style.display='flex';});}
 function cAdv(t){advSay(t,{});}
 function cPtrDown(e){CPTR.set(e.pointerId,{x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY});CMOVED=false;if(CPTR.size===2){const [a,b]=[...CPTR.values()];CPINCH={d:Math.hypot(a.x-b.x,a.y-b.y),s:CV.s};}}
 function cPtrMove(e){const p=CPTR.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;if(Math.hypot(p.x-p.x0,p.y-p.y0)>9)CMOVED=true;
@@ -1270,10 +1291,17 @@ function cPtrMove(e){const p=CPTR.get(e.pointerId);if(!p)return;const dx=e.clien
  else if(CPTR.size===1&&CMOVED){CV.ox+=dx;CV.oy+=dy;cClamp();}}
 function cPtrUp(e){const p=CPTR.get(e.pointerId);CPTR.delete(e.pointerId);if(CPTR.size<2)CPINCH=null;if(p&&!CMOVED&&CPTR.size===0)cTap(e);}
 function cWheel(e){e.preventDefault();const [wx,wy]=cTo(e.clientX,e.clientY);CV.s*=Math.exp(-e.deltaY*.0015);cClamp();CV.ox=e.clientX-wx*CV.s;CV.oy=e.clientY-wy*CV.s;cClamp();}
-function cTap(ev){if(CBUSY||!CS)return;const [mx,my]=cTo(ev.clientX,ev.clientY);
+let CBUSY0=0;
+function cTap(ev){if(!CS)return;
+ if(CBUSY){const busyUI=['cdlg','scene','load'].some(id=>{const e=$(id);return e&&getComputedStyle(e).display!=='none';});
+  if(!busyUI&&CBUSY0&&performance.now()-CBUSY0>12000){CBUSY=false;CBUSY0=0;errLog('map was stuck busy; unlocked');}else{if(!CBUSY0)CBUSY0=performance.now();cToast('One moment…');return;}}
+ CBUSY0=0;const [mx,my]=cTo(ev.clientX,ev.clientY);
  const dA=a=>Math.hypot(a._x-mx,(a._y-45)-my);const hit=CS.armies.filter(a=>!a.anim&&a._x!=null&&dA(a)<58).sort((a,b)=>dA(a)-dA(b))[0];
  const sa=CSEL&&CS.armies.find(a=>a.id===CSEL);const pi=cProvAt(mx,my);
- if(sa&&sa.o==='caelan'&&!sa.mv&&pi>=0&&CADJ[PI[sa.prov]].has(pi)&&!(hit&&hit.prov===sa.prov)){cMove(sa,PROV[pi].id);return;}
+ // a tap on a neighbouring region always means: march there
+ if(sa&&sa.o==='caelan'&&pi>=0&&pi!==PI[sa.prov]&&!(hit&&hit.o==='caelan'&&hit!==sa&&hit.prov!==PROV[pi].id&&dA(hit)<30)){
+  if(CADJ[PI[sa.prov]].has(pi)){if(sa.mv){buzz();cToast(sa.name+' has already marched this season.');return;}cMove(sa,PROV[pi].id);return;}
+  if(!hit){buzz();cToast(PROV[pi].n+' is too far. An army can only march to a neighbouring region.');}}
  if(hit){CSEL=hit.id;buzz();}else if(pi>=0){const own=CS.armies.find(a=>a.prov===PROV[pi].id&&!a.anim);CSEL=own?own.id:null;}else CSEL=null;cPanel();}
 function cMergeInto(src,dst){while(src.u.length&&dst.u.length<10)dst.u.push(src.u.shift());if(!src.u.length){CS.armies=CS.armies.filter(z=>z!==src);CSEL=dst.id;}
  const gen=dst.u.findIndex(x=>x.t==="General's guard");if(gen>0)dst.u.unshift(dst.u.splice(gen,1)[0]);if(dst.name!=="Caelan's army"&&dst.u.some(x=>x.t==="General's guard"))dst.name="Caelan's army";
@@ -1286,8 +1314,8 @@ async function cMove(a,pid){if(CS.part===2){const fo=CS.armies.find(x=>x.prov===
   else if(Math.random()<surrOdds(f,th)){a.mv=true;await armySurr(f,'As your army comes over the hill, '+f.name+' sees it cannot win. A rider comes out under a white cloth.',a);}
   foe=CS.armies.filter(x=>x.prov===pid&&x.o!=='caelan');}
  if(foe.length){const f=foe[0],r=power(a)/(power(a)+power(f));
-  const near=cNearby(pid,a).filter(z=>!z.mv),tot=armyMen(a)+near.reduce((q,z)=>q+armyMen(z),0),r2=(power(a)+near.reduce((q,z)=>q+power(z),0));const rr=r2/(r2+power(f));
-  const v=await cDlg('Attack '+f.name+'?','Your '+armyMen(a)+' men against '+armyMen(f)+'. Odds: '+(r>.6?'in your favour':r>.45?'even':'against you')+'.'+(near.length?' With all reinforcements: '+tot+' men, odds '+(rr>.6?'in your favour':rr>.45?'even':'against you')+'.':'')+(PROV[PI[pid]].walls?' Their army is behind the walls of '+PROV[PI[pid]].n+'. <b>Storm</b> the walls now, or <b>besiege</b> the city and starve them out: its granary holds about '+sgLeft(pid)+' season'+(sgLeft(pid)===1?'':'s')+' of food for the men inside.':'')+cRfHtml(near,true),[[PROV[PI[pid]].walls?'Storm the walls':'Fight the battle','fight','pri'],['Auto-resolve','auto'],...(PROV[PI[pid]].walls&&CS.prov[pid]===f.o?[[isBesieged(pid)?'Keep up the siege':'Besiege (starve them out)','siege']]:[]),['Cancel','no']]);
+  const near=cNearby(pid,a).filter(z=>!z.mv),efar=cFoeNear(pid,f),ep=power(f)+efar.reduce((q,z)=>q+power(z),0),tot=armyMen(a)+near.reduce((q,z)=>q+armyMen(z),0),r2=(power(a)+near.reduce((q,z)=>q+power(z),0));const rr=r2/(r2+ep);
+  const r1=power(a)/(power(a)+ep),v=await cDlg('Attack '+f.name+'?','Your '+armyMen(a)+' men against '+armyMen(f)+'.'+(efar.length?' <b style="color:#ff8a6e">Enemy reinforcements will join them: '+efar.map(z=>z.name+(z.o!==f.o?' ('+OWN[z.o].n+')':'')+', '+armyMen(z)+' men').join('; ')+'.</b>':'')+' Odds: '+(r1>.6?'in your favour':r1>.45?'even':'against you')+'.'+(near.length?' With all reinforcements: '+tot+' men, odds '+(rr>.6?'in your favour':rr>.45?'even':'against you')+'.':'')+(PROV[PI[pid]].walls?' Their army is behind the walls of '+PROV[PI[pid]].n+'. <b>Storm</b> the walls now, or <b>besiege</b> the city and starve them out: its granary holds about '+sgLeft(pid)+' season'+(sgLeft(pid)===1?'':'s')+' of food for the men inside.':'')+cRfHtml(near,true),[[PROV[PI[pid]].walls?'Storm the walls':'Fight the battle','fight','pri'],['Auto-resolve','auto'],...(PROV[PI[pid]].walls&&CS.prov[pid]===f.o?[[isBesieged(pid)?'Keep up the siege':'Besiege (starve them out)','siege']]:[]),['Cancel','no']]);
   if(v==='no')return;
   if(v==='siege'){a.mv=true;CS.sg=CS.sg||{};if(!isBesieged(pid))CS.sg[pid]={a:a.id,h:0};else CS.sg[pid].a=a.id;cRender();cToast('You lay siege to '+PROV[PI[pid]].n+'. Keep this army next to the city.');cSave();cPanel();return;}const rf=near.length?cRfPick():[];a.mv=true;rf.forEach(z=>z.mv=true);await cBattle(a,f,pid,v==='auto',true,rf);}
  else{CBUSY=true;a.mv=true;await cWalk(a,pid);CBUSY=false;const o=CS.prov[pid];if(o!=='caelan'){CS.prov[pid]='caelan';cRender();cToast(PROV[PI[pid]].n+' is yours.');cCheckBros();}
@@ -1295,14 +1323,18 @@ async function cMove(a,pid){if(CS.part===2){const fo=CS.armies.find(x=>x.prov===
  await broFallQ();cPanel();cSave();cCheckEnd();}
 function cToast(t){toast(t);}
 // ---- battles ----
-function cNearby(pid,main){return CS.armies.filter(z=>z!==main&&z.o==='caelan'&&!z.anim&&z.prov!==pid&&CADJ[PI[pid]].has(PI[z.prov])&&z.u.length);}
-function cRfHtml(list,attack){if(!list.length)return '';return '<div style="margin-top:8px"><b>Reinforcements</b> nearby'+(attack?' (they use up their move)':'')+':'+list.map(z=>'<label style="display:block;margin:4px 0"><input type="checkbox" class="rf" value="'+z.id+'" checked> '+z.name+' at '+PROV[PI[z.prov]].n+' · '+armyMen(z)+' men</label>').join('')+'</div>';}
+function isAllyArmy(z){return CS.part===2&&CS.p2&&CS.p2.ally&&CS.p2.ally[z.o]&&!CS.p2.war[z.o];}
+function foeSide(a,b){if(a===b)return true;if(CS.part!==2||!CS.p2)return false;const P=CS.p2;if(isNation(a)&&isNation(b))return !!(P.coal&&P.war[a]&&P.war[b]);return false;}
+function cFoeNear(pid,foe){return CS.armies.filter(z=>z!==foe&&z.o!=='caelan'&&!isAllyArmy(z)&&!z.anim&&z.u.length&&foeSide(z.o,foe.o)&&(z.prov===pid||CADJ[PI[pid]].has(PI[z.prov]))).slice(0,2);}
+function cNearby(pid,main){return CS.armies.filter(z=>z!==main&&(z.o==='caelan'||isAllyArmy(z))&&!z.anim&&z.prov!==pid&&CADJ[PI[pid]].has(PI[z.prov])&&z.u.length);}
+function cRfHtml(list,attack){if(!list.length)return '';return '<div style="margin-top:8px"><b>Reinforcements</b> nearby'+(attack?' (they use up their move)':'')+':'+list.map(z=>'<label style="display:block;margin:4px 0"><input type="checkbox" class="rf" value="'+z.id+'" checked> '+z.name+(z.o!=='caelan'?' ('+OWN[z.o].n+', allied)':'')+' at '+PROV[PI[z.prov]].n+' · '+armyMen(z)+' men</label>').join('')+'</div>';}
 function cRfPick(){return (window._rf||[]).map(id=>CS.armies.find(z=>z.id===id)).filter(Boolean);}
 
 function cBattle(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P=PROV[PI[pid]];
  const mine=att.o==='caelan'?att:def,foe=att.o==='caelan'?def:att;rf=(rf||[]).filter(z=>z!==mine&&CS.armies.includes(z));const hadGen=mine.u.some(x=>x.t==="General's guard"&&x.n>0);
- const rset=new Set();rf.forEach(z=>z.u.forEach(x=>rset.add(x)));if(rf.length){mine.u=mine.u.concat(...rf.map(z=>z.u));cToast(rf.length+(rf.length>1?' armies march':' army marches')+' to reinforce.');}
- const split=()=>{if(!rf.length)return;mine.u=mine.u.filter(x=>!rset.has(x));rf.forEach(z=>{z.u=z.u.filter(x=>x.n>0);});rf.length=0;};
+ const rset=new Set();rf.forEach(z=>z.u.forEach(x=>{rset.add(x);if(z.o!==mine.o)x.ban=z.o;}));if(rf.length){mine.u=mine.u.concat(...rf.map(z=>z.u));cToast(rf.length+(rf.length>1?' armies march':' army marches')+' to reinforce.');}
+ const ef=cFoeNear(pid,foe),eset=new Set();ef.forEach(z=>z.u.forEach(x=>{eset.add(x);if(z.o!==foe.o)x.ban=z.o;}));if(ef.length){foe.u=foe.u.concat(...ef.map(z=>z.u));setTimeout(()=>cToast(ef.map(z=>z.name).join(' and ')+(ef.length>1?' march':' marches')+' to aid '+foe.name+'.'),900);}
+ const split=()=>{if(rf.length){mine.u=mine.u.filter(x=>!rset.has(x));rf.forEach(z=>{z.u=z.u.filter(x=>x.n>0);z.u.forEach(x=>delete x.ban);});rf.length=0;}if(ef.length){foe.u=foe.u.filter(x=>!eset.has(x));ef.forEach(z=>{z.u=z.u.filter(x=>x.n>0);z.u.forEach(x=>delete x.ban);});ef.length=0;}};
  const finish=(win,lostGen,pm,pf)=>{CB=null;pm=pm||0;pf=pf||0;split();{const fin=foe.o==='ormana'&&foe.u.some(x=>x.t==="General's guard");renownBattle(win,fin?10:(P.walls||P.seat||lostGen)?6:3);}const loser=win?foe:mine,winner=win?mine:foe;
   let fell=null;if(lostGen&&foe.o!=='caelan'&&CS.bros[foe.o]==='free'){if(foe.o==='osric'){CS.bros.osric='captured';CS.armies=CS.armies.filter(z=>z!==foe);cToast('Osric is struck from his horse and taken alive!');}else{CS.bros[foe.o]='dead';fell=foe.o;foe.u=foe.u.filter(x=>x.t!=="General's guard");}}
   loser.u=loser.u.filter(x=>x.n>0);winner.u=winner.u.filter(x=>x.n>0);
@@ -1313,11 +1345,12 @@ function cBattle(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P
   if(win&&att===mine){mine.prov=pid;if(CS.prov[pid]!=='caelan'){CS.prov[pid]='caelan';}}
   if(!win&&att===foe){foe.prov=pid;CS.prov[pid]=foe.o;}
   CS.armies.forEach(z=>z.u=z.u.filter(x=>x.n>0));CS.armies=CS.armies.filter(z=>z.u.length);
+  if(CS.sg)for(const q of Object.keys(CS.sg)){const s=CS.sg[q];if(s.a===loser.id||!CS.armies.some(z=>z.id===s.a)){delete CS.sg[q];cToast('The siege of '+PROV[PI[q]].n+' is lifted.');}}
   if(hadGen&&!(CS.armies.includes(mine)&&mine.u.some(x=>x.t==="General's guard"&&x.n>0))){cRender();caelanDies('battle').then(()=>res(false));return;}
   cCheckBros();cRender();cSave();$('camp').style.display='block';cResize();if(!CRAF)cLoop();cPanel();
   (fell?broFallen(fell):Promise.resolve()).then(()=>cDlg(win?'Victory':'Defeat',win?'The field is yours. '+(foe.u.length?OWN[foe.o].n+'’s men fall back.':''):'Your army is beaten'+(mine.u.length?' and falls back.':' and scattered.'),[['Continue','ok','pri']]).then(async()=>{await cPrisoners(mine,foe,pm,pf);await broFallQ();cRender();cPanel();cSave();cCheckEnd();res(win);}));};
  if(auto){const pa=power(mine)*(.85+Math.random()*.3),pb=power(foe)*(.85+Math.random()*.3)*(P.walls&&foe===def?Math.max(1,1.3-.1*mine.u.filter(x=>x.t==='Catapult'&&x.n>0).length):1),win=pa>pb,r=Math.min(pa,pb)/Math.max(pa,pb);
-  const cut=(a,f)=>a.u.forEach(x=>{x.n=Math.max(0,Math.round(x.n*(1-f*(.7+Math.random()*.6))));});const lb=armyMen(win?foe:mine);cut(win?mine:foe,.15+.35*r);cut(win?foe:mine,.55+.3*(1-r));
+  const cut=(a,f)=>a.u.forEach(x=>{x.n=Math.max(0,Math.round(x.n*(1-f*(.7+Math.random()*.6))));});const lb=armyMen(win?foe:mine);cut(win?mine:foe,.15+.35*r);cut(win?foe:mine,.55+.3*(1-r));if(!win){const g=mine.u.find(x=>x.t==="General's guard");if(g&&g.n<3&&mine.u.some(x=>x!==g&&x.n>0))g.n=Math.min(UT[g.t][2],3+((Math.random()*5)|0));}
   const pr=Math.round((lb-armyMen(win?foe:mine))*.3);finish(win,win&&Math.random()<.08,win?pr:0,win?0:pr);return;}
  const go=()=>{BOSSB=isBossBattle(foe,P);$('camp').style.display='none';CB={mine,foe,pid,finish};
  window.launchBattle({map:foe.o==='ormana'?'ormana_beach':(P.bf||'arden_fields'),siege:!!(P.walls&&foe===def),A:mine.u,B:foe.u,enemy:OWN[foe.o].n,winter:(CS.turn-1)%4===3});};const sp=preSpeech(foe);if(sp)cDlg(sp.who,'<i>“'+sp.t+'”</i>',[['To battle','ok','pri']]).then(go);else go();});}
@@ -1343,7 +1376,7 @@ async function cRecruit(){const a=CS.armies.find(x=>x.id===CSEL);if(!a)return;
  if(v&&v!=='no'&&CS.silver>=COST[v]&&a.u.length<10){CS.silver-=COST[v];a.u.push(U(v));cSave();cPanel();}}
 function cMergeBtn(){const a=CS.armies.find(x=>x.id===CSEL);if(!a)return;const mate=CS.armies.find(z=>z!==a&&z.o==='caelan'&&z.prov===a.prov);if(mate)cMergeInto(a,mate);}
 async function cDiplo(){if(CS.part===2)return p2Diplo();const rows=Object.entries(NB).map(([k,v])=>'<div class="gw"><b>'+v.n+'</b><span class="bar"><i style="width:'+CS.gw[k]+'%;background:'+(CS.gw[k]<25?'#d33':CS.gw[k]<50?'#e9a21a':'#4cba58')+'"></i></span><span>'+CS.gw[k]+'</span></div>').join('');
- const v=await cDlg('Neighbours','Goodwill falls every season. At zero, that kingdom raids your lands. Send 100 grain to raise it by 20.<br>Dread: '+(CS.dread|0)+(CS.dread>=50?' (feared: goodwill falls half as fast)':'')+'. Executing prisoners raises dread; releasing them lowers it.<br>Grain: '+(CS.grain|0)+rows,[...Object.entries(NB).map(([k,x])=>['Send grain to '+x.n,k,CS.grain>=100?'':'dis']),['Close','no']]);
+ const v=await cDlg('Neighbours','While Arden is divided, the neighbours demand tribute. Goodwill falls every season; at zero, that kingdom raids your lands. Pay 100 grain to raise it by 20. The tribute ends when Arden is united.<br>Dread: '+(CS.dread|0)+(CS.dread>=50?' (feared: goodwill falls half as fast)':'')+'. Executing prisoners raises dread; releasing them lowers it.<br>Grain: '+(CS.grain|0)+rows,[...Object.entries(NB).map(([k,x])=>['Pay tribute to '+x.n,k,CS.grain>=100?'':'dis']),['Close','no']]);
  if(v&&v!=='no'&&CS.grain>=100){CS.grain-=100;CS.gw[v]=Math.min(100,CS.gw[v]+20);addH(2);cSave();cPanel();cDiplo();}}
 async function cEndTurn(){try{return await cEndTurn0();}catch(e){errLog('end turn: '+String(e&&e.stack||e).slice(0,250));CBUSY=false;try{cPanel();cRender();cSave();}catch(_){}}}
 async function cEndTurn0(){if(CBUSY)return;CBUSY=true;CSEL=null;cPanel();await loanPay();if(CS.tax===2){addD(1);addH(-1);}else if(CS.tax===0)addH(1);
@@ -1353,10 +1386,11 @@ async function cEndTurn0(){if(CBUSY)return;CBUSY=true;CSEL=null;cPanel();await l
   if(CS.prov[a.prov]==='caelan'&&!cut)a.u.forEach(x=>{const mx=UT[x.t][2];x.n=Math.min(mx,x.n+Math.ceil(mx*.25));});}
  if(CS.grain<0){CS.grain=0;CS.armies.filter(a=>a.o==='caelan').forEach(a=>a.u.forEach(x=>x.n=Math.max(1,Math.floor(x.n*.9))));cToast('No grain! Your soldiers go hungry and desert.');}
  if(CS.silver<0){CS.silver=0;CS.armies.filter(a=>a.o==='caelan').forEach(a=>a.u.forEach(x=>x.n=Math.max(1,Math.floor(x.n*.9))));cToast('No silver! Your soldiers go unpaid, and some desert.');}
- for(const [k,v] of Object.entries(NB)){if(CS.part===2&&(CS.p2.war[k]||CS.p2.gone[k]||(CS.p2.ally&&CS.p2.ally[k])))continue;CS.gw[k]=Math.max(0,CS.gw[k]-Math.round(v.drop*((CS.dread||0)>=50?.5:1)));if(CS.gw[k]===0){CS.gw[k]=35;const lg=Math.min(CS.grain,200),ls=Math.min(CS.silver,250);CS.grain-=lg;CS.silver-=ls;
+ for(const [k,v] of Object.entries(NB)){if(CS.part===2)break;CS.gw[k]=Math.max(0,CS.gw[k]-Math.round(v.drop*((CS.dread||0)>=50?.5:1)));if(CS.gw[k]===0){CS.gw[k]=35;const lg=Math.min(CS.grain,200),ls=Math.min(CS.silver,250);CS.grain-=lg;CS.silver-=ls;
   await cDlg(v.n+' raids your lands','Their goodwill ran out. Raiders crossed the border and carried off '+lg+' grain and '+ls+' silver.',[['Continue','ok','pri']]);}}
  await sgTurn();
- for(const a of CS.armies.filter(a=>a.o!=='caelan')){if(!CS.armies.includes(a))continue;await cAI(a);}
+ for(const a of CS.armies.filter(a=>a.o!=='caelan')){if(CS.done===9)break;if(!CS.armies.includes(a))continue;await cAI(a);}
+ if(CS.done===9){CBUSY=false;return;}
  await surrTurn();
  if(CS.part!==2)for(const o of ['osric','bran','varen']){if(CS.bros[o]!=='free')continue;const a=CS.armies.find(x=>x.o===o);if(a&&a.u.length<10){const pick=o==='bran'?['Light cavalry','Horse archers','Swordsmen']:o==='varen'?['Spearmen','Crossbowmen','Axemen']:['Spearmen','Swordsmen','Archers','Pikemen'];const t=pick[(Math.random()*pick.length)|0];if(CS.bs[o]>=COST[t]){CS.bs[o]-=COST[t];a.u.push(U(t));}}
   if(a&&CS.prov[a.prov]===o&&!isBesieged(a.prov))a.u.forEach(x=>{const mx=UT[x.t][2];x.n=Math.min(mx,x.n+Math.ceil(mx*.2));});}
@@ -1366,7 +1400,7 @@ async function cEndTurn0(){if(CBUSY)return;CBUSY=true;CSEL=null;cPanel();await l
  await cEvents();cCheckEnd();}
 function cPath(from,goal){const prev={},q=[PI[from]],seen=new Set(q);while(q.length){const c=q.shift();if(goal(c))break;for(const n of CADJ[c])if(!seen.has(n)){seen.add(n);prev[n]=c;q.push(n);}}
  let t=[...seen].find(goal);if(t==null)return null;while(prev[t]!=null&&prev[t]!==PI[from])t=prev[t];return PROV[t].id;}
-async function cAI(a){if(CS.part===2){if(isNation(a.o)&&!CS.p2.war[a.o])return;}else{if(a.o==='osric'&&CS.turn<7)return;if(a.o==='bran'&&CS.turn<2)return;if(a.o==='varen'&&CS.turn<3)return;}const mine=CS.armies.filter(x=>x.o==='caelan');
+async function cAI(a){if(a.o==='ormana'&&a.name==='Maskhold guard'){if(a.prov!=='maskhold'){const st=cPath(a.prov,c=>PROV[c].id==='maskhold');if(st&&!CS.armies.some(z=>z.prov===st&&z.o!=='ormana'))await cWalk(a,st);}return;}if(CS.part===2){if(isNation(a.o)&&!CS.p2.war[a.o])return;}else{if(a.o==='osric'&&CS.turn<7)return;if(a.o==='bran'&&CS.turn<2)return;if(a.o==='varen'&&CS.turn<3)return;}const mine=CS.armies.filter(x=>x.o==='caelan');
  if(CS.sg&&Object.values(CS.sg).some(s=>s.a===a.id))return;
  if(await aiShelter(a))return;
  const bold=CS.part===2?(a.o==='ormana'?.8:isNation(a.o)?1.25:1.15):(a.o==='bran'?1.05:a.o==='varen'?1.3:1.2);
@@ -1441,9 +1475,11 @@ function broTake(o){if(o==='osric'){CS.bros.osric='captured';cToast('Osric is ta
 async function broFallQ(){while(CS.fallQ&&CS.fallQ.length)await broFallen(CS.fallQ.shift());}
 function cCheckBros(){for(const o of ['osric','bran','varen']){if(CS.bros[o]!=='free')continue;const has=PROV.some(p=>CS.prov[p.id]===o),army=CS.armies.some(a=>a.o===o);
  if(!army&&!has)broTake(o);}}
-async function cEvents(){if(CS.part===2){const ok=await p2Turn();if(ok){await p2Check();await ormWarn();chat();}cSave();return;}chat();
- if(CS.turn===3&&!CS.trev){CS.trev=1;const v=await cDlg('A letter from King Aldous','“To Caelan, son of my old friend. I hear you hold Calder alone against three brothers. Trevelle cannot choose your war for you, but it can lend you steel. Four companies of my highlanders are yours. Pay me 150 silver a season for six seasons, when you can. I will charge you nothing more.”',[['Accept his help','yes','pri'],['Decline politely','no']]);
-  if(v==='yes'){CS.loan={left:6,amt:150,missed:0};CS.gw.trevelle=Math.min(100,CS.gw.trevelle+20);const home=PROV.find(p=>CS.prov[p.id]==='caelan');CS.armies.push({id:CS.nid++,o:'caelan',prov:home?home.id:'calder',name:'Trevelle company',u:[U('Spearmen'),U('Pikemen'),U('Crossbowmen'),U('Light cavalry')],mv:false});cPanel();cAdv('Trevelle’s highlanders have arrived. March them into the same province as your army to merge them, or use them as a second army.');}
+async function cEvents(){if(CS.part===2&&!CS.tribEnd){CS.tribEnd=1;await sceneHere([{img:'holmcounsel',fx:['embers'],cam:[.5,.5,1.1,.5,.5,1.03],t:'No more tribute',x:'“Arden is one again, '+lord()+'. The neighbours sent their riders home the day the last brother fell. We owe them no more grain. From now on, what we grow is ours.”',bg:'dirt',tint:'rgba(20,10,0,.35)'}]);cSave();}
+ if(CS.part!==2&&CS.turn>=2&&!CS.tribI){CS.tribI=1;await sceneHere([{img:'holmcounsel',fx:['embers'],cam:[.5,.5,1.1,.5,.5,1.03],t:'The price of a divided kingdom',x:'“While Arden is split three ways, the neighbours smell weakness, '+lord()+'. Yova, Terfein, Trevelle, all of them. Their riders will cross the border and take what they like.”',bg:'dirt',tint:'rgba(20,10,0,.35)'},{img:'holmcounsel',fx:['embers'],cam:[.5,.5,1.03,.5,.5,1.1],t:'Marshal Holm’s counsel',x:'“Pay them in grain. It costs us less than a raid. Keep their goodwill up until your brothers are beaten. Once Arden is united, no king will dare ask for tribute again.”',bg:'dirt',tint:'rgba(20,10,0,.35)'}]);cSave();}
+ if(CS.part===2){const ok=await p2Turn();if(ok){await p2Check();await seekPeace();await ormWarn();chat();}cSave();return;}chat();
+ if(CS.turn===3&&!CS.trev){CS.trev=1;const v=await cDlg('A letter from King Aldous','“To Caelan, son of my old friend. I hear you hold Calder alone against three brothers. Trevelle cannot choose your war for you, but it can lend you steel. Six companies of my highlanders are yours. Pay me 100 silver a season for six seasons, when you can. I will charge you nothing more.”',[['Accept his help','yes','pri'],['Decline politely','no']]);
+  if(v==='yes'){CS.loan={left:6,amt:100,missed:0};CS.gw.trevelle=Math.min(100,CS.gw.trevelle+20);const home=PROV.find(p=>CS.prov[p.id]==='caelan');CS.armies.push({id:CS.nid++,o:'caelan',prov:home?home.id:'calder',name:'Trevelle company',u:[U('Spearmen'),U('Spearmen'),U('Pikemen'),U('Archers'),U('Crossbowmen'),U('Light cavalry')],mv:false});cPanel();cAdv('Trevelle’s highlanders have arrived. March them into the same province as your army to merge them, or use them as a second army.');}
   else cAdv('Aldous writes back within the month: “As you wish, my boy. The offer stands, if you ever need it.”');}
  if(CS.turn===4)cAdv('Winter. Your brothers will not wait for spring, and neither will the neighbours: keep an eye on their goodwill.');
  cSave();}
@@ -1519,10 +1555,21 @@ for(const k in NB)NB[k].seeds=PROV2.filter(q=>q.o===k).map(q=>[q.x,q.y]);
 const P1N=PROV.length;
 function p2Ext(){if(PROV.length>P1N)return;PROV2.forEach(p=>PROV.push(p));PROV.forEach((p,i)=>PI[p.id]=i);PIX=null;CIMG=null;}
 function cMigrate(){if(!CS)return;for(const p of PROV)if(!CS.prov[p.id])CS.prov[p.id]=(CS.part===2&&['osric','bran','varen'].includes(p.o))?'caelan':p.o;
- for(const a of CS.armies)if(PI[a.prov]==null)a.prov=(PROV.find(p=>CS.prov[p.id]===a.o)||PROV[0]).id;if(CS.tax==null)CS.tax=1;if(CS.gw.vaskar==null)CS.gw.vaskar=55;if(CS.part===2&&CS.bs.vaskar==null){CS.bs.vaskar=900;for(const q of ['farwood','karrow','northreach'])if(CS.prov[q]==='odei'||CS.prov[q]==='terfein')CS.prov[q]='vaskar';}}
+ for(const a of CS.armies)if(PI[a.prov]==null)a.prov=(PROV.find(p=>CS.prov[p.id]===a.o)||PROV[0]).id;if(CS.tax==null)CS.tax=1;if(CS.p2&&!CS.p2.orm&&CS.p2.t0!=null&&!CS.p2.tl6){CS.p2.tl6=1;CS.p2.ormT=Math.max(CS.turn+5,CS.p2.t0+24);}if(CS.gw.vaskar==null)CS.gw.vaskar=55;if(CS.part===2&&CS.bs.vaskar==null){CS.bs.vaskar=900;for(const q of ['farwood','karrow','northreach'])if(CS.prov[q]==='odei'||CS.prov[q]==='terfein')CS.prov[q]='vaskar';}}
 function isNation(o){return NATIONS.includes(o);}
 function natProvs(k){return PROV.filter(p=>CS.prov[p.id]===k);}
+function peaceWhy(k){const h=hon(),orig=PROV.filter(p=>p.o===k).length,now=natProvs(k).length,seat=PROV.find(p=>p.seat===k),mp=natArmies(k).reduce((a,x)=>a+power(x),0),cp=CS.armies.filter(a=>a.o==='caelan').reduce((a,x)=>a+power(x),0);
+ if(h>=75)return 'Your Honour is known across Ethrann, and they believe you will keep your word.';
+ if(seat&&CS.prov[seat.id]!==k)return 'Their capital is lost and they have no heart left for the war.';
+ if(now<=orig/2)return 'They have lost half their lands and want no more of this war.';
+ if(cp>mp*2.5&&h>=40)return 'Their armies are no match for yours, and they would rather keep what they have.';return null;}
+async function seekPeace(){const P=CS.p2;if(!P||!P.coal||P.orm)return;const h=hon(),d=CS.dread||0;if(h<100&&d<100)return;
+ const war=NATIONS.filter(k=>P.war[k]&&!P.gone[k]);if(!war.length)return;if(P.sought===CS.turn)return;if(Math.random()>.5)return;P.sought=CS.turn;
+ const k=war[(Math.random()*war.length)|0];P.war[k]=0;P.gone[k]='surr';(P.treaty=P.treaty||{})[k]=1;CS.armies=CS.armies.filter(a=>a.o!==k);
+ await natPeace(k,d>=100?'Envoys of '+OWN[k].n+' come to your camp on foot, heads bowed. They have heard what happens to those who stand against you. '+OWN[k].n+' begs for peace and leaves the coalition.':'Envoys of '+OWN[k].n+' come to your camp under a flag of truce. Your name for justice has reached their court. '+OWN[k].n+' asks for an honest peace and leaves the coalition.');await p2Check();}
 function natArmies(k){return CS.armies.filter(a=>a.o===k);}
+function ormMain(){return PROV.filter(p=>!p.isl&&CS.prov[p.id]==='ormana');}
+function ormStatus(){const P=CS.p2;if(!P||P.orm!==1)return '';const m=ormMain().length,left=P.ormT+16-CS.turn;return 'Ormana: '+(m?m+' mainland region'+(m>1?'s':''):'mainland free')+' · Maskhold '+(CS.prov.maskhold==='ormana'?'stands':'taken')+(P.mainClear||!m?'':' · '+Math.max(0,left)+' seasons left');}
 function p2Say(t){cAdv(t);}
 function p2Scene(list){return new Promise(r=>{$('camp').style.display='none';advHide();playScenes(list,r);}).then(()=>{$('camp').style.display='block';cResize();if(!CRAF)cLoop();cPanel();});}
 // Ormana's own soldiers and the new knights
@@ -1551,7 +1598,7 @@ function p2Begin(){p2Ext();CS.part=2;CS.done=0;for(const k in CS.prov)if(['osric
  Object.assign(CS.bs,{trevelle:1500,terfein:1400,odei:1900,yova:800,vaskar:900,ormana:0});
  mkArmy('trevelle','aldmoor',"King Aldous's highlanders",NARMY.trevelle);mkArmy('trevelle','ironhold','Ironhold guard',[['Spearmen'],['Crossbowmen'],['Pikemen']]);
  mkArmy('terfein','hollin',"Terfein's host",NARMY.terfein);mkArmy('terfein','whitefell','Whitefell axes',[['Axemen'],['Spearmen'],['Crossbowmen'],['Heavy cavalry']]);mkArmy('odei','varda',"Odei's riders",NARMY.odei);mkArmy('odei','dunmere','Dunmere riders',[['Light cavalry'],['Horse archers'],['Horse archers'],['Spearmen']]);mkArmy('odei','redsteppe','Redsteppe riders',[['Light cavalry'],['Light cavalry'],['Horse archers'],['Spearmen']]);mkArmy('yova','yovard',"Yova's woodsmen",NARMY.yova);mkArmy('vaskar','farwood',"Vaskar's hunters",NARMY.vaskar);
- CS.p2={t0:CS.turn,dl:Math.max(12,CS.turn+6),war:{},gone:{},obey:null,coal:0,reveal:0,ormT:Math.max(29,CS.turn+16),orm:0,holm:null,plotT:0,end:0,alarm:{}};
+ CS.p2={t0:CS.turn,dl:Math.max(12,CS.turn+6),war:{},gone:{},obey:null,coal:0,reveal:0,ormT:CS.turn+24,orm:0,holm:null,plotT:0,end:0,alarm:{}};
  CS.gw.trevelle=Math.max(CS.gw.trevelle,70);PIX=null;CIMG=null;cSave();}
 // ---- war ----
 async function p2Declare(k){if(CS.p2.war[k])return true;
@@ -1593,18 +1640,20 @@ async function p2Turn(){const P=CS.p2;
   mkArmy('trevelle',b.id,"Trevelle's council army",[["General's guard"],['Pikemen'],['Pikemen'],['Spearmen'],['Swordsmen'],['Crossbowmen'],['Crossbowmen'],['Heavy cavalry']]);
   await p2Scene([{img:'seer',fx:['mist'],cam:[.5,.5,1.05,.5,.45,1.15],t:'Trevelle strikes',x:'Famine has come to the highlands. Trevelle’s council has overruled King Aldous and sent its army over the border to take Arden’s granaries. The Seer was right.',bg:'leaves',tint:'rgba(10,0,20,.6)'}]);
   p2Say('Trevelle is at war with you. Drive them back, and take their six regions if you can.');}
- if(P.coal&&!P.plotDone&&['exile','pardon'].includes(CS.fate.osric)&&CS.turn>=P.coal+2){P.plotDone=1;
+ if(!P.plotDone&&(['captured','dead'].includes(CS.bros.osric)&&CS.fate.osric==='pardon'||P.orm))P.plotDone=1;
+ if(P.coal&&!P.plotDone&&!P.orm&&['exile','pardon'].includes(CS.fate.osric)&&!['captured','dead'].includes(CS.bros.osric)&&CS.turn>=P.coal+2){P.plotDone=1;
   if(hon()>=50){await p2Scene([{img:'osricplot',fx:['embers'],cam:[.5,.5,1.1,.5,.5,1.0],t:'Osric’s attempt',x:'Midnight. Two of your guards wake you, pale and shaking. Osric’s men offered them a fortune in gold to open your door tonight. They refused, and told you instead. “They love you, my king,” Thorne says. “That is worth more than walls.”\n\nBy dawn, Osric has fled to the coalition.',bg:'dirt',tint:'rgba(30,0,0,.6)'}]);
    CS.bros.osric='free';const k=NATIONS.find(n=>P.war[n]&&natProvs(n).length);const seat=k&&(natProvs(k).find(p=>p.seat===k)||natProvs(k)[0]);if(seat)mkArmy('osric',seat.id,'Osric’s exiles',[["General's guard"],['Spearmen'],['Swordsmen'],['Archers'],['Heavy cavalry']]);cRender();cSave();}
   else{CS.done=1;cSave();await p2Scene([{img:'knife',fx:['embers'],cam:[.5,.5,1.1,.5,.5,1.0],t:'A knife in the dark',x:'Midnight. Your guards were paid well, and they do not love you enough to refuse the gold. Osric’s men find you asleep.\n\nCaelan dies in his own bed. Holm told you what mercy would cost.',bg:'dirt',tint:'rgba(30,0,0,.6)'}]);
   try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return false;}}
  // the Seer reveals the truth about the spear
- if(P.coal&&!P.reveal&&CS.turn>=P.coal+2){P.reveal=1;PIX=null;CIMG=null;await p2Scene([{img:'seernight',fx:['mist'],cam:[.55,.5,1.15,.5,.45,1.04],t:'The knight in plain armour',x:'The Seer finds you in your tent between battles. “You think your father died for a crown. He died for Ormana. The knight in plain armour who killed him wore no colours because his colour is black. Ormana has been watching Ethrann for years, waiting for it to bleed.”',bg:'leaves',tint:'rgba(20,10,30,.65)'},
+ if(!P.reveal&&!P.orm&&(P.coal&&CS.turn>=P.coal+2||CS.turn>=P.ormT-6)){P.reveal=1;PIX=null;CIMG=null;await p2Scene([{img:'seernight',fx:['mist'],cam:[.55,.5,1.15,.5,.45,1.04],t:'The knight in plain armour',x:'The Seer finds you in your tent between battles. “You think your father died for a crown. He died for Ormana. The knight in plain armour who killed him wore no colours because his colour is black. Ormana has been watching Ethrann for years, waiting for it to bleed.”',bg:'leaves',tint:'rgba(20,10,30,.65)'},
   {img:'spear',fx:['dust'],cam:[.5,.5,1.12,.5,.45,1.02],t:'Those who came for your father',x:'“Those who came for your father will come for you. Do not destroy these kingdoms, little king. Make peace with them as soon as they will take it. When the black sails come, you will need their strength, or you will fight on every shore alone.”',bg:'dirt',tint:'rgba(0,0,0,.6)'}]);}
  // Ormana lands
- if(!P.orm&&CS.turn>=P.ormT)await p2Landing();
- if(P.orm===1&&(P.wave||1)<3&&CS.turn>=P.waveT){await ormWave();P.waveT=CS.turn+3;}
- if(P.orm===1&&CS.turn>P.ormT+16){CS.done=1;cSave();await p2Scene([{img:'rising',fx:['embers'],cam:[.5,.5,1.05,.5,.5,1.15],t:'Black sails over Ethrann',x:'Ormana’s grip closes on the mainland, one town at a time. The black sails fill every harbour, and Arden kneels to the Iron Mask.',bg:'sand',tint:'rgba(0,0,0,.6)'}]);try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return false;}
+ if(!P.orm&&CS.turn>=P.ormT){if(!P.w1){P.ormT=CS.turn+1;await ormWarn();}else await p2Landing();}
+ if(P.orm===1&&!P.mainClear&&(P.wave||1)<3&&CS.turn>=P.waveT&&ormMain().length){await ormWave();P.waveT=CS.turn+3;}
+ if(P.orm===1&&!P.mainClear&&!ormMain().length&&!natArmies('ormana').some(a=>!PROV[PI[a.prov]].isl)){P.mainClear=CS.turn;await cDlg('The mainland is free','The last Ormana host on the mainland is broken. Their ships are gone from our shores, '+lord()+'. Now finish it: cross the sea and take Maskhold.',[['Continue','ok','pri']]);}
+ if(P.orm===1&&!P.mainClear&&CS.turn>P.ormT+16&&ormMain().length){CS.done=1;cSave();await p2Scene([{img:'rising',fx:['embers'],cam:[.5,.5,1.05,.5,.5,1.15],t:'Black sails over Ethrann',x:'Ormana’s grip closes on the mainland, one town at a time. The black sails fill every harbour, and Arden kneels to the Iron Mask.',bg:'sand',tint:'rgba(0,0,0,.6)'}]);try{localStorage.removeItem('tbt_save');}catch(e){}cExit();return false;}
  return true;}
 async function p2Landing(){const P=CS.p2;P.orm=1;PIX=null;CIMG=null;
  const coast=['frostmark','yovard','whitefell','northwatch','icewater'].filter(q=>!CS.armies.some(z=>z.prov===q&&z.o==='caelan'));
@@ -1650,7 +1699,9 @@ function natFallen(k){const n=OWN[k].n,L=[{img:'natfall_'+k,fx:['dust','embers']
 function natPeace(k,x){return sceneHere([{img:'natpeace_'+k,fx:['dust','birds'],cam:[.5,.5,1.04,.5,.48,1.14],t:'Envoys from '+OWN[k].n,x,bg:'grass',tint:'rgba(20,15,0,.35)'}]);}
 async function p2Check(){const P=CS.p2;if(!P||CS.done)return;
  // conquered kingdoms
- for(const k of NATIONS){if(P.gone[k])continue;if(!natProvs(k).length){P.gone[k]='conq';P.war[k]=0;CS.armies=CS.armies.filter(a=>a.o!==k);await natFallen(k);
+ for(const k of NATIONS){if(P.gone[k])continue;if(!natProvs(k).length){P.gone[k]='conq';P.war[k]=0;CS.armies=CS.armies.filter(a=>a.o!==k);const seatP=PROV2.find(q=>q.seat===k),byMe=!seatP||CS.prov[seatP.id]==='caelan'||PROV.filter(q=>q.o===k).some(q=>CS.prov[q.id]==='caelan');
+   if(!byMe){cToast(OWN[k].n+' has fallen to '+OWN[CS.prov[seatP.id]].n+'.');continue;}
+   await natFallen(k);
    if(k==='trevelle'){P.plotT=0;const v=await cDlg('King Aldous','Aldmoor has fallen and King Aldous is brought before you in chains. He asks only why.',[['Imprison him','jail','pri'],['Exile him','exile'],['Execute him','exec']]);P.aldous=v;
     const d=v==='exec'?20:v==='jail'?10:5;for(const n of NATIONS)if(!P.gone[n])CS.gw[n]=Math.max(0,CS.gw[n]-d);if(v==='exec'){CS.dread=Math.min(100,(CS.dread||0)+15);addH(-15);}else if(v==='jail')addH(-3);else addH(3);
     await noted('natfall_trevelle',v==='exec'?'King Aldous dies in the square of his own capital. He never stopped calling you his friend.':v==='jail'?'King Aldous goes to a cell in Aldmoor’s tower. He asks for books, and for news of your health.':'King Aldous rides into exile with a single servant. At the border he turns and raises his hand to you.');
@@ -1663,9 +1714,9 @@ async function p2Check(){const P=CS.p2;if(!P||CS.done)return;
  if(P.holm&&!P.holm.done&&!CS.armies.some(a=>a.id===P.holm.army)){P.holm.done=1;const v=await cDlg('Marshal Holm is taken','Your old marshal is brought before you, wounded but unbowed. “I served your father’s blood,” he says. “Do what you must.”',[['Spare him','spare','pri'],['Execute him','exec']]);P.holm.fate=v;if(v==='exec')deed(-10,10);else deed(8,-3);await noted('holmdefects',v==='exec'?'Marshal Holm dies as a soldier, standing. The men he trained watch in silence.':'Marshal Holm is sent home to his estates under guard. He does not thank you, and you did not expect him to.');}
  const conq=NATIONS.filter(k=>P.gone[k]==='conq').length;
  if(!P.coal&&conq>=2)await p2Coalition();
- if(P.coal&&!P.coalDone&&!NATIONS.some(k=>P.war[k])&&!['osric','bran','varen'].some(o=>CS.bros[o]==='free')){P.coalDone=CS.turn;P.ormT=Math.min(P.ormT,CS.turn+2);
-  await cDlg('The coalition is broken','The last of the coalition lays down its arms. Arden is the strongest power on the mainland, but it is exhausted. Your scouts report black sails gathering across the water.',[['Continue','ok','pri']]);}
- if(P.orm===1&&(P.wave||1)>=3&&!natArmies('ormana').length&&!natProvs('ormana').length)await p2End();
+ if(P.coal&&!P.coalDone&&!NATIONS.some(k=>P.war[k])&&!['osric','bran','varen'].some(o=>CS.bros[o]==='free')){P.coalDone=CS.turn;
+  await cDlg('The coalition is broken','The last of the coalition lays down its arms. Arden is the strongest power on the mainland, but it is exhausted. Arden has time now to rebuild before whatever comes next.',[['Continue','ok','pri']]);}
+ if(P.orm===1&&!natArmies('ormana').length&&CS.prov.maskhold&&CS.prov.maskhold!=='ormana')await p2End();
  else if(P.orm===1&&!natArmies('ormana').length&&!P.lull){P.lull=1;say('The shore is clear, '+lord()+', for now. Their sails are still on the horizon. Rest the men while you can.');}
  cSave();cRender();cPanel();}
 
@@ -1716,11 +1767,15 @@ async function marenOffer(){const P=CS.p2;if(P.marenOffer||P.wed||!marenAlive()|
  if(v==='yes')await marenWed('offer');else{CS.gw.yova=Math.max(0,(CS.gw.yova||0)-10);cToast('Maren’s envoys ride home. She does not offer twice.');}}
 async function p2Diplo(){const P=CS.p2;const peace=NATIONS.filter(k=>!P.gone[k]&&!P.war[k]),war=NATIONS.filter(k=>P.war[k]&&P.coal);
  const rows=peace.map(k=>'<div class="gw"><b>'+OWN[k].n+'</b><span class="bar"><i style="width:'+CS.gw[k]+'%;background:'+(CS.gw[k]<25?'#d33':CS.gw[k]<50?'#e9a21a':'#4cba58')+'"></i></span><span>'+CS.gw[k]+'</span></div>').join('');
- const st=NATIONS.map(k=>OWN[k].n+': '+(P.gone[k]==='conq'?'conquered':P.gone[k]==='surr'?'at peace (surrendered)':P.war[k]?'<b style="color:#d33">at war</b>':'at peace')).join('<br>');
- const v=await cDlg('Kingdoms',st+'<br><br>'+(peace.length?'Goodwill falls every season. At zero, that kingdom raids your lands. Send 100 grain to raise it by 20.'+rows:'')+(war.length?'<br>Bribe a coalition member to leave the war. The price depends on its size, and every bribe you pay makes the next one cost half as much again.<br>'+war.map(k=>OWN[k].n+' ('+natProvs(k).length+' regions): '+bribeS(k).toLocaleString()+' silver or '+bribeG(k).toLocaleString()+' grain').join('<br>'):'')+'<br>Silver: '+(CS.silver|0)+' · Grain: '+(CS.grain|0),
-  [...peace.map(k=>['Send grain to '+OWN[k].n,'g:'+k,CS.grain>=100?'':'dis']),...(marenCan()?[['Propose marriage to Queen Maren (feast: 500 silver)','m:yova',CS.silver>=500?'':'dis']]:[]),...war.map(k=>['Bribe '+OWN[k].n+' ('+bribeS(k).toLocaleString()+' silver)','s:'+k,CS.silver>=bribeS(k)?'':'dis']),...war.map(k=>['Bribe '+OWN[k].n+' ('+bribeG(k).toLocaleString()+' grain)','r:'+k,CS.grain>=bribeG(k)?'':'dis']),['Close','no']]);
+ const st=NATIONS.map(k=>OWN[k].n+': '+(P.gone[k]==='conq'?'conquered':P.gone[k]==='surr'?(P.treaty&&P.treaty[k]?'at peace (treaty)':'at peace (surrendered)'):P.war[k]?'<b style="color:#d33">at war</b>':'at peace')).join('<br>');
+ const v=await cDlg('Kingdoms',st+'<br><br>'+(peace.length?'Arden pays no more tribute. A gift of 100 grain still raises a kingdom’s goodwill by 20.'+rows:'')+(war.length?'<br>Bribe a coalition member to leave the war. The price depends on its size, and every bribe you pay makes the next one cost half as much again.<br>'+war.map(k=>OWN[k].n+' ('+natProvs(k).length+' regions): '+bribeS(k).toLocaleString()+' silver or '+bribeG(k).toLocaleString()+' grain').join('<br>'):'')+'<br>Silver: '+(CS.silver|0)+' · Grain: '+(CS.grain|0),
+  [...peace.map(k=>['Gift grain to '+OWN[k].n,'g:'+k,CS.grain>=100?'':'dis']),...(marenCan()?[['Propose marriage to Queen Maren (feast: 500 silver)','m:yova',CS.silver>=500?'':'dis']]:[]),...war.map(k=>['Offer peace to '+OWN[k].n,'p:'+k]),...war.map(k=>['Bribe '+OWN[k].n+' ('+bribeS(k).toLocaleString()+' silver)','s:'+k,CS.silver>=bribeS(k)?'':'dis']),...war.map(k=>['Bribe '+OWN[k].n+' ('+bribeG(k).toLocaleString()+' grain)','r:'+k,CS.grain>=bribeG(k)?'':'dis']),['Close','no']]);
  if(!v||v==='no')return;const [t,k]=v.split(':');
  if(t==='m'){await marenPropose();}
+ else if(t==='p'){if(P.tried&&P.tried[k]===CS.turn){await cDlg('Envoys','Your envoys came back from '+OWN[k].n+' this season already. Try again next season.',[['Continue','ok','pri']]);}
+  else{(P.tried=P.tried||{})[k]=CS.turn;const why=peaceWhy(k);
+   if(why){P.war[k]=0;P.gone[k]='surr';(P.treaty=P.treaty||{})[k]=1;CS.armies=CS.armies.filter(a=>a.o!==k);addH(3);await natPeace(k,'Your envoys return from '+OWN[k].n+' with its seal on a treaty. '+why+' '+OWN[k].n+' leaves the coalition. There will be peace between you.');await p2Check();}
+   else await cDlg('Peace refused','The court of '+OWN[k].n+' sends your envoys back unanswered. They think they are winning, and they do not trust your word. Take more of their land, or earn more Honour, and ask again.',[['Continue','ok','pri']]);}}
  else if(t==='g'&&CS.grain>=100){CS.grain-=100;CS.gw[k]=Math.min(100,CS.gw[k]+20);addH(2);}
  else if((t==='s'&&CS.silver>=bribeS(k))||(t==='r'&&CS.grain>=bribeG(k))){if(t==='s')CS.silver-=bribeS(k);else CS.grain-=bribeG(k);P.bribes=(P.bribes||0)+1;P.war[k]=0;P.gone[k]='surr';CS.armies=CS.armies.filter(a=>a.o!==k);await natPeace(k,'Envoys of '+OWN[k].n+' come to Aurenhall under a flag of truce. They accept your gift, and '+OWN[k].n+' leaves the coalition. There will be peace between you.');await p2Check();}
  cSave();cPanel();cRender();p2Diplo();}
@@ -1740,26 +1795,26 @@ function kTitle(){if(CS&&CS.p2&&CS.p2.orm===2)return 'Caelan the Inevitable';con
  const v=Math.max(h,d),i=v>=100?3:v>=75?2:v>=50?1:v>=25?0:-1;if(i<0)return CS.part===2?'King Caelan':'Prince Caelan';
  return h>=d?'Caelan '+H[i]:(i===1?'Caelan Ironhand':i===3?'Caelan, King of the Dead':'Caelan '+D[i]);}
 function lord(){return CS&&CS.part===2?'my king':'my lord';}
-function voice(){return CS&&CS.part===2&&CS.p2&&CS.p2.coal?'Captain Edric Thorne':'Marshal Holm';}
+function voice(){return (typeof CS!=='undefined')&&CS&&CS.part===2&&CS.p2&&(CS.p2.coal||CS.p2.holm)?'Captain Edric Thorne':'Marshal Holm';}
 function say(t){cAdv(voice()+': “'+t+'”');}
 // battles push the king further along the path he walks
 function renownBattle(win,size){const L=lean(),n=size;
  if(!L){if(win){addH(Math.ceil(n*.67));addD(Math.ceil(n*.67));}return;}
  if(L==='h')addH(win?n:-n);else addD(win?n:-n);}
 // raising a new army with Dread or Honour
-const TAXM=[.7,1,1.4],TAXN=['Light','Fair','Heavy'],GARS=15,GARG=10;
+const TAXM=[.7,1,1.4],TAXN=['Light','Fair','Heavy'],GARS=0,GARG=0;
 function payOf(t){return COST[t]?Math.round(COST[t]/30):15;}
 function eatOf(t){return UT[t]&&UT[t][0]==='cav'?25:15;}
-function harvOf(p,turn){const q=(turn-1)%4;return q===3?0:Math.round(p.g*.6*(q===2?3:1));}
+function harvOf(p,turn){const q=(turn-1)%4;return q===2?Math.round(p.g*1.8):0;}
 async function loanPay(){const L=CS.loan;if(!L||L.left<=0)return;
  if(CS.silver>=L.amt){CS.silver-=L.amt;L.left--;if(L.left===0){CS.loan=null;CS.gw.trevelle=Math.min(100,(CS.gw.trevelle||0)+10);await cDlg('A letter from King Aldous','“Paid in full, and early by my reckoning. Your father would be proud of you, Caelan. If Arden ever needs Trevelle again, you have only to write.”',[['Continue','ok','pri']]);}}
  else{L.missed++;await cDlg('A letter from King Aldous',L.missed===1?'“My dear Caelan, the season’s payment did not come. Think nothing of it. War is expensive, and you have more pressing creditors than an old friend. Take your time.”':'“Another season, and still nothing. No matter. Pay me when the war is won. I would rather have a living friend than a paid debt.”',[['Continue','ok','pri']]);}}
 async function cTreasury(){if(CBUSY)return;for(;;){const tx=CS.tax==null?1:CS.tax,mine=PROV.filter(p=>CS.prov[p.id]==='caelan'),aut=(CS.turn-1)%4===2;
  const tax=mine.reduce((a,p)=>a+Math.round(p.s*TAXM[tx]),0),us=CS.armies.filter(a=>a.o==='caelan').flatMap(z=>z.u),pay=us.reduce((a,x)=>a+payOf(x.t),0),eat=us.reduce((a,x)=>a+eatOf(x.t),0),harv=mine.reduce((a,p)=>a+harvOf(p,CS.turn),0),win=(CS.turn-1)%4===3,gs=mine.length*GARS,gg=mine.length*GARG;
  const rows=mine.map(p=>'<div class="gw"><b style="width:110px">'+p.n+'</b><span style="flex:1">'+(isBesieged(p.id)?'<b style="color:#ff6b5e">besieged: no taxes or harvest</b>':Math.round(p.s*TAXM[tx])+' silver · '+harvOf(p,CS.turn)+' grain')+(p.walls?' · city granary '+cityGr(p.id):'')+'</span></div>').join('');
- const v=await cDlg('Treasury','<b>Silver '+(CS.silver|0)+' · Grain '+(CS.grain|0)+'</b><br>Taxes are '+TAXN[tx]+': <b>+'+tax+' silver</b> a season from '+mine.length+(mine.length===1?' region':' regions')+'. Soldiers’ pay: −'+pay+'. Garrisons: −'+gs+'. <b>Net '+(tax-pay-gs>=0?'+':'')+(tax-pay-gs)+' silver.</b><br>'+(CS.loan?'Owed to King Aldous: '+CS.loan.left+' payments of '+CS.loan.amt+' silver. ':'')+'<br>Harvest: +'+harv+' grain'+(aut?' (autumn harvest)':win?' (nothing grows in winter)':'')+'. Soldiers eat: −'+eat+'. Garrisons: −'+gg+'. <b>Net '+(harv-eat-gg>=0?'+':'')+(harv-eat-gg)+' grain.</b><br><span style="opacity:.8">If silver or grain runs out, a tenth of every unit deserts. Better troops cost more pay; horsemen eat more.</span><br><span style="opacity:.8">Light taxes bring 30% less silver but raise Honour. Heavy taxes bring 40% more but raise Dread and cost Honour.</span>'+rows+'<br>The grain market pays <b>40 silver for 100 grain</b>.',
-  [['Sell 100 grain','s1',CS.grain>=100?'':'dis'],['Sell 500 grain','s5',CS.grain>=500?'':'dis'],['Taxes: '+TAXN[(tx+1)%3],'tax'],['Close','no']]);
- if(v==='s1'&&CS.grain>=100){CS.grain-=100;CS.silver+=40;}else if(v==='s5'&&CS.grain>=500){CS.grain-=500;CS.silver+=200;}else if(v==='tax'){CS.tax=(tx+1)%3;}else break;cSave();cPanel();}}
+ const v=await cDlg('Treasury','<b>Silver '+(CS.silver|0)+' · Grain '+(CS.grain|0)+'</b><br>Taxes are '+TAXN[tx]+': <b>+'+tax+' silver</b> a season from '+mine.length+(mine.length===1?' region':' regions')+'. Soldiers’ pay: −'+pay+'. <b>Net '+(tax-pay-gs>=0?'+':'')+(tax-pay-gs)+' silver.</b><br>'+(CS.loan?'Owed to King Aldous: '+CS.loan.left+' payments of '+CS.loan.amt+' silver. ':'')+'<br>Harvest: +'+harv+' grain'+(aut?' (the autumn harvest)':' (the harvest comes once a year, in autumn)')+'. Soldiers eat: −'+eat+'. <b>Net '+(harv-eat-gg>=0?'+':'')+(harv-eat-gg)+' grain.</b><br><span style="opacity:.8">If silver or grain runs out, a tenth of every unit deserts. Better troops cost more pay; horsemen eat more.</span><br><span style="opacity:.8">Light taxes bring 30% less silver but raise Honour. Heavy taxes bring 40% more but raise Dread and cost Honour.</span>'+rows+'<br>The grain market pays <b>40 silver for 100 grain</b>, and sells <b>100 grain for 60 silver</b>.',
+  [['Buy 100 grain (60)','b1',CS.silver>=60?'':'dis'],['Buy 500 grain (300)','b5',CS.silver>=300?'':'dis'],['Sell 100 grain','s1',CS.grain>=100?'':'dis'],['Sell 500 grain','s5',CS.grain>=500?'':'dis'],['Taxes: '+TAXN[(tx+1)%3],'tax'],['Close','no']]);
+ if(v==='b1'&&CS.silver>=60){CS.silver-=60;CS.grain+=100;}else if(v==='b5'&&CS.silver>=300){CS.silver-=300;CS.grain+=500;}else if(v==='s1'&&CS.grain>=100){CS.grain-=100;CS.silver+=40;}else if(v==='s5'&&CS.grain>=500){CS.grain-=500;CS.silver+=200;}else if(v==='tax'){CS.tax=(tx+1)%3;}else break;cSave();cPanel();}}
 async function cRaise(){if(CBUSY)return;const home=[PROV[PI.aurenhall],PROV[PI.calder],...PROV].find(p=>p&&CS.prov[p.id]==='caelan');if(!home){cToast('You hold no town to raise an army in.');return;}
  const d=CS.dread||0,h=hon();
  const v=await cDlg('Raise a new army','A new army gathers at '+home.n+'.<br><br><b>Conscripts</b> (40 Dread): men dragged from the villages by fear. Many of them, poorly armed, quick to run.<br><b>Volunteers</b> (40 Honour): men who come because they believe in you. Fewer, better armed, steady in battle.<br><br>Dread: '+d+' · Honour: '+h+'<br>Spending lowers the score, and with it your title.',
@@ -1802,8 +1857,8 @@ async function chat(){if(!CS||CS.done)return;CS.chat=CS.chat||{};if(Math.random(
  const q=ok[(Math.random()*ok.length)|0];CS.chat[q.k]=CS.turn;setTimeout(()=>say(q.t()),900);}
 // Ormana warnings the year before they land
 async function ormWarn(){const P=CS.p2;if(!P||P.orm||P.ormT==null)return;const left=P.ormT-CS.turn;
- if(left===4&&!P.w1){P.w1=1;await p2Scene([{img:'seer',fx:['mist'],cam:[.5,.5,1.05,.5,.45,1.15],t:'The Seer',x:'“Across the water, the forges of Ormana have not gone cold for a year. They will come like the relentless waves of the sea, little king, and so, like the sands of the seashore, you must meet them. Mark my words: like the sands of the seashore.”',bg:'leaves',tint:'rgba(10,0,20,.65)'}]);}
- else if(left>0&&left<4){const m=CS.armies.filter(a=>a.o==='caelan').reduce((s,a)=>s+armyMen(a),0);say('We have '+m+' men under arms, '+lord()+'. It is not enough for what is coming. Raise every man you can: recruit, call a levy, buy back the kingdoms’ friendship. '+left+(left>1?' seasons':' season')+', the scouts say.');}}
+ if(left<=4&&left>0&&!P.w1){P.w1=CS.turn;await p2Scene([{img:'seer',fx:['mist'],cam:[.5,.5,1.05,.5,.45,1.15],t:'The Seer',x:'“Across the water, the forges of Ormana have not gone cold for a year. They will come like the relentless waves of the sea, little king, and so, like the sands of the seashore, you must meet them. Mark my words: like the sands of the seashore.”',bg:'leaves',tint:'rgba(10,0,20,.65)'}]);}
+ else if(left>0&&left<4&&P.w1&&P.w1!==CS.turn){const m=CS.armies.filter(a=>a.o==='caelan').reduce((s,a)=>s+armyMen(a),0);say('We have '+m+' men under arms, '+lord()+'. It is not enough for what is coming. Raise every man you can: recruit, call a levy, buy back the kingdoms’ friendship. '+left+(left>1?' seasons':' season')+', the scouts say.');}}
 
 // ================= the enemy commander speaks before battle =================
 const LORDS={osric:'Lord Edric Vane',bran:'Sir Rodric Hale, master of horse',varen:'Brother-Captain Anselm',trevelle:'Lord Ewan Mor',terfein:'Jarl Hakon Grey',odei:'Lord-Rider Tamar',yova:'Warden Corrin of the Deepwood',vaskar:'Huntmaster Bror of the Far Wood',ormana:'A masked war-lord of Ormana'};
@@ -1982,7 +2037,7 @@ function playScenes(list,done){const sc=$('scene'),cv=$('scv'),g=cv.getContext('
 // ---- battle advisor ----
 let advQ=null,advCd={},advT=0,TUT=null,tutI=0,advTimer=null;
 function advSay(txt,opts){opts=opts||{};if(ADV==='off'&&!opts.tut)return;if(ADV==='warn'&&!opts.warn&&!opts.tut)return;
- const a=$('adv');a.style.display='flex';a.classList.toggle('warn',!!opts.warn);$('advt').textContent=txt;$('advNext').style.display=opts.tut?'':'none';
+ const a=$('adv');{const v=voice();$('advn').textContent=v;$('advp').textContent=v==='Marshal Holm'?'H':'T';}a.style.display='flex';a.classList.toggle('warn',!!opts.warn);$('advt').textContent=txt;$('advNext').style.display=opts.tut?'':'none';
  clearTimeout(advTimer);if(!opts.tut)advTimer=setTimeout(()=>{a.style.display='none';},opts.warn?6000:9000);}
 function advHide(){$('adv').style.display='none';}
 function advOnce(key,cd,txt,warn){const now=time;if(advCd[key]&&now-advCd[key]<cd)return;if(now-advT<5)return;advCd[key]=now;advT=now;advSay(txt,{warn});}
@@ -2173,7 +2228,7 @@ function boot(){
  ['bMus','cMus','tMus'].forEach(id=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();buzz();musToggle();};});musLabel();
  {const te=$('tErr');if(te)te.onclick=e=>{e.stopPropagation();buzz();errShow();};}
  {const cm=$('cmap');cm.addEventListener('pointerdown',e=>{cm.setPointerCapture(e.pointerId);cPtrDown(e);});cm.addEventListener('pointermove',cPtrMove);cm.addEventListener('pointerup',cPtrUp);cm.addEventListener('pointercancel',e=>{CPTR.delete(e.pointerId);CPINCH=null;});cm.addEventListener('wheel',cWheel,{passive:false});}$('cMrg').onclick=()=>{buzz();cMergeBtn();};$('cEnd').onclick=()=>{buzz();cEndTurn();};$('cRaise').onclick=()=>{buzz();cRaise();};$('cDip').onclick=()=>{buzz();cDiplo();};$('cRec').onclick=()=>{buzz();cRecruit();};
- $('cMenu').onclick=async()=>{buzz();cSave();const msg=STORE_OK?'Your campaign is saved after every move, battle and turn.':'<b>This browser is not keeping saves.</b> Your progress lasts only while this page stays open. Copy your save code and keep it somewhere safe (notes, a message to yourself). Paste it into “Load a save code” on the title screen to carry on.';const v=await cDlg('Menu',msg,[['Resume','r','pri'],['Copy save code','c'],['Problem report','e'],['Back to title','t']]);if(v==='t')cExit();if(v==='c')showCode();if(v==='e')errShow();};
+ $('cMenu').onclick=async()=>{buzz();cSave();const msg=STORE_OK?'Your campaign is saved after every move, battle and turn.':'<b>This browser is not keeping saves.</b> Your progress lasts only while this page stays open. Copy your save code and keep it somewhere safe (notes, a message to yourself). Paste it into “Load a save code” on the title screen to carry on.';const v=await cDlg('Menu',msg,[['Resume','r','pri'],['Save to file','f'],['Music on/off','m'],['Copy save code','c'],['Problem report','e'],['Back to title','t']]);if(v==='f')$('cSaveB').click();if(v==='m')$('cMus').click();if(v==='t')cExit();if(v==='c')showCode();if(v==='e')errShow();};
 
 async function saveFile(){const c=saveCode();const n='broken-thrones-'+(['Spring','Summer','Autumn','Winter'][(CS.turn-1)%4]||'')+'-year'+(Math.floor((CS.turn-1)/4)+1)+'.tbt';
  try{const dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;if(dl){await dl.save({filename:n,data:c});return n;}}catch(e){return null;}
@@ -2188,10 +2243,10 @@ async function showCode(){const c=saveCode();let copied=false;try{await navigato
 $('bCode').onclick=async()=>{buzz();const v=await cDlg('Load a save code','Paste the save code you copied from the Menu.<textarea id="codeIn" style="width:100%;height:90px;margin-top:8px;font-size:11px"></textarea><div id="codeErr" style="color:#e66;margin-top:4px"></div>',[['Load','l','pri'],['Cancel','x']]);
  if(v!=='l')return;const t=window._codeVal||'';try{const o=readCode(t);MEMSAVE=JSON.stringify(o);try{localStorage.setItem('tbt_save',MEMSAVE);}catch(e){}$('title').style.display='none';cStart(false);}catch(e){toast('That save code did not work. Check you copied all of it.');}};
  window.launchBattle=o=>{STORY=false;TUT=null;AIHOLD=false;advHide();WINTER=!!o.winter;if(/ormana/i.test(o.enemy||''))SIDE[1].cloak='#1c1b1e';else delete SIDE[1].cloak;BDREAD=(CS&&CS.dread)||0;SIDE[1].name=o.enemy;{const ow=Object.values(OWN).find(q=>q.n===o.enemy);{const tk=Object.keys(OWN).find(k=>OWN[k].n===o.enemy);if(SPR.ok)sprTeam(1,tk||'terfein');else SIDE[1].team=tk||'terfein';}if(ow){SIDE[1].col=ow.c;SIDE[1].dark=ow.d;SIDE[1].sym=ow.sym;const sh=$('shB');if(sh){sh.style.setProperty('--c',ow.c);const cv=document.createElement('canvas');cv.width=48;cv.height=48;cv.style.width='100%';cv.style.height='100%';drawSym(cv.getContext('2d'),ow.sym,24,24,3.6,'#fff');sh.innerHTML='';sh.appendChild(cv);}}}$('nB').textContent=o.enemy;
-  const cnt=L=>{const q={};L.forEach(x=>{(q[x.t]=q[x.t]||[]).push(x.n);});return q;};NQ=[cnt(o.A),cnt(o.B)];
+  const cnt=L=>{const q={};L.forEach(x=>{(q[x.t]=q[x.t]||[]).push(x.n);});return q;};NQ=[cnt(o.A),cnt(o.B)];{const cb=L=>{const q={};L.forEach(x=>{(q[x.t]=q[x.t]||[]).push(x.ban||null);});return q;};NBQ=[cb(o.A),cb(o.B)];}
   const tA=o.A.filter(x=>x.n>0&&(o.siege||UT[x.t][0]!=='siege')).map(x=>x.t),tB=o.B.filter(x=>x.n>0&&(o.siege||UT[x.t][0]!=='siege')).map(x=>x.t);
   if(o.siege){CB.siegeLists=[tA,tB];CB.lists=null;}else{CB.lists=[tA,tB];CB.siegeLists=null;setMap(o.map);BSIZE='c';}
-  $('load').style.display='flex';setTimeout(()=>{MODE=o.siege?'siege':'field';if(!o.siege)genTerrain();init();NQ=null;sel=new Set();$('bot').innerHTML='';$('grp').dataset.k='x';refreshUI();$('load').style.display='none';started=true;paused=false;setPause();runKey='camp';if(!o.siege)startDeploy();
+  $('load').style.display='flex';setTimeout(()=>{MODE=o.siege?'siege':'field';if(!o.siege)genTerrain();init();NQ=null;NBQ=null;sel=new Set();$('bot').innerHTML='';$('grp').dataset.k='x';refreshUI();$('load').style.display='none';started=true;paused=false;setPause();runKey='camp';if(!o.siege)startDeploy();
    if(o.siege){cam.x=Math.max(VW/cam.z/2,150);cam.y=150;}else{cam.x=VW/cam.z/2+60;cam.y=MAP.cy||150;}clampCam();advPre();},30);};
  $('advNext').onclick=()=>{buzz();if(TUT&&TUTS[tutI]&&!TUTS[tutI].last){tutI++;tutShow();}else advHide();};$('advHide').onclick=()=>{buzz();advHide();};
  $('depGo').onclick=()=>{buzz();endDeploy();};
@@ -2208,6 +2263,9 @@ $('bCode').onclick=async()=>{buzz();const v=await cDlg('Load a save code','Paste
  }),30);
 }
 if(typeof window!=='undefined'&&typeof document!=='undefined'&&document.getElementById('c'))boot();
+
+;(()=>{document.addEventListener('touchstart',()=>{},{passive:true});
+document.addEventListener('pointerdown',e=>{const b=e.target&&e.target.closest&&e.target.closest('button');if(!b||b.disabled)return;b.classList.add('tapd');setTimeout(()=>b.classList.remove('tapd'),200);},true);})();
 </script>
 </body>
 </html>
