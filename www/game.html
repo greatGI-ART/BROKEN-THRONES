@@ -1330,7 +1330,21 @@ function cNearby(pid,main){return CS.armies.filter(z=>z!==main&&(z.o==='caelan'|
 function cRfHtml(list,attack){if(!list.length)return '';return '<div style="margin-top:8px"><b>Reinforcements</b> nearby'+(attack?' (they use up their move)':'')+':'+list.map(z=>'<label style="display:block;margin:4px 0"><input type="checkbox" class="rf" value="'+z.id+'" checked> '+z.name+(z.o!=='caelan'?' ('+OWN[z.o].n+', allied)':'')+' at '+PROV[PI[z.prov]].n+' · '+armyMen(z)+' men</label>').join('')+'</div>';}
 function cRfPick(){return (window._rf||[]).map(id=>CS.armies.find(z=>z.id===id)).filter(Boolean);}
 
-function cBattle(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P=PROV[PI[pid]];
+// the parley with the Iron Mask, before the first battle with his own host
+function parleyLines(){const killed=['osric','bran','varen'].some(o=>CS.bros[o]==='dead'||(CS.fate&&CS.fate[o]==='execute'));
+ const M=(x)=>({img:'ironmask',fx:['dust'],cam:[.5,.45,1.08,.5,.42,1.14],t:'The Iron Mask',x,bg:'dirt',tint:'rgba(10,10,20,.35)'}),C=(x)=>({img:'gather',fx:['dust'],cam:[.42,.35,1.12,.42,.32,1.18],t:'Caelan',x,bg:'dirt',tint:'rgba(20,0,0,.25)'});
+ return [{img:'ironmask',fx:['dust'],cam:[.5,.5,1.0,.5,.45,1.08],t:'Under a flag of truce',x:'Before the armies meet, a rider comes out under a white cloth. The Iron Mask wishes to speak with the king of Arden. You ride out to meet him between the lines.',bg:'dirt',tint:'rgba(0,0,0,.45)'},
+  M(killed?'“I heard you killed your brothers to get here. You have the blood of many on your hands.”':'“I heard you spared your brothers. Mercy. How quaint. It will not save you.”'),
+  C('“It was unavoidable. I was honouring my father’s wish. They were dragging Arden to hell, and I stopped them.”'),
+  M('He chuckles behind the mask.\n\n“I killed thirteen brothers to stand here, and more cousins than I can count. I fought through hell to be here today.”'),
+  C('“What do you want?”'),
+  M('“Think on this. My riders are called steppe riders, yet there is no steppe in Ormana. We come from the steppes of Odei. That was our home, until your father drove us from it.”'),
+  M('“Today we have come to take back what is ours, with interest. The whole of Ethrann is ours now.”'),
+  C('“Interesting. Then come and take it.”')];}
+async function cBattle(att,def,pid,auto,playerAtt,rf){const foe=att.o==='caelan'?def:att;
+ if(CS.part===2&&CS.p2&&!CS.p2.parley&&foe.o==='ormana'&&foe.u.some(x=>x.t==="General's guard"&&x.n>0)){CS.p2.parley=1;cSave();await sceneHere(parleyLines());}
+ return cBattle0(att,def,pid,auto,playerAtt,rf);}
+function cBattle0(att,def,pid,auto,playerAtt,rf){return new Promise(res=>{const P=PROV[PI[pid]];
  const mine=att.o==='caelan'?att:def,foe=att.o==='caelan'?def:att;rf=(rf||[]).filter(z=>z!==mine&&CS.armies.includes(z));const hadGen=mine.u.some(x=>x.t==="General's guard"&&x.n>0);
  const rset=new Set();rf.forEach(z=>z.u.forEach(x=>{rset.add(x);if(z.o!==mine.o)x.ban=z.o;}));if(rf.length){mine.u=mine.u.concat(...rf.map(z=>z.u));cToast(rf.length+(rf.length>1?' armies march':' army marches')+' to reinforce.');}
  const ef=cFoeNear(pid,foe),eset=new Set();ef.forEach(z=>z.u.forEach(x=>{eset.add(x);if(z.o!==foe.o)x.ban=z.o;}));if(ef.length){foe.u=foe.u.concat(...ef.map(z=>z.u));setTimeout(()=>cToast(ef.map(z=>z.name).join(' and ')+(ef.length>1?' march':' marches')+' to aid '+foe.name+'.'),900);}
