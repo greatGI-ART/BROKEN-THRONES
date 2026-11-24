@@ -1,1 +1,1 @@
-{"build": 41, "notes": "Build 41: fixes the game closing during battles against new kingdoms (memory), new tribute paintings"}
+{"build": 42, "notes": "Build 42: cutscene pictures load from the phone again (online only when a painting is newer), and preload before each scene"}
