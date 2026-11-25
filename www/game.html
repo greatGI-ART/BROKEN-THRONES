@@ -1951,8 +1951,11 @@ function sceneKey(q){const t=q.t||'',x=q.x||'';if(SCK[t])return SCK[t];
  if(t==='The Seer')return x.startsWith('That night')?'seernight':x.startsWith('“Across')?'seerwarn':'seerlast';
  if(x.startsWith('“My lord, war is upon'))return 'thorne2';if(x.startsWith('“They will call it luck'))return 'thornelast';return null;}
 const SEQMUS={highking:'k_exploration',fallen:'k_lamentpe',noted:'k_darkquest',knife:'k_lamentpe',calderholds:'k_btA',lastbanner:'k_btA',coronation:'k_fanfare',trevstrikes:'k_laments',coalition:'k_mystery',seerwarn:'k_darkquest',truth:'k_sinister',blacksails:'k_runaway',seatakes:'k_hordedrums',knife:'k_lamentpe',ormwins:'k_defeat'};
-function sceneMus(q){const k=sceneKey(q),f=k&&(SEQMUS[k]||SCMUS[k]);if(!f)return;MUS.res='f:'+f;MUS.resT=performance.now()+1e9;musTick();}
-function sceneMusEnd(){if(MUS.res&&String(MUS.res).startsWith('f:')){MUS.res=null;musTick();}}
+function runId(q){let k=sceneKey(q);if(k)return k;const im=q.img||'',m=im.match(/^(natfall|natdeath|natpeace|fallen)_/);return m?m[1]:im;}
+function sceneMus(q){const now=performance.now();clearTimeout(MUS.endT);if(MUS.res&&String(MUS.res).startsWith('f:')&&MUS.runUntil&&now<MUS.runUntil){MUS.runUntil=0;return;}const id=runId(q),f=RUNMUS[id]||SEQMUS[id]||SCMUS[id]||RUNMUS._default;MUS.res='f:'+f;MUS.resT=now+1e9;musTick();}
+function sceneMusEnd(){if(!(MUS.res&&String(MUS.res).startsWith('f:')))return;MUS.runUntil=performance.now()+2500;clearTimeout(MUS.endT);MUS.endT=setTimeout(()=>{if(MUS.runUntil&&!musVis('scene')){MUS.runUntil=0;MUS.res=null;musTick();}},2600);}
+// the song for each cutscene, keyed by the scene that starts it (chosen by the player)
+const RUNMUS={_default:'k_darkquest',natfall:'k_lamentpe',natdeath:'k_lamentpe',natpeace:'k_minstrel',fallen:'k_lamentpe',noted:'k_darkquest',surrender:'k_ofstone',raids:'k_darkforest',granary:'k_ofstone',ironmask:'k_hordedrums',wedding:'k_kingsfeast',defeat:'k_atwhatcost',osricplot:'k_sinister'};
 let BOSSB=false;
 function isBossBattle(foe,P){const gen=foe.u.some(x=>x.t==="General's guard"&&x.n>0);if(P&&P.walls)return true;
  if(['osric','bran','varen'].includes(foe.o))return gen||(typeof CS!=='undefined'&&CS.part===2);
@@ -1962,12 +1965,13 @@ function musVis(id){const e=document.getElementById(id);return !!e&&getComputedS
 function musWant(){if(!MUS.on)return null;const now=performance.now();if(MUS.res&&now<MUS.resT)return MUS.res;MUS.res=null;
  if(musVis('scene')||musVis('title'))return 'title';if(musVis('camp'))return 'map';if(typeof started!=='undefined'&&started)return 'battle';return 'title';}
 function musFade(el,to,ms,done){const from=el.volume,t0=performance.now();const f=()=>{const k=Math.min(1,(performance.now()-t0)/ms);el.volume=Math.max(0,Math.min(1,from+(to-from)*k));if(k<1)requestAnimationFrame(f);else done&&done();};f();}
-function musStart(k){const old=MUS.el;MUS.cur=k;MUS.el=null;if(old)musFade(old,0,900,()=>{old.pause();old.src='';});
+function musStopAll(keep){MUS.all=MUS.all||new Set();for(const o of [...MUS.all]){if(o===keep)continue;MUS.all.delete(o);const st=()=>{try{o.pause();o.src='';}catch(e){}};if(!o.paused&&o.volume>0)musFade(o,0,700,st);else st();}}
+function musStart(k){MUS.cur=k;MUS.el=null;musStopAll(null);
  if(!k)return;let name;if(String(k).startsWith('f:'))name=k.slice(2);else if(k==='map')name=MUSF.map[MUS.mapI%MUSF.map.length];else if(k==='battle'){const orm=SIDE[1]&&SIDE[1].team==='ormana',L=orm?MUSF.orm:BOSSB?MUSF.boss:MUSF.battle,ik=orm?'ormI':BOSSB?'bossI':'batI';MUS[ik]++;const n=L.length;for(let i=0;i<n;i++){name=L[(MUS[ik]+i)%n];if(!MUS.bad[name])break;}}else name=MUSF[k];if(MUS.bad[name])return;
  const a=new Audio('music/'+name+'.mp3');a.loop=(k==='battle'||k==='title'||k==='finale'||(String(k).startsWith('f:')&&k!=='f:k_fanfare'));a.volume=0;a.preload='auto';
  a.onended=()=>{if(MUS.el!==a)return;if(k==='map'){MUS.mapI++;MUS.cur=null;musTick();}else if(k==='victory'||k==='defeat'){MUS.res=null;MUS.cur=null;musTick();}};
- a.onerror=()=>{const P=(()=>{try{return window.parent!==window&&window.parent.TBT;}catch(e){return null;}})();if(P&&P.remote&&!a._remote){a._remote=1;a.src=P.remote+'music/'+name+'.mp3';const q=a.play();if(q&&q.catch)q.catch(()=>{});return;}MUS.bad[name]=true;if(MUS.el===a){MUS.el=null;MUS.cur=null;}};
- MUS.el=a;const p=a.play();if(p&&p.catch)p.catch(()=>{if(MUS.el===a){MUS.el=null;MUS.cur=null;}});musFade(a,MUS.vol*(k==='victory'||k==='defeat'?1:1),1200);}
+ a.onerror=()=>{if(MUS.el!==a)return;const P=(()=>{try{return window.parent!==window&&window.parent.TBT;}catch(e){return null;}})();if(P&&P.remote&&!a._remote){a._remote=1;a.src=P.remote+'music/'+name+'.mp3';const q=a.play();if(q&&q.catch)q.catch(()=>{});return;}MUS.bad[name]=true;if(MUS.el===a){MUS.el=null;MUS.cur=null;}};
+ MUS.el=a;(MUS.all=MUS.all||new Set()).add(a);const p=a.play();if(p&&p.catch)p.catch(()=>{if(MUS.el===a){MUS.el=null;MUS.cur=null;}});musFade(a,MUS.vol*(k==='victory'||k==='defeat'?1:1),1200);}
 function musTick(){if(!MUS.unlocked)return;const w=musWant();if(w!==MUS.cur)musStart(w);}
 function musResult(win){MUS.res=win?'victory':'defeat';MUS.resT=performance.now()+30000;musTick();}
 function musToggle(){MUS.on=!MUS.on;try{localStorage.setItem('tbt_music',MUS.on?'on':'off');}catch(e){}musLabel();musTick();}
